@@ -1,16 +1,16 @@
 import os
 import ntpath
+from pathlib import Path
 
 import bpy
 
 from datetime import datetime
 from .stamper import (
-    getRenderResolution,
     getRenderResolutionForStampInfo,
-    getRenderRange,
     getInnerHeight,
     getInfoFileFullPath,
 )
+
 
 # Called by the Pre renderer callback
 # Preparation of the files
@@ -26,7 +26,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     #   top:    file, date, render time, host, note, memory         frame range
     #   bottom: marker, timecode, frame, camera, lens               sequencer strip, strip metadata
 
-    from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance
+    from PIL import Image, ImageDraw, ImageFont
 
     print("\n       renderTmpImageWithStampedInfo ")
 
@@ -500,7 +500,20 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
 
     # filepath = r"Z:\EvalSofts\Blender\DevPython_Data\UAS_StampInfo_Data\Outputs"
     print("Info file rendered name: ", (filepath))
-    imgInfo.save(filepath)
+
+    if not os.path.exists(dirAndFilename[0]):
+        try:
+            path = Path(dirAndFilename[0])
+            path.mkdir(parents=True, exist_ok=True)
+        except:
+            print("\n*** Creation of the directory %s failed" % dirAndFilename[0])
+            print("\n")
+
+    try:
+        imgInfo.save(filepath)
+    except BaseException:
+        print(" * * * renderTmpImageWithStampedInfo Error: Cannot save file: ", filepath)
+        raise
 
 
 def drawRangesAndFrame(
@@ -544,7 +557,7 @@ def drawRangesAndFrame(
     # font                = ImageFont.truetype("arial", fontsize)
     # textLineH           = (font.getsize("Aj"))[1]            # line height
 
-    ### text is aligned on the right !!! ###
+    # text is aligned on the right !!! ###
 
     if stampValue:
         if rangeUsed or handlesUsed:
@@ -585,7 +598,7 @@ def drawRangesAndFrame(
         if frameUsed:
             textProp = "{:03d}".format(currentFrame)
             currentTextLeftFor3DFrames -= (fontLarge.getsize(textProp))[0]
-            currentTextHeight = (font.getsize(textProp))[1]
+            # currentTextHeight = (font.getsize(textProp))[1]
             newTextHeight = (fontLarge.getsize(textProp))[1] - (font.getsize(textProp))[1]
             img_draw.text(
                 (currentTextLeftFor3DFrames, currentTextTopFor3DFrames - newTextHeight),

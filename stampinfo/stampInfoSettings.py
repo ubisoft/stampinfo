@@ -2,19 +2,13 @@ import os
 from pathlib import Path
 
 import bpy
-from bpy.props import (
-    CollectionProperty,
-    IntProperty,
-    StringProperty,
-    EnumProperty,
-    BoolProperty,
-    FloatProperty,
-    FloatVectorProperty,
-)
+from bpy.props import StringProperty, BoolProperty
 
+from . import infoImage
 from . import stamper
 from . import handlers
 
+# from stampinfo.__init__ import bl_info
 
 # global vars
 if not "gbWkDebug" in vars() and not "gbWkDebug" in globals():
@@ -42,6 +36,11 @@ else:
 
 
 class UAS_StampInfoSettings(bpy.types.PropertyGroup):
+    # def version(self):
+    #     return ".".join(str(v) for v in bl_info["version"])
+
+    renderRootPath: StringProperty(name="Render Root Path", default="")
+    renderRootPathUsed: BoolProperty(default=False)
 
     innerImageHeight_percentage: bpy.props.FloatProperty(
         name="Inner Height",
@@ -214,12 +213,13 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         default="SEPARATEOUTPUT",
     )
 
-    ### project properties -------------------------------------------
+    # ---------- project properties -------------
+
     projectUsed: bpy.props.BoolProperty(name="Project", description="Stamp project name", default=True, options=set())
 
     projectName: bpy.props.StringProperty(name="", description="Project name", default="UAS", options=set())
 
-    ### Logo properties ----------------------------------------------
+    # ---------- Logo properties -------------
 
     def buildLogosList(self, context):
         dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
@@ -316,7 +316,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Framerate", description="Stamp current framerate", default=True, options=set()
     )
 
-    ### Scene Frame properties ----------------------------------------------
+    # ---------- Scene Frame properties -------------
 
     currentFrameUsed: bpy.props.BoolProperty(
         name="3D Frame",
@@ -336,7 +336,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         options=set(),
     )
 
-    ### file properties -------------------------------------------
+    # ---------- file properties -------------
     filenameUsed: bpy.props.BoolProperty(name="File", description="Stamp file name", default=True, options=set())
 
     filepathUsed: bpy.props.BoolProperty(name="Path", description="Stamp file path", default=True, options=set())
@@ -362,13 +362,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Take Name", description="Enter the name of the current take", default="Take Name", options=set()
     )
 
-    ### Camera properties -------------------------------------------
+    # ---------- Camera properties -------------
     cameraUsed: bpy.props.BoolProperty(name="Camera", description="Stamp camera name", default=True, options=set())
 
     cameraLensUsed: bpy.props.BoolProperty(name="Lens", description="Stamp camera lens", default=True, options=set())
 
-    ### Notes properties ----------------------------------------------
-
+    # ---------- Notes properties -------------
     notesUsed: bpy.props.BoolProperty(name="Notes", description="User notes", default=False, options=set())
 
     notesLine01: bpy.props.StringProperty(
@@ -377,7 +376,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     notesLine02: bpy.props.StringProperty(name="Notes Line 02", description="Enter notes here", options=set())
     notesLine03: bpy.props.StringProperty(name="Notes Line 03", description="Enter notes here", options=set())
 
-    ### Border properties -------------------------------------------
+    # ---------- Border properties -------------
+
     borderUsed: bpy.props.BoolProperty(name="Borders", description="Stamp borders", default=True, options=set())
 
     # regarder https://blender.stackexchange.com/questions/141333/how-controll-rgb-node-with-floatvectorproperty-blender-2-8
@@ -393,12 +393,13 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         options=set(),
     )
 
-    ### Date properties -------------------------------------------
+    # ---------- Date properties -------------
+
     dateUsed: bpy.props.BoolProperty(name="Date", description="Stamp rendering date", default=False, options=set())
 
     timeUsed: bpy.props.BoolProperty(name="Time", description="Stamp rendering time", default=False, options=set())
 
-    ### Settings properties --------------------------------------------
+    # ---------- Settings properties -------------
     # https://devtalk.blender.org/t/how-to-change-the-color-picker/9666/7
     # https://docs.blender.org/api/current/bpy.props.html?highlight=floatvectorproperty#bpy.props.FloatVectorProperty
 
@@ -473,7 +474,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Stamp Property Value", description="Stamp Property Value", default=True, options=set()
     )
 
-    ### Debug properties -------------------------------------------
+    # ---------- Debug properties -------------
 
     def set_debugMode(self, value):
         # self.debugMode = value
@@ -502,7 +503,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     #     default = "-",
     #     update = filePathAndName_valueChanged )
 
-    ### temp properties -------------------------------------------
+    # ---------- temp properties -------------
 
     tmp_usePreviousValues: bpy.props.BoolProperty(
         name="usePreviousValues", description="usePreviousValues", default=False
@@ -520,6 +521,9 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="previousResolution_y Dir To Compo", description="previousResolution_y", default=50
     )
 
+    def renderTmpImageWithStampedInfo(self, scene, currentFrame):
+        infoImage.renderTmpImageWithStampedInfo(scene, currentFrame)
+
     def restorePreviousValues(self, scene):
         scene.render.resolution_x = self.tmp_previousResolution_x
         scene.render.resolution_y = self.tmp_previousResolution_y
@@ -536,6 +540,9 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         # scene.UAS_StampInfo_Settings.stampInfoRenderMode = tmp_stampInfoRenderMode
 
         # tmp_usePreviousValues = False
+
+    def clearInfoCompoNodes(self, scene):
+        stamper.clearInfoCompoNodes(scene)
 
     def clearRenderHandlers(self):
         print("\n ** -- ** clearRenderHandlers ** -- **")

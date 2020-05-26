@@ -1,24 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-from pathlib import Path
-
 
 import bpy
 import bpy.utils.previews
-from bpy.props import (
-    CollectionProperty,
-    IntProperty,
-    StringProperty,
-    EnumProperty,
-    BoolProperty,
-    PointerProperty,
-    FloatProperty,
-    FloatVectorProperty,
-)
+
 
 # for file browser:
-from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator
 
 
@@ -75,7 +63,6 @@ def getRenderResolutionForStampInfo(scene):
 
 # returns the height (integer) in pixels of the image between the 2 borders according to the current mode
 def getInnerHeight(scene):
-    stampRenderRes = [0.0, 0.0]
     innerH = -1
 
     if "DIRECTTOCOMPOSITE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # DIRECTTOCOMPOSITE
@@ -114,13 +101,21 @@ def getRenderFileName(scene):
     return filename
 
 
-# returns the path of the info image corresponding to the specified frame
-# path of temp info files is the same as the render output files
-# renderFrameInd can be None to get only the path
 def getInfoFileFullPath(scene, renderFrameInd):
+    """
+        returns the path of the info image corresponding to the specified frame
+        path of temp info files is the same as the render output files
+        renderFrameInd can be None to get only the path
+        *** Validity of the path is NOT tested
+    """
     #   print("\n getInfoFileFullPath ")
+    filepath = ""
 
-    filepath = scene.render.filepath
+    if scene.UAS_StampInfo_Settings.renderRootPathUsed:
+        filepath = scene.UAS_StampInfo_Settings.renderRootPath
+    else:
+        filepath = scene.render.filepath
+
     filepath = bpy.path.abspath(filepath)
     #    print("    Temp Info Filepath: ", filepath)
 
@@ -151,6 +146,9 @@ def getInfoFileFullPath(scene, renderFrameInd):
         #        print("  Rendering path is valid")
         filePathIsValid = True
 
+    # validity is NOT tested
+    filePathIsValid = True
+
     renderPath = None
     renderedInfoFileName = None
     if filePathIsValid:
@@ -161,7 +159,7 @@ def getInfoFileFullPath(scene, renderFrameInd):
         #      filenameNoExt, fileExt = os.path.splitext(getRenderFileName(scene))
         filenameNoExt, fileExt = os.path.splitext(tail)
 
-        if None != renderFrameInd:
+        if renderFrameInd is not None:
             renderedInfoFileName = filenameNoExt
         renderedInfoFileName += r"_tmp_StampInfo." + "{:04d}".format(renderFrameInd) + ".png"
 
@@ -178,7 +176,7 @@ def clearInfoCompoNodes(scene):
     print("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
 
     # if gbWkDebug_DontDeleteCompoNodes: return()
-    ### wkip to remove !!! ###
+    # !!! wkip to remove !!! ###
     # clear all nodes
     scene.use_nodes = False
     allCompoNodes = scene.node_tree
@@ -187,7 +185,7 @@ def clearInfoCompoNodes(scene):
     return ()
 
     # relink
-    if None != scene.node_tree:
+    if scene.node_tree is not None:
 
         # if None == scene.node_tree:
         #     scene.use_nodes = True
@@ -196,7 +194,7 @@ def clearInfoCompoNodes(scene):
         links = scene.node_tree.links
 
         compoNode_OutputToStamp_Img = scene.node_tree.nodes.get("UAS_StampInfo_OutputToStamp_Img")
-        if None != compoNode_OutputToStamp_Img:
+        if compoNode_OutputToStamp_Img is not None:
             print("compoNode_OutputToStamp_Img found ")
             # get composite
             if 0 < len(compoNode_OutputToStamp_Img.inputs[0].links):
@@ -209,7 +207,7 @@ def clearInfoCompoNodes(scene):
 
         allCompoNodes = scene.node_tree
         # print("    allCompoNodes: ", allCompoNodes)
-        if None != allCompoNodes:
+        if allCompoNodes is not None:
             namePrefix = "UAS_StampInfo_"
             for currentNode in reversed(allCompoNodes.nodes):
                 if namePrefix == currentNode.name[0 : len(namePrefix)]:
@@ -263,9 +261,9 @@ def deleteTempImage(scene):
 def getNodeFromGraph(scene, nodeType, namePrefix=""):
     nodeFromGraph = None
     nodeFound = False
-    if None != scene.node_tree:
+    if scene.node_tree is not None:
         i = 0
-        while None == nodeFromGraph and len(scene.node_tree.nodes) > i and not nodeFound:
+        while nodeFromGraph is None and len(scene.node_tree.nodes) > i and not nodeFound:
             # print(  "  i: ", i)
             if nodeType == scene.node_tree.nodes[i].type:
                 if "" == namePrefix or scene.node_tree.nodes[i].name == namePrefix:
@@ -311,7 +309,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
     # node used to easily get the output of the graph that was set by the user
     compoNode_OutputToStamp_Img = getNodeFromGraph(scene, "TRANSLATE", "UAS_StampInfo_OutputToStamp_Img")
     # if None != compoNode_OutputToStamp_Img: allCompoNodes.nodes.remove(compoNode_OutputToStamp_Img)
-    if None == compoNode_OutputToStamp_Img:
+    if compoNode_OutputToStamp_Img is None:
         print("  Create new compoNode_OutputToStamp_Img")
         compoNode_OutputToStamp_Img = scene.node_tree.nodes.new("CompositorNodeTranslate")
         compoNode_OutputToStamp_Img.name = "UAS_StampInfo_OutputToStamp_Img"
@@ -319,7 +317,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
 
     compoNode_OutputToStamp_A = getNodeFromGraph(scene, "SEPRGBA", "UAS_StampInfo_OutputToStamp_Alpha")
     # if None != compoNode_OutputToStamp_A: allCompoNodes.nodes.remove(compoNode_OutputToStamp_A)
-    if None == compoNode_OutputToStamp_A:
+    if compoNode_OutputToStamp_A is None:
         compoNode_OutputToStamp_A = scene.node_tree.nodes.new("CompositorNodeSepRGBA")
         compoNode_OutputToStamp_A.name = "UAS_StampInfo_OutputToStamp_Alpha"
         compoNode_OutputToStamp_A.location = -100, 200
@@ -336,9 +334,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
 
     #    compoNodeOutput     = getNodeFromGraph(scene, 'OUTPUT_FILE')
 
-    isCompoNodeCompositeFound = None == compoNodeComposite
-
-    if None == compoNodeComposite:
+    if compoNodeComposite is None:
         print("   composite not found")
     else:
         print("  compoNodeComposite found: " + compoNodeComposite.name)
@@ -350,7 +346,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
     #     print("  compoNodeRLayers found: " + compoNodeRLayers.name)
 
     # an existing composite has not been found and has to be created
-    if None == compoNodeComposite:
+    if compoNodeComposite is None:
         compoNodeComposite = scene.node_tree.nodes.new("CompositorNodeComposite")
         compoNodeComposite.name = "UAS_StampInfo_InputInfoComposite"
         compoNodeComposite.location = 400, 200
@@ -358,7 +354,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
     print("   wkip crash marker 01")
 
     compoNodeInput = getNodeFromGraph(scene, "IMAGE", "UAS_StampInfo_InputBGImage")
-    if None != compoNodeInput:
+    if compoNodeInput is not None:
         allCompoNodes.nodes.remove(compoNodeInput)
     compoNodeInput = scene.node_tree.nodes.new("CompositorNodeImage")
     compoNodeInput.name = "UAS_StampInfo_InputBGImage"
@@ -373,7 +369,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
     # compoNodeMix.location           = 100, 0
 
     compoNodeMix = getNodeFromGraph(scene, "ALPHAOVER", "UAS_StampInfo_InputInfoMix")
-    if None != compoNodeMix:
+    if compoNodeMix is not None:
         allCompoNodes.nodes.remove(compoNodeMix)
     compoNodeMix = scene.node_tree.nodes.new("CompositorNodeAlphaOver")
     compoNodeMix.name = "UAS_StampInfo_InputInfoMix"
@@ -403,7 +399,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
             compoNodeRLayers = getNodeFromGraph(scene, "R_LAYERS", "UAS_StampInfo_InputInfoRLayers")
             # if None != compoNodeRLayers: allCompoNodes.nodes.remove(compoNodeRLayers)
             try:
-                if None == compoNodeRLayers:
+                if compoNodeRLayers is None:
                     compoNodeRLayers = scene.node_tree.nodes.new("CompositorNodeRLayers")
                     compoNodeRLayers.name = "UAS_StampInfo_InputInfoRLayers"
                     compoNodeRLayers.location = -500, 200
@@ -429,7 +425,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
         print("   before linking - SEPARATEOUTPUT")
         compoNodeOutput = getNodeFromGraph(scene, "OUTPUT_FILE", "UAS_StampInfo_OutputInfo")
         print("   wkip crash marker 03-b-1")
-        if None != compoNodeOutput:
+        if compoNodeOutput is not None:
             allCompoNodes.nodes.remove(compoNodeOutput)
         # create output node
         compoNodeOutput = scene.node_tree.nodes.new("CompositorNodeOutputFile")
@@ -459,7 +455,7 @@ def createInfoCompoNodes(scene, renderFrameInd):
             print("  compoNodeComposite.inputs[0].is_linked: false")
             compoNodeRLayers = getNodeFromGraph(scene, "R_LAYERS", "UAS_StampInfo_InputInfoRLayers")
             # if None != compoNodeRLayers: allCompoNodes.nodes.remove(compoNodeRLayers)
-            if None == compoNodeRLayers:
+            if compoNodeRLayers is None:
                 print("      one == compoNodeRLayers")
                 compoNodeRLayers = scene.node_tree.nodes.new("CompositorNodeRLayers")
                 compoNodeRLayers.name = "UAS_StampInfo_InputInfoRLayers"
