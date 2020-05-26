@@ -69,38 +69,13 @@
 #   - Compo nodes:  https://docs.blender.org/api/current/bpy.types.CompositorNodeImage.html
 #
 
-
-bl_info = {
-    "name": "UAS_StampInfo",
-    "author": "Julien Blervaque (aka Werwack)",
-    "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
-    "\nRequiers (and automatically install if not found) the Python library named Pillow",
-    "blender": (2, 82, 0),
-    "version": (0, 9, 14),
-    "location": "Right panel in the 3D View",
-    "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
-    "warning": "",
-    "category": "UAS",
-}
-
-
 import os
 import subprocess
 
 import bpy
 import bpy.utils.previews
-from bpy.app.handlers import persistent
-from bpy.types import Operator, Menu, Panel
-from bpy.props import (
-    CollectionProperty,
-    IntProperty,
-    StringProperty,
-    EnumProperty,
-    BoolProperty,
-    PointerProperty,
-    FloatProperty,
-    FloatVectorProperty,
-)
+from bpy.types import Operator, Panel
+from bpy.props import StringProperty, PointerProperty
 
 
 # for file browser:
@@ -121,6 +96,19 @@ importlib.reload(handlers)
 importlib.reload(debug)
 
 
+bl_info = {
+    "name": "UAS_StampInfo",
+    "author": "Julien Blervaque (aka Werwack)",
+    "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
+    "\nRequiers (and automatically install if not found) the Python library named Pillow",
+    "blender": (2, 82, 0),
+    "version": (0, 9, 14),
+    "location": "Right panel in the 3D View",
+    "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
+    "warning": "",
+    "category": "UAS",
+}
+
 # ------------------------------------------------------------------------#
 #                               Main Panel                               #
 # ------------------------------------------------------------------------#
@@ -128,14 +116,12 @@ importlib.reload(debug)
 
 class UAS_PT_StampInfoAddon(Panel):
     bl_idname = "UAS_PT_StampInfoAddon"
-    bl_label = f"UAS StampInfo {'.'.join ( str ( v ) for v in bl_info[ 'version'] ) }"
+    bl_label = f"UAS StampInfo {'.'.join ( str ( v ) for v in bl_info['version'] ) }"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "UAS StampInfo"
 
     def draw_header_preset(self, context):
-        scene = context.scene
-
         layout = self.layout
         layout.emboss = "NONE"
         row = layout.row(align=True)
