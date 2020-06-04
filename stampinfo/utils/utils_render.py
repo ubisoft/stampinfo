@@ -26,6 +26,10 @@ class Utils_LaunchRender(Operator):
         name="Render", description="", items=(("STILL", "Still", ""), ("ANIMATION", "Animation", "")), default="STILL"
     )
 
+    @classmethod
+    def poll(cls, context):
+        return context.scene.camera is not None
+
     def execute(self, context):
 
         if "STILL" == self.renderMode:

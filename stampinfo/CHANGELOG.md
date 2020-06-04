@@ -7,10 +7,17 @@ History:
 ## Known issues:
 - When the handlers are used the compositing graph is completely cleared after each rendering
 
-* V  0.9.15 - 04/06/2020:
+* V  0.9.17 - 04/06/2020:
+	- Added color on the range limits
+	- Introduced a About... block, to be filled
+	
+* V  0.9.17 - 04/06/2020:
+	- Added video duration
+
+* V  0.9.16 - 04/06/2020:
 	- Added shot duration
 	- Added parameter to start the output mediat frame index at 0 instead of 1 by default
-	
+
 * V  0.9.14 - 26/05/2020:
 	- Features to run the stamping without the use of the handlers
 

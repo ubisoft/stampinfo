@@ -301,6 +301,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     col01 = paddingLeft
     col01 = col01 + paddingLeftMetadataTop
     col02 = 0.1 * renderW
+    col028 = 0.68 * renderW
     col03 = 0.75 * renderW
     col04 = 0.8 * renderW
 
@@ -388,13 +389,29 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
             textProp += " / " + str(int(totalImages)) + " fr." if stampValue else ""
         img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
+    # ---------- video duration -------------
+    # currentTextTop += textLineH + textInterlineH
+    if userSettings.videoDuration:
+        textProp = "Duration: "
+        textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
+        img_draw.text((col028, currentTextTop), textProp, font=font, fill=textColorRGBA)
+
     # currentTextTop += textLineH + textInterlineH
 
     # ---------- notes -------------
     currentTextTop = offsetToCenterH + paddingTopExt
-    colNotesLabel = 0.25 * renderW
-    colNotes = 0.29 * renderW
+
     if userSettings.notesUsed:
+        colNotesLabel = 0.25 * renderW
+        colNotes = 0.29 * renderW
+
+        currentBoxTop = currentTextTop - 0.005 * renderH
+        currentBoxBottom = currentTextTop + 3 * (textLineH + textInterlineH) + 0.005 * renderH
+        colBoxLeft = colNotes - 0.0075 * renderW
+        colBoxRight = colBoxLeft + 0.35 * renderW
+        boxLineThickness = max(1, int(0.0025 * renderH))
+        textColorGray = (128, 128, 128, 255)
+
         textProp = "Notes: " if stampLabel else ""
         img_draw.text((colNotesLabel, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
@@ -409,6 +426,22 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         textProp = userSettings.notesLine03 if stampValue else ("Notes Line 3" if stampLabel else "")
         img_draw.text((colNotes, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
+        # draw box
+        img_draw.line(
+            [(colBoxLeft, currentBoxTop), (colBoxRight, currentBoxTop)], fill=textColorGray, width=boxLineThickness,
+        )
+        img_draw.line(
+            [(colBoxLeft, currentBoxBottom), (colBoxRight, currentBoxBottom)],
+            fill=textColorGray,
+            width=boxLineThickness,
+        )
+        img_draw.line(
+            [(colBoxLeft, currentBoxTop), (colBoxLeft, currentBoxBottom)], fill=textColorGray, width=boxLineThickness,
+        )
+        img_draw.line(
+            [(colBoxRight, currentBoxTop), (colBoxRight, currentBoxBottom)], fill=textColorGray, width=boxLineThickness,
+        )
+
     # ---------------------------------
     # bottom border
     # ---------------------------------
@@ -417,7 +450,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     col02 = 0.19 * renderW
     col03 = 0.34 * renderW
     col04 = 0.5 * renderW
-    col05 = 0.7 * renderW
+    # col05 = 0.7 * renderW
     currentTextTop = (
         renderH
         - paddingBottomExt
@@ -463,7 +496,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     currentTextTop += textLineH + textInterlineH
     if userSettings.shotDuration:
         textProp = "Shot Duration: "
-        textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
+        textProp += (
+            str(scene.frame_end - scene.frame_start + 1 - 2 * userSettings.shotHandles) + " fr." if stampValue else ""
+        )
         img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- 3d frames and range -------------
@@ -549,7 +584,6 @@ def drawRangesAndFrame(
     """
     userSettings = scene.UAS_StampInfo_Settings
 
-    display3DFrame = "3DFRAME" == framemode
     #    currentTextTopFor3DFrames += textLineH + textInterlineH
     #    currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
 
@@ -557,8 +591,11 @@ def drawRangesAndFrame(
     currentTextLeftFor3DFrames = textRight
     textColorRGBA = color
     textColorGray = (128, 128, 128, 255)
-    textColorWhite = (200, 200, 200, 255)
-    textColorRed = (200, 200, 200, 255)
+    textColorGrayLight = (200, 200, 200, 255)
+    textColorWhite = (240, 240, 240, 255)
+    textColorRed = (190, 90, 90, 255)
+    textColorGreen = (60, 200, 60, 255)
+    textColorOrange = (255, 185, 62, 255)
 
     stampLabel = userSettings.stampPropertyLabel
     stampValue = userSettings.stampPropertyValue
@@ -581,9 +618,10 @@ def drawRangesAndFrame(
         if rangeUsed:
             textProp = "{:03d}".format(endRange)
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
-            img_draw.text(
-                (currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorGray
-            )
+            textColor = textColorOrange if not handlesUsed and currentFrame == endRange else textColorGray
+            if handlesUsed and (endRange - handle < currentFrame):
+                textColor = textColorRed
+            img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
 
         if rangeUsed and handlesUsed:
             textProp = " / "
@@ -595,9 +633,8 @@ def drawRangesAndFrame(
         if handlesUsed:
             textProp = "{:03d}".format(endRange - handle)
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
-            img_draw.text(
-                (currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorWhite
-            )
+            textColor = textColorOrange if currentFrame == endRange - handle else textColorGrayLight
+            img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
 
         if rangeUsed or handlesUsed:
             textProp = " / "
@@ -615,7 +652,7 @@ def drawRangesAndFrame(
                 (currentTextLeftFor3DFrames, currentTextTopFor3DFrames - newTextHeight),
                 textProp,
                 font=fontLarge,
-                fill=textColorRGBA,
+                fill=textColorWhite,
             )
 
         if (rangeUsed or handlesUsed) and frameUsed:
@@ -628,9 +665,8 @@ def drawRangesAndFrame(
         if handlesUsed:
             textProp = "{:03d}".format(startRange + handle)
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
-            img_draw.text(
-                (currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorWhite
-            )
+            textColor = textColorGreen if currentFrame == startRange + handle else textColorGrayLight
+            img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
 
         if rangeUsed and handlesUsed:
             textProp = " / "
@@ -642,9 +678,10 @@ def drawRangesAndFrame(
         if rangeUsed:
             textProp = "{:03d}".format(startRange)
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
-            img_draw.text(
-                (currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorGray
-            )
+            textColor = textColorGreen if not handlesUsed and currentFrame == startRange else textColorGray
+            if handlesUsed and (currentFrame < startRange + handle):
+                textColor = textColorRed
+            img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
 
         if rangeUsed or handlesUsed:
             textProp = "[ "
@@ -654,9 +691,12 @@ def drawRangesAndFrame(
             )
 
     if frameUsed and stampLabel:
-        textProp = "Range / " if rangeUsed else ""
-        textProp += "Handles / " if handlesUsed else ""
-        textProp += "3D Frame: " if frameUsed else ""
+        textProp = "Handle / " if handlesUsed else ""
+        textProp += "Range / " if rangeUsed else ""
+        if "3DFRAME" == framemode:
+            textProp += "3D Frame: " if frameUsed else ""
+        else:
+            textProp += "Video Frame: " if frameUsed else ""
         currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
         img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorRGBA)
 
