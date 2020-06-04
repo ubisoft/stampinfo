@@ -102,7 +102,7 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 82, 0),
-    "version": (0, 9, 14),
+    "version": (0, 9, 16),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     "warning": "",
@@ -340,6 +340,11 @@ class UAS_PT_StampInfoMetadata(Panel):
         row.prop(scene.UAS_StampInfo_Settings, "cameraUsed")
         row.prop(scene.UAS_StampInfo_Settings, "cameraLensUsed")
 
+        # ---------- Shot duration -------------
+        box = layout.box()
+        row = box.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "shotDuration")
+
         # ---------- 3D frame -------------
         box = layout.box()
         row = box.row(align=True)
@@ -426,6 +431,12 @@ class UAS_PT_StampInfoSettings(Panel):
 
         row = layout.row()
         row.prop(scene.UAS_StampInfo_Settings, "stampPropertyValue")
+
+        row = layout.row()
+        row.label(text="Advanced:")
+        row = layout.row()
+        box = layout.box()
+        box.prop(scene.UAS_StampInfo_Settings, "mediaFistFrameIsZero")
 
 
 # This operator requires   from bpy_extras.io_utils import ImportHelper

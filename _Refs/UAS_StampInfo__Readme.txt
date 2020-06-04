@@ -1,30 +1,28 @@
 
+
+UAS Stamp Info
+
+Purpose:
+--------
+
+
+
+Features:
+---------
+
+	- Can stamp a specified logo.
+	  Logo path can be relative to the path of the current blender file. It must then start with //
+	
+	- Support also intergrated Blender Metadata (= text is moved if metadata are used)
+
+
 History:
 --------
 
-# V  0.9.1.1x:
-
-## Known issues:
-- When the handlers are used the compositing graph is completely cleared after each rendering
-
-* V  0.9.15 - 04/06/2020:
-	- Added shot duration
-	- Added parameter to start the output mediat frame index at 0 instead of 1 by default
-	
-* V  0.9.14 - 26/05/2020:
-	- Features to run the stamping without the use of the handlers
-
-* V  0.9.13 - 18/05/2020:
-	- stability fixes
-
-* V  0.9.11 - 08/05/2020:
-	- Exposed text for shot and Take
-	- Metadata labels and values are now separated infos
+* V  0.9.11 - xx/05/2020:
 
 * V 0.9.10:
 	- Added Date and Time medadata
-
-# V  0.9.1.x:
 
 * V 0.9.7:
 	- Added Take medadata
