@@ -1,37 +1,26 @@
-# -*- coding: utf-8 -*-
-
 import bpy
-
 from bpy.app.handlers import persistent
-from bpy.types import Operator
-
 from . import stamper
 
 from . import infoImage
 
 
 # global vars
-if not "gbWkDebug" in vars() and not "gbWkDebug" in globals():
+if "gbWkDebug" not in vars() and "gbWkDebug" not in globals():
     gbWkDebug = False
 
 if gbWkDebug:
-    if not "gbWkDebug_DontDeleteCompoNodes" in vars() and not "gbWkDebug_DontDeleteCompoNodes" in globals():
-        gbWkDebug_DontDeleteCompoNodes = True
-
-    if not "gbWkDebug_DontDeleteTmpFiles" in vars() and not "gbWkDebug_DontDeleteTmpFiles" in globals():
+    if "gbWkDebug_DontDeleteTmpFiles" not in vars() and "gbWkDebug_DontDeleteTmpFiles" not in globals():
         gbWkDebug_DontDeleteTmpFiles = True
 
-    if not "gbWkDebug_DrawTextLines" in vars() and not "gbWkDebug_DrawTextLines" in globals():
+    if "gbWkDebug_DrawTextLines" not in vars() and "gbWkDebug_DrawTextLines" not in globals():
         gbWkDebug_DrawTextLines = True
 
 else:
-    if not "gbWkDebug_DontDeleteCompoNodes" in vars() and not "gbWkDebug_DontDeleteCompoNodes" in globals():
-        gbWkDebug_DontDeleteCompoNodes = False
-
-    if not "gbWkDebug_DontDeleteTmpFiles" in vars() and not "gbWkDebug_DontDeleteTmpFiles" in globals():
+    if "gbWkDebug_DontDeleteTmpFiles" not in vars() and "gbWkDebug_DontDeleteTmpFiles" not in globals():
         gbWkDebug_DontDeleteTmpFiles = False
 
-    if not "gbWkDebug_DrawTextLines" in vars() and not "gbWkDebug_DrawTextLines" in globals():
+    if "gbWkDebug_DrawTextLines" not in vars() and "gbWkDebug_DrawTextLines" not in globals():
         gbWkDebug_DrawTextLines = False
 
 
@@ -130,9 +119,13 @@ def uas_stampinfo_renderPreHandler(scene):
 def uas_stampinfo_renderCompleteHandler(scene):
     print("\n ** -- ** Handler uas_stampinfo_renderCompleteHandler  ** -- **")
     print("   scene.UAS_StampInfo_Settings.stampInfoUsed: " + str(scene.UAS_StampInfo_Settings.stampInfoUsed))
+
+    global gbWkDebug_DontDeleteTmpFiles
+
     if scene.UAS_StampInfo_Settings.stampInfoUsed:
         if (
-            not gbWkDebug_DontDeleteCompoNodes and 2 != scene.UAS_StampInfo_Settings["stampInfoRenderMode"]
+            not scene.UAS_StampInfo_Settings.debug_DontDeleteCompoNodes
+            and 2 != scene.UAS_StampInfo_Settings.stampInfoRenderMode
         ):  # USEEXISTING
             stamper.clearInfoCompoNodes(scene)
         if not gbWkDebug_DontDeleteTmpFiles:
@@ -149,10 +142,12 @@ def uas_stampinfo_renderCancelHandler(scene):
     print("\n ** -- ** Handler uas_stampinfo_renderCancelHandler ** -- **")
     print("   scene.UAS_StampInfo_Settings.stampInfoUsed: " + str(scene.UAS_StampInfo_Settings.stampInfoUsed))
 
+    global gbWkDebug_DontDeleteTmpFiles
+
     if (
         scene.UAS_StampInfo_Settings.stampInfoUsed and 2 != scene.UAS_StampInfo_Settings["stampInfoRenderMode"]
     ):  # USEEXISTING
-        if not gbWkDebug_DontDeleteCompoNodes:
+        if not scene.UAS_StampInfo_Settings.debug_DontDeleteCompoNodes:
             stamper.clearInfoCompoNodes(scene)
         if not gbWkDebug_DontDeleteTmpFiles:
             #       stamper.deletePreviousInfoImage(scene, scene.frame_end)    # commented cause last rendered frame may not be the last of the range
@@ -164,7 +159,7 @@ def uas_stampinfo_renderCancelHandler(scene):
 @persistent
 def uas_stampinfo_postFileLoadHandler(scene):
     print("\n ** -- ** Handler uas_stampinfo_postFileLoadHandler ** -- **")
-    if None != scene:
+    if scene is not None:
         scene.UAS_StampInfo_Settings.clearRenderHandlers()
         if scene.UAS_StampInfo_Settings.stampInfoUsed:
             scene.UAS_StampInfo_Settings.registerRenderHandlers()

@@ -1,17 +1,5 @@
-# -*- coding: utf-8 -*-
-
-
 import bpy
 from bpy.types import Operator, Panel
-from bpy.props import (
-    CollectionProperty,
-    IntProperty,
-    StringProperty,
-    EnumProperty,
-    BoolProperty,
-    FloatProperty,
-    FloatVectorProperty,
-)
 
 from ..utils import utils_render
 
@@ -20,6 +8,8 @@ from .. import stamper
 # ------------------------------------------------------------------------#
 #                                Debug Panel                             #
 # ------------------------------------------------------------------------#
+
+
 class UAS_PT_StampInfoDebug(Panel):
     bl_idname = "UAS_PT_StampInfoDebug"
     bl_label = "Debug"

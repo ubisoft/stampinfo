@@ -75,7 +75,7 @@ import subprocess
 import bpy
 import bpy.utils.previews
 from bpy.types import Operator, Panel
-from bpy.props import StringProperty, PointerProperty
+from bpy.props import StringProperty, PointerProperty, BoolProperty
 
 
 # for file browser:
@@ -102,12 +102,15 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 82, 0),
-    "version": (0, 9, 16),
+    "version": (0, 9, 18),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     "warning": "",
     "category": "UAS",
 }
+
+icons_col = None
+
 
 # ------------------------------------------------------------------------#
 #                               Main Panel                               #
@@ -120,6 +123,23 @@ class UAS_PT_StampInfoAddon(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "UAS StampInfo"
+
+    # About panel ###
+    def draw_header(self, context):
+        layout = self.layout
+        layout.emboss = "NONE"
+        row = layout.row(align=True)
+
+        if context.window_manager.UAS_StampInfo_displayAbout:
+            # _emboss = True
+            row.alert = True
+        else:
+            #    _emboss = False
+            row.alert = False
+
+        global icons_col
+        icon = icons_col["General_Ubisoft_32"]
+        row.prop(context.window_manager, "UAS_StampInfo_displayAbout", icon_value=icon.icon_id, icon_only=True)
 
     def draw_header_preset(self, context):
         layout = self.layout
@@ -134,6 +154,24 @@ class UAS_PT_StampInfoAddon(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        okForRender = True
+
+        ################
+        # About... panel
+        if context.window_manager.UAS_StampInfo_displayAbout:
+            row = layout.row()
+            aboutStr = "About UAS Stamp Info..."
+            row.label(text=aboutStr)
+
+            row = layout.row()
+            box = row.box()
+            #    aboutStr = "Create a set of camera shots and edit them\nin the 3D View as you would do with video clips."
+            box.label(text="Write scene information on the rendered images.")
+            # box.label(text="in the 3D View as you would do with video clips.")
+            #    box = row.box()
+
+            row = layout.row()
+            row.separator(factor=1.4)
 
         #    row     = layout.row ()
         #    row.operator("stampinfo.clearhandlers")
@@ -159,18 +197,30 @@ class UAS_PT_StampInfoAddon(Panel):
             row.operator("stampinfo.resethandlers", text="N")  # , icon = 'ERROR'
 
         # ready to render text
-        row = layout.row()
         # if '' == bpy.data.filepath:
         #     row.alert = True
         #     row.label ( text = "*** Save file first ***" )
-        # el
         if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
+            row = layout.row()
             row.alert = True
             row.label(text="*** Invalid Output Path ***")
+            okForRender = False
         elif "" == stamper.getRenderFileName(scene):
+            row = layout.row()
             row.alert = True
             row.label(text="*** Invalid Output File Name ***")
-        else:
+            okForRender = False
+
+        # if camera doen't exist
+        if scene.camera is None:
+            row = layout.row()
+            row.alert = True
+            row.label(text="*** No Camera in the Scene ***")
+            okForRender = False
+
+        # ready to render text
+        if okForRender:
+            row = layout.row()
             row.label(text="Ready to render")
 
         row = layout.row()
@@ -296,6 +346,11 @@ class UAS_PT_StampInfoMetadata(Panel):
             row.prop(scene.UAS_StampInfo_Settings, "notesLine02", text="")
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "notesLine03", text="")
+
+        # ---------- Video duration -------------
+        box = layout.box()
+        row = box.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "videoDuration")
 
         # ---------- video image -------------
         box = layout.box()
@@ -523,7 +578,7 @@ class UAS_ResetHandlersAndCompoNodes(Operator):
         return {"FINISHED"}
 
 
-classes = [
+classes = (
     UAS_PT_StampInfoAddon,
     UAS_PT_StampInfoMetadata,
     UAS_PT_StampInfoLayout,
@@ -534,7 +589,7 @@ classes = [
     UAS_OpenExplorer,
     UAS_ResetHandlersAndCompoNodes,
     UAS_ResetHandlers,
-]
+)
 # debug:
 #   handlers.UAS_StampInfoCreateHandlers,
 #   handlers.UAS_StampInfoClearHandlers,
@@ -562,9 +617,26 @@ def register():
 
     bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
 
+    # declaration of properties that will not be saved in the scene
+
+    # About button panel Quick Settings
+    bpy.types.WindowManager.UAS_StampInfo_displayAbout = BoolProperty(
+        name="About...", description="Display About Informations", default=False
+    )
+
     # stampInfoSettings.registerRenderHandlers()
 
     # handlers.registerPostLoadHandler()
+
+    from pathlib import Path
+
+    pcoll = bpy.utils.previews.new()
+    my_icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+    for png in Path(my_icons_dir).rglob("*.png"):
+        pcoll.load(png.stem, str(png), "IMAGE")
+
+    global icons_col
+    icons_col = pcoll
 
 
 def unregister():
@@ -573,6 +645,12 @@ def unregister():
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.WindowManager.UAS_StampInfo_displayAbout
+
+    global icons_col
+    bpy.utils.previews.remove(icons_col)
+    icons_col = None
 
     # clearing handlers
     # https://blender.stackexchange.com/questions/53894/how-to-avoid-multiple-running-instances-of-same-handler-function-when-running-it

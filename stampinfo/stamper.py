@@ -6,10 +6,6 @@ import bpy
 import bpy.utils.previews
 
 
-# for file browser:
-from bpy.types import Operator
-
-
 from .utils import utils_render
 
 

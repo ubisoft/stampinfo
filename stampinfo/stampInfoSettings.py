@@ -15,9 +15,6 @@ if "gbWkDebug" not in vars() and "gbWkDebug" not in globals():
     gbWkDebug = False
 
 if gbWkDebug:
-    if "gbWkDebug_DontDeleteCompoNodes" not in vars() and "gbWkDebug_DontDeleteCompoNodes" not in globals():
-        gbWkDebug_DontDeleteCompoNodes = True
-
     if "gbWkDebug_DontDeleteTmpFiles" not in vars() and "gbWkDebug_DontDeleteTmpFiles" not in globals():
         gbWkDebug_DontDeleteTmpFiles = True
 
@@ -25,9 +22,6 @@ if gbWkDebug:
         gbWkDebug_DrawTextLines = True
 
 else:
-    if "gbWkDebug_DontDeleteCompoNodes" not in vars() and "gbWkDebug_DontDeleteCompoNodes" not in globals():
-        gbWkDebug_DontDeleteCompoNodes = False
-
     if "gbWkDebug_DontDeleteTmpFiles" not in vars() and "gbWkDebug_DontDeleteTmpFiles" not in globals():
         gbWkDebug_DontDeleteTmpFiles = False
 
@@ -178,7 +172,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
         #     return prop
         # val = self.get("stampInfoRenderMode", 'SEPARATEOUTPUT')
-        val = self.get("stampInfoRenderMode", 1)
+        val = self.get("stampInfoRenderMode", 0)
         return val
 
     # return self.stampInfoRenderMode     #no
@@ -217,7 +211,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         ],
         get=get_stampInfoRenderMode,
         set=set_stampInfoRenderMode,
-        default="SEPARATEOUTPUT",
+        default="DIRECTTOCOMPOSITE",
     )
 
     # ---------- project properties -------------
@@ -270,7 +264,14 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     # ---------- video image -------------
+    videoDuration: BoolProperty(
+        name="Video Duration",
+        description="Total number of frames in the output sequence (handles included)",
+        default=False,
+        options=set(),
+    )
 
+    # ---------- video image -------------
     videoFrameUsed: BoolProperty(
         name="Video Frame",
         description="Stamp the index of the current image in the image sequence",
@@ -359,7 +360,11 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     shotHandles: IntProperty(
-        name="Shot Handles Duration", description="Handles duration of the shot", default=5, soft_min=0, soft_max=50
+        name="Shot Handles Duration",
+        description="Duration of the handles of the shot",
+        default=0,
+        soft_min=0,
+        soft_max=50,
     )
 
     # To be filled by a production script or by UAS Shot Manager
@@ -373,7 +378,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     cameraLensUsed: BoolProperty(name="Lens", description="Stamp camera lens", default=True, options=set())
 
     # ---------- Shot duration -------------
-    shotDuration: BoolProperty(name="Shot Duration", description="Shot Duration", default=False, options=set())
+    shotDuration: BoolProperty(
+        name="Shot Duration",
+        description="Duration of the shot (in frames) as defined in the 3D edit (= WITHOUT the handles)",
+        default=False,
+        options=set(),
+    )
 
     # ---------- Notes properties -------------
     notesUsed: BoolProperty(name="Notes", description="User notes", default=False, options=set())
@@ -414,7 +424,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         subtype="COLOR",
         size=4,
         description="Stamp borders",
-        default=(0.6, 0.6, 0.6, 1.0),
+        default=(0.65, 0.65, 0.65, 1.0),
         min=0.0,
         max=1.0,
         precision=2,
@@ -489,12 +499,16 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         options=set(),
     )
 
-    # ---------- Debug properties -------------
+    # debug properties -------------
 
     def set_debugMode(self, value):
         # self.debugMode = value
+        global gbWkDebug
+        global gbWkDebug_DontDeleteTmpFiles
+        global gbWkDebug_DrawTextLines
+
         gbWkDebug = value
-        gbWkDebug_DontDeleteCompoNodes = value
+        self.debug_DontDeleteCompoNodes = value
         gbWkDebug_DontDeleteTmpFiles = value
         gbWkDebug_DrawTextLines = value
 
@@ -508,6 +522,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     debug_DrawTextLines: BoolProperty(
         name="Debug - Draw Text Lines", description="Debug - Draw Text Lines", default=gbWkDebug_DrawTextLines
     )
+
+    debug_DontDeleteCompoNodes: BoolProperty(default=False)
 
     # def filePathAndName_valueChanged(self, context):
     #     print(" *** filePathAndName Changed !!! ***")
