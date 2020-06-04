@@ -248,7 +248,6 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         logoFile = bpy.path.abspath(logoFile)
 
     if os.path.exists(logoFile):
-        print("  Logo path is valid")
         logoFilePathIsValid = True
     else:
         if userSettings.logoUsed:
@@ -339,16 +338,22 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     textProp = "Video: " if stampLabel else ""
     currentTextTopFor3DFrames = offsetToCenterH + paddingTopExt + textLineH + textInterlineH
     currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
-    currentImage = scene.frame_current - scene.frame_start + 1
-    totalImages = scene.frame_end - scene.frame_start + 1
-    # we consider video frames starts at 1, not 0!
+
+    currentImage = scene.frame_current - scene.frame_start
+    if not userSettings.mediaFistFrameIsZero:
+        currentImage += 1
+    firstFrameInd = 0 if userSettings.mediaFistFrameIsZero else 1
+    lastFrameInd = scene.frame_end - scene.frame_start
+    if not userSettings.mediaFistFrameIsZero:
+        lastFrameInd += 1
+
     drawRangesAndFrame(
         scene,
         img_draw,
         "VIDEOFRAME",
         currentImage,
-        1,
-        totalImages,
+        firstFrameInd,
+        lastFrameInd,
         userSettings.shotHandles,
         userSettings.videoFrameUsed,
         userSettings.videoRangeUsed,
@@ -360,6 +365,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         textColorRGBA,
     )
 
+    # ---------- fps and 3D edit -------------
     currentTextTop = currentTextTopFor3DFrames + textLineH + textInterlineH
 
     if userSettings.framerateUsed:
@@ -377,9 +383,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         #  textProp += '{:03d}'.format(scene.render.fps) + " fps" if stampValue else ""
         currentImage = userSettings.edit3DFrame
         totalImages = userSettings.edit3DTotalNumber
-        textProp += str(currentImage) if stampValue else ""
+        textProp += str(int(currentImage)) if stampValue else ""
         if userSettings.edit3DTotalNumberUsed:
-            textProp += " / " + str(totalImages) if stampValue else ""
+            textProp += " / " + str(int(totalImages)) + " fr." if stampValue else ""
         img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # currentTextTop += textLineH + textInterlineH
@@ -440,7 +446,6 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- camera -------------
-
     if userSettings.cameraLensUsed and not userSettings.cameraUsed:
         textProp = "Lens: " if stampLabel else ""
         # textProp += f"{(scene.camera.data.lens):05.0f}" + " mm" if stampValue else ""       # :05.2f}
@@ -454,8 +459,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
                 textProp += "   " + (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""
             img_draw.text((col04, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
-    # ---------- 3d frames and range -------------
+    # ---------- shot duration -------------
+    currentTextTop += textLineH + textInterlineH
+    if userSettings.shotDuration:
+        textProp = "Shot Duration: "
+        textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
+        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
+    # ---------- 3d frames and range -------------
     currentTextTopFor3DFrames += textLineH + textInterlineH
     currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
     drawRangesAndFrame(
@@ -477,7 +488,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     )
 
     # ---------- file -------------
-    currentTextTop += 2 * (textLineH + textInterlineH)
+    currentTextTop += textLineH + textInterlineH  # * 2
 
     if userSettings.filenameUsed or userSettings.filepathUsed:
         textProp = "Blender file: " if stampLabel else ""
