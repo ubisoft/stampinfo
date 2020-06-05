@@ -350,7 +350,7 @@ class UAS_PT_StampInfoMetadata(Panel):
         # ---------- Video duration -------------
         box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "videoDuration")
+        row.prop(scene.UAS_StampInfo_Settings, "videoDurationUsed")
 
         # ---------- video image -------------
         box = layout.box()
@@ -398,7 +398,7 @@ class UAS_PT_StampInfoMetadata(Panel):
         # ---------- Shot duration -------------
         box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "shotDuration")
+        row.prop(scene.UAS_StampInfo_Settings, "shotDurationUsed")
 
         # ---------- 3D frame -------------
         box = layout.box()

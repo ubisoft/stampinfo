@@ -391,7 +391,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
 
     # ---------- video duration -------------
     # currentTextTop += textLineH + textInterlineH
-    if userSettings.videoDuration:
+    if userSettings.videoDurationUsed:
         textProp = "Duration: "
         textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
         img_draw.text((col028, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -494,7 +494,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
 
     # ---------- shot duration -------------
     currentTextTop += textLineH + textInterlineH
-    if userSettings.shotDuration:
+    if userSettings.shotDurationUsed:
         textProp = "Shot Duration: "
         textProp += (
             str(scene.frame_end - scene.frame_start + 1 - 2 * userSettings.shotHandles) + " fr." if stampValue else ""

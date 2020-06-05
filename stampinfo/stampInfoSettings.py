@@ -264,7 +264,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     # ---------- video image -------------
-    videoDuration: BoolProperty(
+    videoDurationUsed: BoolProperty(
         name="Video Duration",
         description="Total number of frames in the output sequence (handles included)",
         default=False,
@@ -378,7 +378,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     cameraLensUsed: BoolProperty(name="Lens", description="Stamp camera lens", default=True, options=set())
 
     # ---------- Shot duration -------------
-    shotDuration: BoolProperty(
+    shotDurationUsed: BoolProperty(
         name="Shot Duration",
         description="Duration of the shot (in frames) as defined in the 3D edit (= WITHOUT the handles)",
         default=False,
