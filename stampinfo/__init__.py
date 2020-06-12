@@ -83,7 +83,7 @@ from bpy_extras.io_utils import ImportHelper
 
 import importlib
 
-from .utils import utils_render
+from .utils.utils_render import Utils_LaunchRender
 
 from . import handlers
 from . import stamper
@@ -101,8 +101,8 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack)",
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
-    "blender": (2, 82, 0),
-    "version": (0, 9, 18),
+    "blender": (2, 83, 0),
+    "version": (0, 9, 19),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     "warning": "",
@@ -584,7 +584,7 @@ classes = (
     UAS_PT_StampInfoLayout,
     UAS_PT_StampInfoSettings,
     stampInfoSettings.UAS_StampInfoSettings,
-    utils_render.Utils_LaunchRender,
+    Utils_LaunchRender,
     UAS_OpenFileBrowser,
     UAS_OpenExplorer,
     UAS_ResetHandlersAndCompoNodes,
@@ -644,6 +644,7 @@ def unregister():
     debug.unregister()
 
     for cls in reversed(classes):
+        # print(str(cls) + " being unregistered...")
         bpy.utils.unregister_class(cls)
 
     del bpy.types.WindowManager.UAS_StampInfo_displayAbout

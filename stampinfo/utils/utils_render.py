@@ -17,9 +17,9 @@ def isRenderPathValid(scene):
 
 
 class Utils_LaunchRender(Operator):
-    bl_idname = "utils.launchrender"
+    bl_idname = "utils.launch_render"
     bl_label = "Render"
-    bl_description = "Render."
+    bl_description = "Render"
     bl_options = {"INTERNAL"}
 
     renderMode: bpy.props.EnumProperty(

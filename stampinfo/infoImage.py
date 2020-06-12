@@ -14,7 +14,7 @@ from .stamper import (
 
 # Called by the Pre renderer callback
 # Preparation of the files
-def renderTmpImageWithStampedInfo(scene, currentFrame):
+def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     """  Called by the Pre renderer callback
         Preparation of the files
     """
@@ -28,7 +28,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
 
     from PIL import Image, ImageDraw, ImageFont
 
-    print("\n       renderTmpImageWithStampedInfo ")
+    if verbose:
+        print("\n       renderTmpImageWithStampedInfo ")
 
     userSettings = scene.UAS_StampInfo_Settings
     paddingLeftMetadataTopNorm = 0.0
@@ -140,12 +141,12 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     paddingLeftMetadataTop = int((paddingLeftMetadataTopNorm) * renderW)
     paddingLeftMetadataBottom = int((paddingLeftMetadataBottomNorm) * renderW)
     # paddingLeft         = int((paddingLeftNorm + paddingLeftMetadataTopNorm) * renderW)
-    paddingRight = paddingLeft
+    #    paddingRight = paddingLeft
 
     paddingTopExt = int(paddingTopExtNorm * renderH)
     paddingBottomExt = paddingTopExt
-    paddingTopInt = int(paddingTopIntNorm * renderH)
-    paddingBottomInt = paddingTopInt
+    #    paddingTopInt = int(paddingTopIntNorm * renderH)
+    #    paddingBottomInt = paddingTopInt
 
     borderColorRGB = userSettings.borderColor  # (0, 0, 0, 255)
     borderColorRGBA = (
@@ -301,7 +302,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     col01 = paddingLeft
     col01 = col01 + paddingLeftMetadataTop
     col02 = 0.1 * renderW
-    col028 = 0.68 * renderW
+    col028 = 0.65 * renderW
+    col035 = 0.84 * renderW
+
     col03 = 0.75 * renderW
     col04 = 0.8 * renderW
 
@@ -387,7 +390,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
         textProp += str(int(currentImage)) if stampValue else ""
         if userSettings.edit3DTotalNumberUsed:
             textProp += " / " + str(int(totalImages)) + " fr." if stampValue else ""
-        img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        img_draw.text((col035, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- video duration -------------
     # currentTextTop += textLineH + textInterlineH
@@ -449,7 +452,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
     col01 = paddingLeft
     col02 = 0.19 * renderW
     col03 = 0.34 * renderW
-    col04 = 0.5 * renderW
+    col04 = 0.7 * renderW
     # col05 = 0.7 * renderW
     currentTextTop = (
         renderH
@@ -541,17 +544,15 @@ def renderTmpImageWithStampedInfo(scene, currentFrame):
 
     dirAndFilename = getInfoFileFullPath(scene, currentFrame)
     filepath = dirAndFilename[0] + dirAndFilename[1]
-    print("  01 filepath: dirAndFilename[0]: ", dirAndFilename[0])
-    print("  02 filepath: dirAndFilename[1]: ", dirAndFilename[1])
 
-    # filepath = r"Z:\EvalSofts\Blender\DevPython_Data\UAS_StampInfo_Data\Outputs"
-    print("Info file rendered name: ", (filepath))
+    if verbose:
+        print("Info file rendered name: ", (filepath))
 
     if not os.path.exists(dirAndFilename[0]):
         try:
             path = Path(dirAndFilename[0])
             path.mkdir(parents=True, exist_ok=True)
-        except:
+        except Exception:  # as e
             print("\n*** Creation of the directory %s failed" % dirAndFilename[0])
             print("\n")
 
@@ -690,7 +691,7 @@ def drawRangesAndFrame(
                 (currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorRGBA
             )
 
-    if frameUsed and stampLabel:
+    if frameUsed:  # and stampLabel:
         textProp = "Handle / " if handlesUsed else ""
         textProp += "Range / " if rangeUsed else ""
         if "3DFRAME" == framemode:
