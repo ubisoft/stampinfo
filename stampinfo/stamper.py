@@ -176,8 +176,9 @@ def clearInfoCompoNodes(scene):
     # clear all nodes
     scene.use_nodes = False
     allCompoNodes = scene.node_tree
-    for currentNode in allCompoNodes.nodes:
-        allCompoNodes.nodes.remove(currentNode)
+    if allCompoNodes is not None and allCompoNodes.nodes is not None:
+        for currentNode in allCompoNodes.nodes:
+            allCompoNodes.nodes.remove(currentNode)
     return ()
 
     # relink

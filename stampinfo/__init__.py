@@ -102,7 +102,7 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 83, 0),
-    "version": (0, 9, 19),
+    "version": (0, 9, 20),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     "warning": "",
