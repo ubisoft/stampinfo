@@ -84,6 +84,7 @@ from bpy_extras.io_utils import ImportHelper
 import importlib
 
 from .utils.utils_render import Utils_LaunchRender
+from .utils.utils import display_addon_registered_version
 
 from . import handlers
 from . import stamper
@@ -102,7 +103,7 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 83, 0),
-    "version": (0, 9, 20),
+    "version": (0, 9, 21),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     "warning": "",
@@ -604,7 +605,7 @@ def module_can_be_imported(name):
 
 
 def register():
-    print("\n--------- Registering UAS_StampInfo ---------")
+    display_addon_registered_version("UAS_StampInfo")
 
     # Pillow lib installation
     if not module_can_be_imported("PIL"):
