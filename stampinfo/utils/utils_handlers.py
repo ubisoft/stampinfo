@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
+import logging
 
-# werwack 2020/05/14
-# V 1.0.0
+_logger = logging.getLogger(__name__)
 
 import bpy
 

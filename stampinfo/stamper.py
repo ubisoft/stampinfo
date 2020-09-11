@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 import os
 
@@ -167,9 +170,9 @@ def getInfoFileFullPath(scene, renderFrameInd):
 
 
 def clearInfoCompoNodes(scene):
-    print("\n\n**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
-    print("\n**** clearInfoCompoNodes ****")
-    print("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
+    _logger.debug("\n\n**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
+    _logger.debug("\n**** clearInfoCompoNodes ****")
+    _logger.debug("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
 
     # if gbWkDebug_DontDeleteCompoNodes: return()
     # !!! wkip to remove !!! ###
@@ -274,9 +277,9 @@ def getNodeFromGraph(scene, nodeType, namePrefix=""):
 # called at the very beginning of the render process by the Init handler
 # origine of the nodes grid is bottom left
 def createInfoCompoNodes(scene, renderFrameInd):
-    print("\n\n**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
-    print("\n**** createInfoCompoNodes ****")
-    print("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
+    _logger.debug("\n\n**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
+    _logger.debug("\n**** createInfoCompoNodes ****")
+    _logger.debug("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
     # compositing
     # switch on nodes and get reference
     #  scene.UAS_StampInfo_Settings.use_nodes  = scene.use_nodes

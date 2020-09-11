@@ -1,3 +1,7 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
 import bpy
 from bpy.app.handlers import persistent
 from . import stamper

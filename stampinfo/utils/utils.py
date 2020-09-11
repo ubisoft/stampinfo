@@ -1,3 +1,7 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
 import re
 from pathlib import Path
 from urllib.parse import unquote_plus, urlparse

@@ -1,3 +1,7 @@
+import logging
+
+_logger = logging.getLogger(__name__)
+
 import os
 import ntpath
 from pathlib import Path
