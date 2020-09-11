@@ -7,6 +7,7 @@ from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, 
 from . import infoImage
 from . import stamper
 from . import handlers
+from .utils import utils
 
 # from stampinfo.__init__ import bl_info
 
@@ -31,14 +32,12 @@ else:
 
 class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     def version(self):
-        import addon_utils
-
-        versionTupple = [
-            addon.bl_info.get("version", (-1, -1, -1))
-            for addon in addon_utils.modules()
-            if addon.bl_info["name"] == "UAS_StampInfo"
-        ][0]
-        return str(versionTupple[0]) + "." + str(versionTupple[1]) + "." + str(versionTupple[2])
+        """ Return the add-on version in the form of a tupple made by: 
+                - a string x.y.z (eg: "1.21.3")
+                - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
+            Return None if the addon has not been found
+        """
+        return utils.addonVersion("UAS_StampInfo")
 
     renderRootPath: StringProperty(name="Render Root Path", default="")
     renderRootPathUsed: BoolProperty(default=False)
@@ -103,7 +102,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     def activateStampInfo(self, activated):
-        print("\n*** StampInfo is now: ", activated)
+        _logger.debug(f"\n*** StampInfo is now:  {activated}")
         self.stampInfoUsed = activated
 
         # if self.stampInfoUsed:
@@ -115,7 +114,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         #         stamper.clearInfoCompoNodes(bpy.context.scene)
 
     def stampInfoUsed_StateChanged(self, context):
-        print("\n*** Stamp Info updated. New state: ", self.stampInfoUsed)
+        _logger.debug(f"\n*** Stamp Info updated. New state: {self.stampInfoUsed}")
+
         #   self.activateStampInfo(self.stampInfoUsed)
         if self.stampInfoUsed:
             self.registerRenderHandlers()
@@ -132,7 +132,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         return val
 
     def set_stampInfoUsed(self, value):
-        print("*** set_stampInfoUsed: value: ", value)
+        _logger.debug(f"\n*** set_stampInfoUsed: value: {value}")
 
         self["stampInfoUsed"] = value
 
@@ -570,7 +570,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         stamper.clearInfoCompoNodes(scene)
 
     def clearRenderHandlers(self):
-        print("\n ** -- ** clearRenderHandlers ** -- **")
+        _logger.debug(f"\n ** -- ** clearRenderHandlers ** -- **")
 
         from .utils import utils_handlers
 
@@ -590,14 +590,14 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         )
 
     def registerRenderHandlers(self):
-        print("\n ** -- ** registerRenderHandlers ** -- ** [")
+        _logger.debug(f"\n ** -- ** registerRenderHandlers ** -- **")
         # register handler
         # https://docs.blender.org/api/current/bpy.app.handlers.html
 
         # wkip debug
         #   if gbWkDebug:
         self.clearRenderHandlers()
-        print("\n   (still in registerRenderHandlers)")
+        _logger.debug(f"\n   (still in registerRenderHandlers)")
 
         bpy.app.handlers.render_init.append(handlers.uas_stampinfo_renderInitHandler)  # happens once
 
@@ -606,7 +606,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         bpy.app.handlers.render_complete.append(handlers.uas_stampinfo_renderCompleteHandler)  # happens once
         bpy.app.handlers.render_cancel.append(handlers.uas_stampinfo_renderCancelHandler)  # happens once
 
-        print("\n   registerRenderHandlers ]")
+        _logger.debug(f"\n   registerRenderHandlers ]")
 
     def handlersRegistered(self):
         from .utils import utils_handlers

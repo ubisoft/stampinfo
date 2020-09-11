@@ -1,87 +1,21 @@
-# -*- coding: utf-8 -*-
-#
-# This addon creates a frame around the rendered images and writes scene information on it.
-# It is a flexible alternative to the Metadata post processing integrated system of Blender.
-#
-# Installation:
-#
-#   - The addon must be installed in Administrator mode so that the Pillow Python library can
-#     be downloaded and deployed correctly.
-#
-#
-#
-# Dev notes:
-#  * To do:
-#       - callback de restoration       -- intégrée à la fin du script RRS?
-#       - delete the temp file
-#       - mieux gérer les paths relatifs et messages de chemin invalide
-#
-#       - restaurer les prefs précédentes
-#       - clean compo nodes (only them!!)
-#       - prémultipier les images PIL!!!
-
-#       - Stocker Last Rendered Frame pour pouvoir cleaner en cas de cancel et single rendered frame
-#       - garder les infos dans la scene
-#
-#       - mettre les nodes compo à la fin du graph
-#
-#       - faire un compo premult correct
-#
-# Possible future improvements:
-#       - Add hair cross, safe frame
-#       - Display metadata labels
-#       - Compositing nodes could be put in a separated scene to avoid breaking any existing compositing graph
-#
-#
-# Principle:
-#   - At Prerender Init time:
-#       - creation of the postprocess nodes
-#           - we detect if there is a Composite note (expected to be the standard output)
-#               - if yes: we plug our graph on it with a mix
-#               - if not: we create our own graph
-#           - The resulting image has:
-#               - a large image at the stamp info res fully transparent
-#               - the stamped info
-#               - a RGB that is the rendered image below the stamped info
-#
-#
-#
-#
-#   - At Pre render Frame:
-#       - Voir si on peut rendre les frames de cadrage à ce moment là seulement
-#
-#   - At Completed or Cancel:
-#       - cleaning of the nodes
-#       - the handlers stay in place
-#
-#
-# Dev notes:
-#   - Handlers are NOT persistent
-#   - Compositing nodes are removed at the end of the process
-#   - Temp files used for the information are deleted at the next frame
-#   - Temp files are created in the render directory
-#
-#
-#
-# Resources:
-#   - Renderer:     https://docs.blender.org/api/current/bpy.ops.render.html?highlight=render#module-bpy.ops.render
-#   - handlers:     https://docs.blender.org/api/current/bpy.app.handlers.html
-#   - Compo nodes:  https://docs.blender.org/api/current/bpy.types.CompositorNodeImage.html
-#
+import logging
 
 import os
+from pathlib import Path
 import subprocess
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Operator, Panel
-from bpy.props import StringProperty, PointerProperty, BoolProperty
-
+from bpy.types import Operator
+from bpy.props import StringProperty, PointerProperty
 
 # for file browser:
 from bpy_extras.io_utils import ImportHelper
 
+
 import importlib
+
+from .config import config
 
 from .utils.utils_render import Utils_LaunchRender
 from .utils.utils import display_addon_registered_version
@@ -89,6 +23,12 @@ from .utils.utils import display_addon_registered_version
 from . import handlers
 from . import stamper
 from . import stampInfoSettings
+
+from .ui import si_ui
+
+from .operators import prefs
+from .operators import about
+
 from .operators import debug
 
 importlib.reload(stampInfoSettings)
@@ -103,396 +43,76 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 83, 0),
-    "version": (0, 9, 21),
+    "version": (0, 9, 30),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
-    "warning": "",
+    # "warning": "BETA Version",
     "category": "UAS",
 }
 
-icons_col = None
-
-
-# ------------------------------------------------------------------------#
-#                               Main Panel                               #
-# ------------------------------------------------------------------------#
-
-
-class UAS_PT_StampInfoAddon(Panel):
-    bl_idname = "UAS_PT_StampInfoAddon"
-    bl_label = f"UAS StampInfo {'.'.join ( str ( v ) for v in bl_info['version'] ) }"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
-
-    # About panel ###
-    def draw_header(self, context):
-        layout = self.layout
-        layout.emboss = "NONE"
-        row = layout.row(align=True)
-
-        if context.window_manager.UAS_StampInfo_displayAbout:
-            # _emboss = True
-            row.alert = True
-        else:
-            #    _emboss = False
-            row.alert = False
-
-        global icons_col
-        icon = icons_col["General_Ubisoft_32"]
-        row.prop(context.window_manager, "UAS_StampInfo_displayAbout", icon_value=icon.icon_id, icon_only=True)
-
-    def draw_header_preset(self, context):
-        layout = self.layout
-        layout.emboss = "NONE"
-        row = layout.row(align=True)
-
-        # row.operator("render.render", text="", icon='IMAGE_DATA').animation = False            # not working with stampInfo
-        # row.operator("render.render", text="", icon='RENDER_ANIMATION').animation = True       # ok
-        row.operator("utils.launchrender", text="", icon="RENDER_STILL").renderMode = "STILL"
-        row.operator("utils.launchrender", text="", icon="RENDER_ANIMATION").renderMode = "ANIMATION"
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        okForRender = True
-
-        ################
-        # About... panel
-        if context.window_manager.UAS_StampInfo_displayAbout:
-            row = layout.row()
-            aboutStr = "About UAS Stamp Info..."
-            row.label(text=aboutStr)
-
-            row = layout.row()
-            box = row.box()
-            #    aboutStr = "Create a set of camera shots and edit them\nin the 3D View as you would do with video clips."
-            box.label(text="Write scene information on the rendered images.")
-            # box.label(text="in the 3D View as you would do with video clips.")
-            #    box = row.box()
-
-            row = layout.row()
-            row.separator(factor=1.4)
-
-        #    row     = layout.row ()
-        #    row.operator("stampinfo.clearhandlers")
-        #    row.operator("stampinfo.createhandlers")
-        #    row.menu(SCENECAMERA_MT_SelectMenu.bl_idname,text="Selection",icon='BORDERMOVE')
-
-        row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed")
-
-        # ensure consistency between stampInfoUsed status and handle
-        if not scene.UAS_StampInfo_Settings.handlersRegistered():
-            scene.UAS_StampInfo_Settings.registerRenderHandlers()
-
-        if scene.UAS_StampInfo_Settings.handlersRegistered():
-            row.scale_x = 0.2
-            if not scene.UAS_StampInfo_Settings.stampInfoUsed:
-                row.alert = True
-            row.operator("stampinfo.resethandlers", text="Y")  # , icon = 'CHECKMARK' )
-        else:
-            row.scale_x = 0.2
-            if scene.UAS_StampInfo_Settings.stampInfoUsed:
-                row.alert = True
-            row.operator("stampinfo.resethandlers", text="N")  # , icon = 'ERROR'
-
-        # ready to render text
-        # if '' == bpy.data.filepath:
-        #     row.alert = True
-        #     row.label ( text = "*** Save file first ***" )
-        if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
-            row = layout.row()
-            row.alert = True
-            row.label(text="*** Invalid Output Path ***")
-            okForRender = False
-        elif "" == stamper.getRenderFileName(scene):
-            row = layout.row()
-            row.alert = True
-            row.label(text="*** Invalid Output File Name ***")
-            okForRender = False
-
-        # if camera doen't exist
-        if scene.camera is None:
-            row = layout.row()
-            row.alert = True
-            row.label(text="*** No Camera in the Scene ***")
-            okForRender = False
-
-        # ready to render text
-        if okForRender:
-            row = layout.row()
-            row.label(text="Ready to render")
-
-        row = layout.row()
-        row.alert = True
-        row.label(text="Warning: This version completely clears the compo graph!!")
-
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "stampInfoRenderMode")
-
-        #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings['stampInfoRenderMode']))
-        #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings.stampInfoRenderMode))
-
-        if "DIRECTTOCOMPOSITE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
-            #  if 0 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:
-            # row = box.row(align=True)
-            # row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYDirToCompo_percentage")
-
-            row = box.row(align=True)
-            #   if scene.UAS_StampInfo_Settings.innerImageHeight >= stamper.getRenderResolution(scene)[1]:
-            # row.prop(scene.UAS_StampInfo_Settings, "innerImageHeight")
-            # row.prop(scene.UAS_StampInfo_Settings, "innerImageHeight_percentage")
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYDirToCompo_percentage")
-
-            row = box.row(align=True)
-            if scene.UAS_StampInfo_Settings.stampRenderResYDirToCompo_percentage >= 100.0:
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Out: "
-                + str(int(stamper.getRenderResolutionForStampInfo(scene)[0]))
-                + " px x "
-                + str(outputResStampInfoH)
-                + " px"
-            )
-            resStr += " - Inner: " + str(stamper.getInnerHeight(scene)) + "px"
-            row.label(text=resStr)
-
-        if "SEPARATEOUTPUT" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResX_percentage")
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResY_percentage")
-
-            row = box.row(align=True)
-            if (
-                scene.UAS_StampInfo_Settings.stampRenderResX_percentage < 100.0
-                or scene.UAS_StampInfo_Settings.stampRenderResY_percentage <= 100.0
-            ):
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Stamp Res: "
-                + str(int(stamper.getRenderResolutionForStampInfo(scene)[0]))
-                + " px x "
-                + str(outputResStampInfoH)
-                + " px"
-            )
-            resStr += " - Inner: " + str(stamper.getInnerHeight(scene)) + "px"
-            row.label(text=resStr)
-
-        row = layout.row()
-        row.operator("stampinfo.openexplorer", emboss=True)
-
-
-# ------------------------------------------------------------------------#
-#                             Metadata Panel                             #
-# ------------------------------------------------------------------------#
-class UAS_PT_StampInfoMetadata(Panel):
-    bl_idname = "UAS_PT_StampInfoMetadata"
-    bl_label = "Metadata"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-
-        layout.label(text="Top: Project and Editing Info")
-        box = layout.box()
-
-        # ---------- logo -------------
-        # box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "logoUsed")
-
-        if scene.UAS_StampInfo_Settings.logoUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoFilepath")
-            row.operator("stampinfo.openfilebrowser", text="", icon="FILEBROWSER", emboss=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoName")
-
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoScaleH")
-
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoPosNormX")
-            row.prop(scene.UAS_StampInfo_Settings, "logoPosNormY")
-
-        # ---------- project -------------
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "projectUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "projectName")
-
-        # ---------- date -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "dateUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "timeUsed")
-
-        # ---------- notes -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "notesUsed")
-
-        if scene.UAS_StampInfo_Settings.notesUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine01", text="")
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine02", text="")
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine03", text="")
-
-        # ---------- Video duration -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "videoDurationUsed")
-
-        # ---------- video image -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "videoRangeUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "videoHandlesUsed", text="Handles")
-
-        # ---------- 3d edit frame -------------
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
-        # row.prop(scene.UAS_StampInfo_Settings, "edit3DFrame", text="3D Edit Frame")
-        # row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumberUsed", text="3D Edit Duration")
-        # row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumber", text="3D Edit Duration")
-
-        #  row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "framerateUsed")
-
-        layout.separator()
-        layout.label(text="Bottom: 3D Info")
-
-        # ---------- shot -------------
-        # To be filled by a production script or by UAS Shot Manager
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "sceneUsed")
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "takeUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
-
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "shotUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
-        row = box.row(align=True)
-        row.separator(factor=4)
-        #   row.prop(scene.UAS_StampInfo_Settings, "frameHandlesUsed", text = "")
-        row.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
-
-        # ---------- camera -------------
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "cameraUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "cameraLensUsed")
-
-        # ---------- Shot duration -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "shotDurationUsed")
-
-        # ---------- 3D frame -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "frameRangeUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "frameHandlesUsed", text="Handles")
-
-        # ---------- file -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "filenameUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "filepathUsed")
-
-
-# ------------------------------------------------------------------------#
-#                             Layout Panel                               #
-# ------------------------------------------------------------------------#
-class UAS_PT_StampInfoLayout(Panel):
-    bl_idname = "UAS_PT_StampInfoLayout"
-    bl_label = "Frame Layout"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-
-        box = layout.box()
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "textColor")
-
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "automaticTextSize", text="Fit Text in Borders")
-
-        # if not scene.UAS_StampInfo_Settings.automaticTextSize:
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "fontScaleHNorm", text="Text Size")
-
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "interlineHNorm", text="Interline Size")
-
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "extPaddingNorm")
-
-        # ---------- border -------------
-        box = layout.box()
-        row = box.row(align=True)
-
-        # if stamper.getRenderRatio(scene) + 0.002 >= scene.UAS_StampInfo_Settings.innerImageRatio \
-        #     and scene.UAS_StampInfo_Settings.borderUsed:
-        #     row.alert = True
-
-        row.prop(scene.UAS_StampInfo_Settings, "borderUsed")
-        row.prop(context.scene.UAS_StampInfo_Settings, "borderColor")
-
-    #    row.prop(scene.UAS_StampInfo_Settings, "innerImageRatio")
-
-    # row = layout.row()
-    # row.prop(scene.UAS_StampInfo_Settings, "linkTextToBorderEdge")
-
-
-# ------------------------------------------------------------------------#
-#                             Settings Panel                             #
-# ------------------------------------------------------------------------#
-class UAS_PT_StampInfoSettings(Panel):
-    bl_idname = "UAS_PT_StampInfoSettings"
-    bl_label = "Settings"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-
-        # row = layout.row()
-        # row.prop(scene.UAS_StampInfo_Settings, "linkTextToBorderEdge")
-
-        row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampPropertyLabel")
-
-        row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampPropertyValue")
-
-        row = layout.row()
-        row.label(text="Advanced:")
-        row = layout.row()
-        box = layout.box()
-        box.prop(scene.UAS_StampInfo_Settings, "mediaFistFrameIsZero")
+__version__ = f"v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
+
+
+###########
+# Logging
+###########
+
+_logger = logging.getLogger(__name__)
+_logger.propagate = False
+MODULE_PATH = Path(__file__).parent.parent
+logging.basicConfig(level=logging.INFO)
+_logger.setLevel(logging.DEBUG)  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
+
+pil_logger = logging.getLogger("PIL")
+pil_logger.setLevel(logging.INFO)
+
+# _logger.info(f"Logger {}")
+# _logger.warning(f"logger {}")
+# _logger.error(f"error {}")
+# _logger.debug(f"debug {}")
+
+
+class Formatter(logging.Formatter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def format(self, record: logging.LogRecord):
+        """
+        The role of this custom formatter is:
+        - append filepath and lineno to logging format but shorten path to files, to make logs more clear
+        - to append "./" at the begining to permit going to the line quickly with VS Code CTRL+click from terminal
+        """
+        s = super().format(record)
+        # s = record
+        pathname = Path(record.pathname).relative_to(MODULE_PATH)
+        s += f" [{os.curdir}{os.sep}{pathname}:{record.lineno}]"
+        return s
+
+
+# def get_logs_directory():
+#     def _get_logs_directory():
+#         import tempfile
+
+#         if "MIXER_USER_LOGS_DIR" in os.environ:
+#             username = os.getlogin()
+#             base_shared_path = Path(os.environ["MIXER_USER_LOGS_DIR"])
+#             if os.path.exists(base_shared_path):
+#                 return os.path.join(os.fspath(base_shared_path), username)
+#             logger.error(
+#                 f"MIXER_USER_LOGS_DIR env var set to {base_shared_path}, but directory does not exists. Falling back to default location."
+#             )
+#         return os.path.join(os.fspath(tempfile.gettempdir()), "mixer")
+
+#     dir = _get_logs_directory()
+#     if not os.path.exists(dir):
+#         os.makedirs(dir)
+#     return dir
+
+
+# def get_log_file():
+#     from mixer.share_data import share_data
+
+#     return os.path.join(get_logs_directory(), f"mixer_logs_{share_data.run_id}.log")
 
 
 # This operator requires   from bpy_extras.io_utils import ImportHelper
@@ -536,7 +156,7 @@ class UAS_OpenExplorer(Operator):
         # subprocess.Popen(r'explorer "C:\tmp"')
         subprocess.Popen('explorer "' + renderPath + '"')
 
-        print(" UAS_OpenExplorer: Open " + renderPath)
+        _logger.debug(f" UAS_OpenExplorer: Open {renderPath}")
 
         return {"FINISHED"}
 
@@ -551,7 +171,7 @@ class UAS_ResetHandlers(Operator):
 
     def execute(self, context):
         """Clear Compo Nodes"""
-        print(" UAS_ResetHandlersAndCompoNodes")
+        _logger.debug(f" UAS_ResetHandlersAndCompoNodes")
 
         # stamper.clearInfoCompoNodes(context.scene)
 
@@ -568,7 +188,7 @@ class UAS_ResetHandlersAndCompoNodes(Operator):
 
     def execute(self, context):
         """Clear Compo Nodes"""
-        print(" UAS_ResetHandlersAndCompoNodes")
+        _logger.debug(f" UAS_ResetHandlersAndCompoNodes")
 
         context.scene.UAS_StampInfo_Settings.clearRenderHandlers()
 
@@ -580,10 +200,6 @@ class UAS_ResetHandlersAndCompoNodes(Operator):
 
 
 classes = (
-    UAS_PT_StampInfoAddon,
-    UAS_PT_StampInfoMetadata,
-    UAS_PT_StampInfoLayout,
-    UAS_PT_StampInfoSettings,
     stampInfoSettings.UAS_StampInfoSettings,
     Utils_LaunchRender,
     UAS_OpenFileBrowser,
@@ -605,54 +221,66 @@ def module_can_be_imported(name):
 
 
 def register():
+
     display_addon_registered_version("UAS_StampInfo")
 
+    config.initGlobalVariables()
+
+    ###################
+    # logging
+    ###################
+
+    if len(_logger.handlers) == 0:
+        _logger.setLevel(logging.WARNING)
+        formatter = Formatter("{asctime} {levelname[0]} {name:<36}  - {message:<80}", style="{")
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        _logger.addHandler(handler)
+
+        # handler = logging.FileHandler(get_log_file())
+        # handler.setFormatter(formatter)
+        # _logger.addHandler(handler)
+
+    ###################
     # Pillow lib installation
+    ###################
+
     if not module_can_be_imported("PIL"):
         subprocess.run([bpy.app.binary_path_python, "-m", "pip", "install", "pillow"])
 
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    debug.register()
+    about.register()
+    prefs.register()
+    si_ui.register()
+
+    # debug tools
+    if config.uasDebug:
+        debug.register()
 
     bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
 
     # declaration of properties that will not be saved in the scene
 
-    # About button panel Quick Settings
-    bpy.types.WindowManager.UAS_StampInfo_displayAbout = BoolProperty(
-        name="About...", description="Display About Informations", default=False
-    )
-
     # stampInfoSettings.registerRenderHandlers()
 
     # handlers.registerPostLoadHandler()
 
-    from pathlib import Path
-
-    pcoll = bpy.utils.previews.new()
-    my_icons_dir = os.path.join(os.path.dirname(__file__), "icons")
-    for png in Path(my_icons_dir).rglob("*.png"):
-        pcoll.load(png.stem, str(png), "IMAGE")
-
-    global icons_col
-    icons_col = pcoll
-
 
 def unregister():
 
-    debug.unregister()
+    si_ui.unregister()
+    prefs.unregister()
+    about.unregister()
+
+    # debug tools
+    if config.uasDebug:
+        debug.unregister()
 
     for cls in reversed(classes):
         # print(str(cls) + " being unregistered...")
         bpy.utils.unregister_class(cls)
-
-    del bpy.types.WindowManager.UAS_StampInfo_displayAbout
-
-    global icons_col
-    bpy.utils.previews.remove(icons_col)
-    icons_col = None
 
     # clearing handlers
     # https://blender.stackexchange.com/questions/53894/how-to-avoid-multiple-running-instances-of-same-handler-function-when-running-it
@@ -661,3 +289,5 @@ def unregister():
     # bpy.app.handlers.render_complete.clear()
     # bpy.app.handlers.render_cancel.clear()
     # bpy.app.handlers.render_init.remove(my_handlder)
+
+    config.releaseGlobalVariables()
