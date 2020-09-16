@@ -561,6 +561,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
             print("\n")
 
     try:
+        print(f"Rendering StampInfo file: {filepath}...")
         imgInfo.save(filepath)
     except BaseException:
         print(" * * * renderTmpImageWithStampedInfo Error: Cannot save file: ", filepath)
@@ -652,12 +653,18 @@ def drawRangesAndFrame(
             textProp = "{:03d}".format(currentFrame)
             currentTextLeftFor3DFrames -= (fontLarge.getsize(textProp))[0]
             # currentTextHeight = (font.getsize(textProp))[1]
+            textColor = textColorWhite
+            if currentFrame < startRange + handle:
+                textColor = textColorGreen
+            elif currentFrame > endRange - handle:
+                textColor = textColorRed
+
             newTextHeight = (fontLarge.getsize(textProp))[1] - (font.getsize(textProp))[1]
             img_draw.text(
                 (currentTextLeftFor3DFrames, currentTextTopFor3DFrames - newTextHeight),
                 textProp,
                 font=fontLarge,
-                fill=textColorWhite,
+                fill=textColor,
             )
 
         if (rangeUsed or handlesUsed) and frameUsed:
