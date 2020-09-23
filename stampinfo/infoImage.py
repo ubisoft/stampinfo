@@ -385,7 +385,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     currentTextTop = offsetToCenterH + paddingTopExt / 2.0
     currentTextRight = renderW * (1.0 - 0.03)
 
-    if True:  # userSettings.cornerNoteUsed:
+    if userSettings.cornerNoteUsed:
         # textProp = "Corner Note: " if stampLabel else ""
         textProp = userSettings.cornerNote if stampValue else ""
         img_draw.text(
