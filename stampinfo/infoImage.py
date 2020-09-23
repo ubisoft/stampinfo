@@ -180,6 +180,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         int(textColorRGB[3] * 255),
     )
 
+    alertColorRGB = (0.7, 0.2, 0.2, 255)  #  userSettings.textColor
+    alertColorRGBA = (
+        int(alertColorRGB[0] * 255),
+        int(alertColorRGB[1] * 255),
+        int(alertColorRGB[2] * 255),
+        int(alertColorRGB[3] * 255),
+    )
+
     # move the content (border + text) toward center
     offsetToCenterH = int(userSettings.offsetToCenterHNorm * renderH)
 
@@ -372,6 +380,17 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         fontLarge,
         textColorRGBA,
     )
+
+    # ------------ corner note ---------------
+    currentTextTop = offsetToCenterH + paddingTopExt / 2.0
+    currentTextRight = renderW * (1.0 - 0.03)
+
+    if True:  # userSettings.cornerNoteUsed:
+        # textProp = "Corner Note: " if stampLabel else ""
+        textProp = userSettings.cornerNote if stampValue else ""
+        img_draw.text(
+            (currentTextRight - (font.getsize(textProp))[0], currentTextTop), textProp, font=font, fill=alertColorRGBA,
+        )
 
     # ---------- fps and 3D edit -------------
     currentTextTop = currentTextTopFor3DFrames + textLineH + textInterlineH

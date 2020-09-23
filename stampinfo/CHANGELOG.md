@@ -2,7 +2,9 @@
 History:
 --------
 
-# V  0.9.1.1x:
+# V  0.9.x:
+* V  0.9.32 - 23/09/2020:
+	- Added a Corner Note parameter
 
 ## Known issues:
 - When the handlers are used the compositing graph is completely cleared after each rendering

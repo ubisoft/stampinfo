@@ -289,6 +289,14 @@ class UAS_PT_StampInfoMetadata(Panel):
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "notesLine03", text="")
 
+        # ---------- corner note -------------
+        box = layout.box()
+        row = box.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "cornerNoteUsed")
+        if scene.UAS_StampInfo_Settings.cornerNoteUsed:
+            row = box.row(align=True)
+            row.prop(scene.UAS_StampInfo_Settings, "cornerNote", text="")
+
         # ---------- Video duration -------------
         box = layout.box()
         row = box.row(align=True)

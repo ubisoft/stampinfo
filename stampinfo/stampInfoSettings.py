@@ -1,7 +1,3 @@
-import logging
-
-_logger = logging.getLogger(__name__)
-
 import os
 from pathlib import Path
 
@@ -12,6 +8,10 @@ from . import infoImage
 from . import stamper
 from . import handlers
 from .utils import utils
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 # from stampinfo.__init__ import bl_info
 
@@ -183,7 +183,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # values are integers
     def set_stampInfoRenderMode(self, value):
-        print(" set_stampInfoRenderMode: value: ", value)
+        _logger.debug(" set_stampInfoRenderMode: value: ", value)
 
         # no clear if we keep the graph with mode USECOMPOSITINGNODES
         if 2 != value:
@@ -389,6 +389,10 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         options=set(),
     )
 
+    # ---------- Top Right Corner Note -------------
+    cornerNoteUsed: BoolProperty(name="Corner Note", description="User note at the top right corner of the frame", default=False, options=set())
+    cornerNote: StringProperty(name="Corner Note Line", description="Enter note here", default="Note...", options=set())
+    
     # ---------- Notes properties -------------
     notesUsed: BoolProperty(name="Notes", description="User notes", default=False, options=set())
 
