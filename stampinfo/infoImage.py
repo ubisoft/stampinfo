@@ -554,15 +554,23 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     if userSettings.filenameUsed or userSettings.filepathUsed:
         textProp = "Blender file: " if stampLabel else ""
         if stampValue:
-            if "" == bpy.data.filepath:
-                textProp += "*** File not saved ***"
+            filenameStr = ""
+            if "" != userSettings.customFileFullPath:
+                filenameStr = userSettings.customFileFullPath
+                if "" == filenameStr:
+                    textProp += "*** Custom File not specified ***"
             else:
-                head, tail = ntpath.split(bpy.data.filepath)
+                filenameStr = bpy.data.filepath
+                if "" == filenameStr:
+                    textProp += "*** File not saved ***"
+            if "" != filenameStr:
+                # head, tail = ntpath.split(filenameStr)
                 if userSettings.filepathUsed:
-                    textProp += os.path.abspath(head) + "\\"
+                    textProp += str(Path(filenameStr).parent) + "\\"
                 if userSettings.filenameUsed:
-                    textProp += tail
-                # textProp  += str(os.path.basename(bpy.data.filepath))
+                    textProp += Path(filenameStr).name
+            print("*** textProp: ", textProp)
+            # textProp  += str(os.path.basename(bpy.data.filepath))
         img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     dirAndFilename = getInfoFileFullPath(scene, currentFrame)

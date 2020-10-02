@@ -351,6 +351,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     filepathUsed: BoolProperty(name="Path", description="Stamp file path", default=True, options=set())
 
+    # used by production scripts to specify another file than the current one
+    # if set to "" then it is ignored and the current file name is used
+    customFileFullPath: StringProperty(
+        name="Custom File Name", description="Enter a path and name of the file to display", default="", options=set(),
+    )
+
     # ---------- shot manager -------------
     sceneUsed: BoolProperty(name="Scene", description="Stamp scene name", default=True, options=set())
 
@@ -390,9 +396,11 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     # ---------- Top Right Corner Note -------------
-    cornerNoteUsed: BoolProperty(name="Corner Note", description="User note at the top right corner of the frame", default=False, options=set())
+    cornerNoteUsed: BoolProperty(
+        name="Corner Note", description="User note at the top right corner of the frame", default=False, options=set()
+    )
     cornerNote: StringProperty(name="Corner Note Line", description="Enter note here", default="Note...", options=set())
-    
+
     # ---------- Notes properties -------------
     notesUsed: BoolProperty(name="Notes", description="User notes", default=False, options=set())
 
