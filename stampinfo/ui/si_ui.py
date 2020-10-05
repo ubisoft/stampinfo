@@ -276,6 +276,11 @@ class UAS_PT_StampInfoMetadata(Panel):
         row.prop(scene.UAS_StampInfo_Settings, "dateUsed")
         row.prop(scene.UAS_StampInfo_Settings, "timeUsed")
 
+        # ---------- user -------------
+        box = layout.box()
+        row = box.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "userNameUsed")
+
         # ---------- notes -------------
         box = layout.box()
         row = box.row(align=True)
@@ -296,6 +301,14 @@ class UAS_PT_StampInfoMetadata(Panel):
         if scene.UAS_StampInfo_Settings.cornerNoteUsed:
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "cornerNote", text="")
+
+        # ---------- bottom note -------------
+        box = layout.box()
+        row = box.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "bottomNoteUsed")
+        if scene.UAS_StampInfo_Settings.bottomNoteUsed:
+            row = box.row(align=True)
+            row.prop(scene.UAS_StampInfo_Settings, "bottomNote", text="")
 
         # ---------- Video duration -------------
         box = layout.box()

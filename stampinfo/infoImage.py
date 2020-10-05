@@ -1,10 +1,7 @@
-import logging
-
-_logger = logging.getLogger(__name__)
-
 import os
 import ntpath
 from pathlib import Path
+import getpass
 
 import bpy
 
@@ -14,6 +11,10 @@ from .stamper import (
     getInnerHeight,
     getInfoFileFullPath,
 )
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 # Called by the Pre renderer callback
@@ -139,7 +140,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
 
     fontsize = int(1.0 * textLineNorm * renderH)
     font = ImageFont.truetype("arial", fontsize)
+    fontHeight = (font.getsize("Text"))[1]
     fontLarge = ImageFont.truetype("arial", fontsize * 2)
+    fontLargeHeight = (fontLarge.getsize("Text"))[1]
 
     paddingLeft = int((paddingLeftNorm) * renderW)
     paddingLeftMetadataTop = int((paddingLeftMetadataTopNorm) * renderW)
@@ -179,6 +182,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         int(textColorRGB[2] * 255),
         int(textColorRGB[3] * 255),
     )
+
+    textColorWhite = (235, 235, 235, 255)
 
     alertColorRGB = (0.7, 0.2, 0.2, 255)  #  userSettings.textColor
     alertColorRGBA = (
@@ -314,7 +319,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     col01 = paddingLeft
     col01 = col01 + paddingLeftMetadataTop
     col02 = 0.1 * renderW
-    col028 = 0.65 * renderW
+    col028 = 0.69 * renderW
     col035 = 0.84 * renderW
 
     col03 = 0.75 * renderW
@@ -345,7 +350,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         textProp += "  " + timeStr if stampValue else ""
 
     if userSettings.dateUsed or userSettings.timeUsed:
-        img_draw.text((col02, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
+
+    # ---------- user -------------
+    currentTextTop += textLineH + textInterlineH
+    if True or userSettings.userNameUsed:
+        textProp = "By: "  # if stampLabel else ""
+        textProp += getpass.getuser() if stampValue else ""
+        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- image sequence indices -------------
     currentTextTop += textLineH + textInterlineH
@@ -353,7 +365,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     # if userSettings.videoFrameUsed:
     textProp = "Video: " if stampLabel else ""
     currentTextTopFor3DFrames = offsetToCenterH + paddingTopExt + textLineH + textInterlineH
-    currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
+    currentTextLeftFor3DFrames = renderW * (1.0 - 0.03)
 
     currentImage = scene.frame_current - scene.frame_start
     if not userSettings.mediaFistFrameIsZero:
@@ -425,18 +437,19 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     # currentTextTop += textLineH + textInterlineH
 
     # ---------- notes -------------
-    currentTextTop = offsetToCenterH + paddingTopExt
+    currentTextTop = offsetToCenterH + 1.5 * paddingTopExt
 
     if userSettings.notesUsed:
         colNotesLabel = 0.25 * renderW
-        colNotes = 0.29 * renderW
+        colNotes = 0.22 * renderW
+        # colNotes = col02
 
         currentBoxTop = currentTextTop - 0.005 * renderH
-        currentBoxBottom = currentTextTop + 3 * (textLineH + textInterlineH) + 0.005 * renderH
+        currentBoxBottom = currentTextTop + 3 * (textLineH + textInterlineH) + 1.5 * 0.005 * renderH
         colBoxLeft = colNotes - 0.0075 * renderW
-        colBoxRight = colBoxLeft + 0.35 * renderW
-        boxLineThickness = max(1, int(0.0025 * renderH))
-        textColorGray = (128, 128, 128, 255)
+        colBoxRight = colBoxLeft + 0.43 * renderW
+        boxLineThickness = max(1, int(0.002 * renderH))
+        textColorGray = (50, 50, 50, 255)
 
         textProp = "Notes: " if stampLabel else ""
         img_draw.text((colNotesLabel, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -477,6 +490,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     col03 = 0.34 * renderW
     col04 = 0.7 * renderW
     # col05 = 0.7 * renderW
+    lineTextXEnd = col01
+    separatorX = 0.015 * renderW
     currentTextTop = (
         renderH
         - paddingBottomExt
@@ -487,49 +502,43 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     currentTextTopFor3DFrames = currentTextTop
     col01 = col01 + paddingLeftMetadataBottom
 
-    # ---------- scene take shot cam -------------
+    # ---------- shot -------------
     stampLabel3D = stampLabel or stampValue
-    if userSettings.sceneUsed:
-        textProp = "Scene: " if stampLabel3D else ""
-        textProp += str(scene.name) if stampValue else ""
-        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
+    currentTextTop += -1.0 * fontLargeHeight + 1.0 * textInterlineH
+    if userSettings.shotUsed:
+        # textProp = "Shot: " if stampLabel3D else ""
+        textProp = userSettings.shotName if stampValue else ""
+        img_draw.text((col01, currentTextTop), textProp, font=fontLarge, fill=textColorRGBA)  # textColorRGBA
+        lineTextXEnd += (fontLarge.getsize(textProp))[0] + separatorX
+
+    # ---------- shot duration -------------
+    currentTextTop += fontHeight
+    if userSettings.shotDurationUsed:
+        # textProp = "Shot Duration: "
+        textProp = (
+            str(scene.frame_end - scene.frame_start + 1 - 2 * userSettings.shotHandles) + " fr." if stampValue else ""
+        )
+        img_draw.text((lineTextXEnd, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        lineTextXEnd += (font.getsize(textProp))[0] + separatorX
+
+    # ---------- take -------------
     if userSettings.takeUsed:
         textProp = "Take: " if stampLabel3D else ""
         textProp += userSettings.takeName if stampValue else ""
-        img_draw.text((col02, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        img_draw.text((lineTextXEnd, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
-    if userSettings.shotUsed:
-        textProp = "Shot: " if stampLabel3D else ""
-        textProp += userSettings.shotName if stampValue else ""
-        img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA)
-
-    # ---------- camera -------------
-    if userSettings.cameraLensUsed and not userSettings.cameraUsed:
-        textProp = "Lens: " if stampLabel else ""
-        # textProp += f"{(scene.camera.data.lens):05.0f}" + " mm" if stampValue else ""       # :05.2f}
-        textProp += (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""  # :05.2f}
-        img_draw.text((col04, currentTextTop), textProp, font=font, fill=textColorRGBA)
-    else:
-        if userSettings.cameraUsed:
-            textProp = "Cam: " if stampLabel3D else ""
-            textProp += str(scene.camera.name) if stampValue else ""
-            if userSettings.cameraLensUsed:
-                textProp += "   " + (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""
-            img_draw.text((col04, currentTextTop), textProp, font=font, fill=textColorRGBA)
-
-    # ---------- shot duration -------------
-    currentTextTop += textLineH + textInterlineH
-    if userSettings.shotDurationUsed:
-        textProp = "Shot Duration: "
-        textProp += (
-            str(scene.frame_end - scene.frame_start + 1 - 2 * userSettings.shotHandles) + " fr." if stampValue else ""
-        )
-        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
+    # ---------- scene -------------
+    if userSettings.sceneUsed:
+        textProp = "Scene: " if stampLabel3D else ""
+        textProp += str(scene.name) if stampValue else ""
+        img_draw.text((lineTextXEnd, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- 3d frames and range -------------
-    currentTextTopFor3DFrames += textLineH + textInterlineH
-    currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
+    # currentTextTopFor3DFrames += textLineH + textInterlineH
+    currentTextTopFor3DFrames = currentTextTop  # - fontHeight
+    currentTextLeftFor3DFrames = renderW * (1.0 - 0.03)
     drawRangesAndFrame(
         scene,
         img_draw,
@@ -547,6 +556,27 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         fontLarge,
         textColorRGBA,
     )
+
+    # ---------- bottom note -------------
+    currentTextTop += textLineH + 2.0 * textInterlineH
+    if userSettings.bottomNoteUsed:
+        # textProp = "Scene: " if stampLabel3D else ""
+        textProp = userSettings.bottomNote if stampValue else ""
+        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
+
+    # ---------- camera -------------
+    if userSettings.cameraLensUsed and not userSettings.cameraUsed:
+        textProp = "Lens: " if stampLabel else ""
+        # textProp += f"{(scene.camera.data.lens):05.0f}" + " mm" if stampValue else ""       # :05.2f}
+        textProp += (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""  # :05.2f}
+        img_draw.text((col04, currentTextTop), textProp, font=font, fill=textColorRGBA)
+    else:
+        if userSettings.cameraUsed:
+            textProp = "Cam: " if stampLabel3D else ""
+            textProp += str(scene.camera.name) if stampValue else ""
+            if userSettings.cameraLensUsed:
+                textProp += "   " + (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""
+            img_draw.text((col04, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- file -------------
     currentTextTop += textLineH + textInterlineH  # * 2
@@ -569,7 +599,6 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
                     textProp += str(Path(filenameStr).parent) + "\\"
                 if userSettings.filenameUsed:
                     textProp += Path(filenameStr).name
-            print("*** textProp: ", textProp)
             # textProp  += str(os.path.basename(bpy.data.filepath))
         img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
@@ -625,10 +654,10 @@ def drawRangesAndFrame(
     textColorRGBA = color
     textColorGray = (128, 128, 128, 255)
     textColorGrayLight = (200, 200, 200, 255)
-    textColorWhite = (240, 240, 240, 255)
+    textColorWhite = (235, 235, 235, 255)
     textColorRed = (190, 90, 90, 255)
-    textColorGreen = (60, 200, 60, 255)
-    textColorOrange = (255, 185, 62, 255)
+    textColorGreen = (70, 210, 70, 255)
+    textColorOrange = (255, 145, 22, 255)
 
     stampLabel = userSettings.stampPropertyLabel
     stampValue = userSettings.stampPropertyValue
@@ -730,8 +759,9 @@ def drawRangesAndFrame(
             )
 
     if frameUsed:  # and stampLabel:
-        textProp = "Handle / " if handlesUsed else ""
-        textProp += "Range / " if rangeUsed else ""
+        textProp = ""
+        # textProp += "Handle / " if handlesUsed else ""
+        # textProp += "Range / " if rangeUsed else ""
         if "3DFRAME" == framemode:
             textProp += "3D Frame: " if frameUsed else ""
         else:

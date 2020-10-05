@@ -183,7 +183,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # values are integers
     def set_stampInfoRenderMode(self, value):
-        _logger.debug(" set_stampInfoRenderMode: value: ", value)
+        _logger.debug(f" set_stampInfoRenderMode: value: {value}")
 
         # no clear if we keep the graph with mode USECOMPOSITINGNODES
         if 2 != value:
@@ -401,6 +401,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
     cornerNote: StringProperty(name="Corner Note Line", description="Enter note here", default="Note...", options=set())
 
+    # ---------- Bottom Note -------------
+    bottomNoteUsed: BoolProperty(
+        name="Bottom Note", description="User note at the bottom of the frame", default=False, options=set()
+    )
+    bottomNote: StringProperty(name="Bottom Note Line", description="Enter note here", default="Note...", options=set())
+
     # ---------- Notes properties -------------
     notesUsed: BoolProperty(name="Notes", description="User notes", default=False, options=set())
 
@@ -428,8 +434,16 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     # ---------- Date properties -------------
 
     dateUsed: BoolProperty(name="Date", description="Stamp rendering date", default=False, options=set())
-
     timeUsed: BoolProperty(name="Time", description="Stamp rendering time", default=False, options=set())
+
+    # ---------- User properties -------------
+
+    userNameUsed: BoolProperty(
+        name="User Name", description="Name of the current user of the OS session", default=True, options=set()
+    )
+    # userName: StringProperty(
+    #     name="User Name", description="Name of the current user of the OS session", default="", options=set()
+    # )
 
     # ---------- Settings properties -------------
     # https://devtalk.blender.org/t/how-to-change-the-color-picker/9666/7
@@ -440,7 +454,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         subtype="COLOR",
         size=4,
         description="Stamp borders",
-        default=(0.65, 0.65, 0.65, 1.0),
+        default=(0.55, 0.55, 0.55, 1.0),
         min=0.0,
         max=1.0,
         precision=2,
