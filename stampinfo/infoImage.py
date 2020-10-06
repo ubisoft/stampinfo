@@ -659,9 +659,9 @@ def drawRangesAndFrame(
     textColorGray = (128, 128, 128, 255)
     textColorGrayLight = (200, 200, 200, 255)
     textColorWhite = (235, 235, 235, 255)
-    textColorRed = (190, 90, 90, 255)
+    textColorRed = (200, 100, 100, 255)
     textColorGreen = (70, 210, 70, 255)
-    textColorOrange = (255, 145, 22, 255)
+    textColorOrange = (245, 135, 42, 255)
 
     stampLabel = userSettings.stampPropertyLabel
     stampValue = userSettings.stampPropertyValue
@@ -715,9 +715,13 @@ def drawRangesAndFrame(
             # currentTextHeight = (font.getsize(textProp))[1]
             textColor = textColorWhite
             if currentFrame < startRange + handle:
+                textColor = textColorRed
+            elif currentFrame == startRange + handle:
                 textColor = textColorGreen
             elif currentFrame > endRange - handle:
                 textColor = textColorRed
+            elif currentFrame == endRange - handle:
+                textColor = textColorOrange
 
             newTextHeight = (fontLarge.getsize(textProp))[1] - (font.getsize(textProp))[1]
             img_draw.text(
