@@ -554,12 +554,13 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
 
     currentTextTop += textLineH + 2.0 * textInterlineH
 
+    lineTextXEnd = col01
     # ---------- scene -------------
     if userSettings.sceneUsed:
         textProp = "Scene: " if stampLabel3D else ""
         textProp += str(scene.name) if stampValue else ""
-        img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
-        lineTextXEnd = (font.getsize(textProp))[0] + separatorX
+        img_draw.text((lineTextXEnd, currentTextTop), textProp, font=font, fill=textColorRGBA)
+        lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
     # ---------- bottom note -------------
     if userSettings.bottomNoteUsed:
