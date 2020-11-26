@@ -62,7 +62,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     # use_stamp_strip_meta
     # use_stamp_time
     # support of metadata from Blender
-    if scene.render.use_stamp:
+
+    # !!! Removed !!! Wkip: to rewrite in a smarter way !!!
+    # if scene.render.use_stamp:
+    if False:
         if (
             scene.render.use_stamp_filename
             or scene.render.use_stamp_date
