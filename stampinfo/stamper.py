@@ -174,6 +174,9 @@ def clearInfoCompoNodes(scene):
     _logger.debug("\n**** clearInfoCompoNodes ****")
     _logger.debug("**** ****** ******** *********** ********** ********* ********* ******** *******  ****")
 
+    # wkip wkip wkip fix pour RRS
+    return ()
+
     # if gbWkDebug_DontDeleteCompoNodes: return()
     # !!! wkip to remove !!! ###
     # clear all nodes
