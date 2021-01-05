@@ -222,7 +222,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     projectUsed: BoolProperty(name="Project", description="Stamp project name", default=True, options=set())
 
-    projectName: StringProperty(name="", description="Project name", default="UAS", options=set())
+    projectName: StringProperty(name="", description="Project name", default="My Project", options=set())
 
     # ---------- Logo properties -------------
 
