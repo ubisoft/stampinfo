@@ -12,7 +12,8 @@ It is a flexible alternative to the Metadata post processing integrated system o
 
 ## Installation:
 The addon must be installed in Administrator mode so that the Pillow Python library can
-be downloaded and deployed correctly.
+be downloaded and deployed correctly. Also be sure that your firewall doesn't block the download (or use OpenVPN or equivalent).
+
 
 
 ## Features
