@@ -15,7 +15,6 @@ The addon must be installed in Administrator mode so that the Pillow Python libr
 be downloaded and deployed correctly. Also be sure that your firewall doesn't block the download (or use OpenVPN or equivalent).
 
 
-
 ## Features
 
 - Can stamp a specified logo.

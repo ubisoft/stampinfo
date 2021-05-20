@@ -1,3 +1,24 @@
+# GPLv3 License
+#
+# Copyright (C) 2021 Ubisoft
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Main init
+"""
+
 import logging
 
 import os
@@ -26,9 +47,6 @@ from . import stampInfoSettings
 
 from .ui import si_ui
 
-from .operators import prefs
-from .operators import about
-
 from .operators import debug
 
 importlib.reload(stampInfoSettings)
@@ -36,22 +54,28 @@ importlib.reload(stamper)
 importlib.reload(handlers)
 importlib.reload(debug)
 
+import os
+from pathlib import Path
+import subprocess
+
+
+from stampinfo.utils.utils_os import open_folder
 
 bl_info = {
-    "name": "UAS_StampInfo",
+    "name": "Stamp Info",
     "author": "Julien Blervaque (aka Werwack)",
-    "description": "Stamp scene information on the rendered images - Ubisoft Animation Studio"
+    "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 83, 0),
-    "version": (0, 9, 36),
+    "version": (0, 9, 37),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     # "warning": "BETA Version",
-    "category": "UAS",
+    "category": "Ubisoft",
 }
 
-__version__ = f"v{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}"
-
+__version__ = ".".join(str(i) for i in bl_info["version"])
+display_version = __version__
 
 ###########
 # Logging
@@ -113,6 +137,24 @@ class Formatter(logging.Formatter):
 #     from mixer.share_data import share_data
 
 #     return os.path.join(get_logs_directory(), f"mixer_logs_{share_data.run_id}.log")
+
+
+class UAS_OT_Open_Documentation_Url(Operator):  # noqa 801
+    bl_idname = "stampinfo.open_documentation_url"
+    bl_label = "Open Documentation Web Page"
+    bl_description = "Open web page.\nShift + Click: Copy the URL into the clipboard"
+
+    path: StringProperty()
+
+    def invoke(self, context, event):
+        if event.shift:
+            # copy path to clipboard
+            cmd = "echo " + (self.path).strip() + "|clip"
+            subprocess.check_call(cmd, shell=True)
+        else:
+            open_folder(self.path)
+
+        return {"FINISHED"}
 
 
 # This operator requires   from bpy_extras.io_utils import ImportHelper
@@ -188,7 +230,7 @@ class UAS_ResetHandlersAndCompoNodes(Operator):
 
     def execute(self, context):
         """Clear Compo Nodes"""
-        _logger.debug(f" UAS_ResetHandlersAndCompoNodes")
+        _logger.debug(" UAS_ResetHandlersAndCompoNodes")
 
         context.scene.UAS_StampInfo_Settings.clearRenderHandlers()
 
@@ -202,6 +244,7 @@ class UAS_ResetHandlersAndCompoNodes(Operator):
 classes = (
     stampInfoSettings.UAS_StampInfoSettings,
     Utils_LaunchRender,
+    UAS_OT_Open_Documentation_Url,
     UAS_OpenFileBrowser,
     UAS_OpenExplorer,
     UAS_ResetHandlersAndCompoNodes,
@@ -222,7 +265,10 @@ def module_can_be_imported(name):
 
 def register():
 
-    display_addon_registered_version("UAS_StampInfo")
+    # from .ui import si_ui
+    from stampinfo import ui
+
+    display_addon_registered_version("Stamp Info")
 
     config.initGlobalVariables()
 
@@ -251,9 +297,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    about.register()
-    prefs.register()
     si_ui.register()
+    ui.register()
 
     # debug tools
     if config.uasDebug:
@@ -270,9 +315,11 @@ def register():
 
 def unregister():
 
+    # from .ui import si_ui
+    from stampinfo import ui
+
+    ui.unregister()
     si_ui.unregister()
-    prefs.unregister()
-    about.unregister()
 
     # debug tools
     if config.uasDebug:

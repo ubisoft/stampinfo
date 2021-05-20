@@ -1,19 +1,29 @@
+# GPLv3 License
+#
+# Copyright (C) 2021 Ubisoft
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Main panel UI
+"""
+
 import logging
-
-_logger = logging.getLogger(__name__)
-
-import os
-from pathlib import Path
-import subprocess
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Operator, Panel
-from bpy.props import StringProperty, PointerProperty, BoolProperty
-
-# for file browser:
-from bpy_extras.io_utils import ImportHelper
-
+from bpy.types import Panel
 
 import importlib
 
@@ -26,10 +36,10 @@ from .. import stampInfoSettings
 
 from stampinfo.utils import utils
 
-from stampinfo.operators import prefs
-from stampinfo.operators import about
-
 from stampinfo.operators import debug
+
+_logger = logging.getLogger(__name__)
+
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
@@ -45,10 +55,10 @@ importlib.reload(debug)
 class UAS_PT_StampInfoAddon(Panel):
     bl_idname = "UAS_PT_StampInfoAddon"
     # bl_label = f"UAS StampInfo {'.'.join ( str ( v ) for v in bl_info['version'] ) }"
-    bl_label = " UAS Stamp Info   V. " + utils.addonVersion("UAS_StampInfo")[0]
+    bl_label = " Stamp Info   V. " + utils.addonVersion("Stamp Info")[0]
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
+    bl_category = "Stamp Info"
 
     # About panel ###
     def draw_header(self, context):
@@ -96,9 +106,7 @@ class UAS_PT_StampInfoAddon(Panel):
         import addon_utils
 
         addonWarning = [
-            addon.bl_info.get("warning", "")
-            for addon in addon_utils.modules()
-            if addon.bl_info["name"] == "UAS_StampInfo"
+            addon.bl_info.get("warning", "") for addon in addon_utils.modules() if addon.bl_info["name"] == "Stamp Info"
         ]
 
         if "" != addonWarning[0]:
@@ -237,7 +245,7 @@ class UAS_PT_StampInfoMetadata(Panel):
     bl_label = "Metadata"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
+    bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -385,7 +393,7 @@ class UAS_PT_StampInfoLayout(Panel):
     bl_label = "Frame Layout"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
+    bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -434,7 +442,7 @@ class UAS_PT_StampInfoSettings(Panel):
     bl_label = "Settings"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "UAS StampInfo"
+    bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
