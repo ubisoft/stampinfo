@@ -39,7 +39,7 @@ _logger = logging.getLogger(__name__)
 
 
 # Preparation of the files
-def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, verbose=False):
+def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
     """  Called by the Pre renderer callback
         Preparation of the files
     """
@@ -57,6 +57,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, verbose=
         print("\n       renderTmpImageWithStampedInfo ")
 
     userSettings = scene.UAS_StampInfo_Settings
+    prefs = bpy.context.preferences.addons["stampinfo"].preferences
     paddingLeftMetadataTopNorm = 0.0
     paddingLeftMetadataBottomNorm = 0.0
 
@@ -392,11 +393,12 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, verbose=
     currentTextLeftFor3DFrames = renderW * (1.0 - 0.03)
 
     currentImage = scene.frame_current - scene.frame_start
-    if not userSettings.mediaFistFrameIsZero:
+
+    if not prefs.mediaFirstFrameIsZero:
         currentImage += 1
-    firstFrameInd = 0 if userSettings.mediaFistFrameIsZero else 1
+    firstFrameInd = 0 if prefs.mediaFirstFrameIsZero else 1
     lastFrameInd = scene.frame_end - scene.frame_start
-    if not userSettings.mediaFistFrameIsZero:
+    if not prefs.mediaFirstFrameIsZero:
         lastFrameInd += 1
 
     drawRangesAndFrame(
@@ -641,7 +643,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, verbose=
             print(f"\n*** Creation of the directory failed: {renderPath}\n")
             raise
 
-    filepath = renderPath + dirAndFilename[1]
+    if renderFilename is None:
+        filepath = renderPath + dirAndFilename[1]
+    else:
+        filepath = renderPath + renderFilename
 
     if verbose:
         print("Info file rendered name: ", (filepath))

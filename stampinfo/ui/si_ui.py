@@ -456,12 +456,6 @@ class UAS_PT_StampInfoSettings(Panel):
         row = layout.row()
         row.prop(scene.UAS_StampInfo_Settings, "stampPropertyValue")
 
-        row = layout.row()
-        row.label(text="Advanced:")
-        row = layout.row()
-        box = layout.box()
-        box.prop(scene.UAS_StampInfo_Settings, "mediaFistFrameIsZero")
-
 
 classes = (
     UAS_PT_StampInfoAddon,

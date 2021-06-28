@@ -27,7 +27,8 @@ from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, 
 
 from . import infoImage
 from . import stamper
-#from . import handlers
+
+# from . import handlers
 from .utils import utils
 
 import logging
@@ -513,14 +514,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Stamp Property Value", description="Stamp Property Value", default=True, options=set()
     )
 
-    mediaFistFrameIsZero: BoolProperty(
-        name="Output Media First Frame is 0",
-        description="Is checked (most common approach) then the first frame of the output\nmedia has index 0 (last then have index (seq. number of frames - 1).\n"
-        "If not checked then it has index 1 and the last frame has the index equal to the media duration",
-        default=True,
-        options=set(),
-    )
-
     # debug properties -------------
 
     def set_debugMode(self, value):
@@ -568,8 +561,10 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="previousResolution_y Dir To Compo", description="previousResolution_y", default=50
     )
 
-    def renderTmpImageWithStampedInfo(self, scene, currentFrame, renderPath=None, verbose=False):
-        infoImage.renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=renderPath, verbose=verbose)
+    def renderTmpImageWithStampedInfo(self, scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
+        infoImage.renderTmpImageWithStampedInfo(
+            scene, currentFrame, renderPath=renderPath, renderFilename=renderFilename, verbose=verbose
+        )
 
     def restorePreviousValues(self, scene):
         scene.render.resolution_x = self.tmp_previousResolution_x

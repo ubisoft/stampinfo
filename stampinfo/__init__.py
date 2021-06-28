@@ -44,7 +44,7 @@ from .utils.utils_os import open_folder
 from .utils import utils_vse_render
 from .utils import utils_operators
 
-#from . import handlers
+# from . import handlers
 from . import stamper
 from . import stampInfoSettings
 
@@ -55,7 +55,7 @@ from .operators import debug
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
-#importlib.reload(handlers)
+# importlib.reload(handlers)
 importlib.reload(debug)
 
 
@@ -173,6 +173,7 @@ def register():
     # from .ui import si_ui
     from stampinfo import ui
     from stampinfo import icons
+    from .properties import addon_prefs
     from .operators import render_operators
 
     display_addon_registered_version("Stamp Info")
@@ -205,6 +206,7 @@ def register():
         bpy.utils.register_class(cls)
 
     icons.register()
+    addon_prefs.register()
     render_operators.register()
     si_ui.register()
     ui.register()
@@ -228,8 +230,9 @@ def unregister():
 
     # from .ui import si_ui
     from stampinfo import ui
-    from .operators import render_operators
     from stampinfo import icons
+    from .operators import render_operators
+    from .properties import addon_prefs
 
     # debug tools
     if config.uasDebug:
@@ -240,6 +243,7 @@ def unregister():
     ui.unregister()
     si_ui.unregister()
     render_operators.unregister()
+    addon_prefs.unregister()
     icons.unregister()
 
     for cls in reversed(classes):

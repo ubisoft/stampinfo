@@ -53,6 +53,28 @@ class SequencePath:
     def __init__(self, filepath):
         self.fullpath = filepath
 
+    def isValidFileExtension(self):
+        """
+        Return False if the extension is empty, containts only digits or contains at least one # character
+        """
+        suf = str(Path(self.fullpath).suffix)
+        if 0 == len(suf):
+            return False
+        if "." == suf[0]:
+            suf = suf[1:]
+            try:
+                # if suf can be converted to an int then the extention is not valid
+                int(suf)
+                return False
+            except Exception:
+                pass
+
+        # case where there is no file extention but filename ends with '.###'
+        if -1 != suf.find("#"):
+            return False
+
+        return True
+
     # ------------------------------
     # standard filepath functions
 
@@ -65,21 +87,57 @@ class SequencePath:
     def stem(self):
         return str(Path(self.fullpath).stem)
 
+    def extension(self):
+        """
+        Same as function self.suffix(). Available for consistensy with operating systems.
+        """
+        return self.suffix()
+
     def suffix(self):
+        """
+        Same as function self.extension(). Available for consistensy with Python pathlib terminology.
+        If the file name extension contains a # its end will not be considered as an extension
+        but as an index.
+        """
+        suf = str(Path(self.fullpath).suffix)
+        if self.isValidFileExtension():
+            return suf
+        return ""
+
+    # ------------------------------
+    # sequence filepath functions
+
+    def sequence_fullpath(self, at_frame=None):
+        if at_frame is None:
+            return self.fullpath
+
+        fullp = f"{self.parent()}{self.sequence_name(at_frame=at_frame)}"
+        return fullp
+
+    def sequence_name(self, at_frame=None):
+        if at_frame is None:
+            return str(Path(self.fullpath).name)
+
+        indices_pattern = self.sequence_indices(at_frame=at_frame)
+        seq_name = f"{self.sequence_basename()}{indices_pattern}{self.suffix()}"
+        return seq_name
+
+    def sequence_stem(self, at_frame=None):
         """
         If the file name extension contains a # its end will not be considered as an extension
         but as an index.
         """
         suf = str(Path(self.fullpath).suffix)
-        if -1 != suf.find("#"):
-            return ""
-        return suf
 
-    # ------------------------------
-    # sequence filepath functions
+        # case where there is no file extention but filename ends with '.###'
+        if self.isValidFileExtension():
+            seq_stem = self.sequence_basename() + self.sequence_indices(at_frame=at_frame)
+        else:
+            seq_stem = self.sequence_basename()
+            indices = self.sequence_indices(at_frame=at_frame)
+            seq_stem += indices
 
-    def sequence_name(self):
-        return str(Path(self.fullpath).name)
+        return seq_stem
 
     def sequence_basename(self):
         if self.fullpath is None:
@@ -95,17 +153,11 @@ class SequencePath:
 
         return name
 
-    def sequence_stem(self):
+    def sequence_indices(self, at_frame=None):
         """
-        If the file name extension contains a # its end will not be considered as an extension
-        but as an index.
+        at_frame: frame infex at which the indices should be set.
+            Returns an empty string if there is no indice pattern in the filename.
         """
-        suf = str(Path(self.fullpath).suffix)
-        if -1 != suf.find("#"):
-            return str(Path(self.fullpath).name)
-        return str(Path(self.fullpath).stem)
-
-    def sequence_indices(self):
         if self.fullpath is None:
             return ""
 
@@ -115,42 +167,57 @@ class SequencePath:
             indices += "#"
             lastInd -= 1
 
+        if at_frame is not None and 0 < len(indices):
+            at_frame_str = str(at_frame)
+            while len(at_frame_str) < len(indices):
+                at_frame_str = "0" + at_frame_str
+            indices = at_frame_str
+
         return indices
 
-    def print(self, spacer=""):
+    def print(self, at_frame=None, spacer=""):
         outStr = ""
-        outStr += f"{spacer}fullpath:          {self.fullpath}\n"
-        outStr += f"{spacer}parent:            {self.parent()}\n"
-        outStr += f"{spacer}name:              {self.name()}\n"
-        outStr += f"{spacer}stem:              {self.stem()}\n"
-        outStr += f"{spacer}suffix:            {self.suffix()}\n"
+        outStr += f"{spacer}fullpath:           {self.fullpath}\n"
+        outStr += f"{spacer}parent:             {self.parent()}\n"
+        outStr += f"{spacer}name:               {self.name()}\n"
+        outStr += f"{spacer}stem:               {self.stem()}\n"
+        outStr += f"{spacer}extension (suffix): {self.extension()}\n"
 
-        # outStr += "\n"
-        outStr += f"{spacer}sequence_name:     {self.sequence_name()}\n"
-        outStr += f"{spacer}sequence_stem:     {self.sequence_stem()}\n"
-        outStr += f"{spacer}sequence_basename: {self.sequence_basename()}\n"
-        outStr += f"{spacer}sequence_indices:  {self.sequence_indices()}\n"
+        outStr += "\n"
+        outStr += f"{spacer}sequence_fullpath:  {self.sequence_fullpath()}\n"
+        outStr += f"{spacer}sequence_name:      {self.sequence_name()}\n"
+        outStr += f"{spacer}sequence_stem:      {self.sequence_stem()}\n"
+        outStr += f"{spacer}sequence_basename:  {self.sequence_basename()}\n"
+        outStr += f"{spacer}sequence_indices:   {self.sequence_indices()}\n"
+
+        if at_frame is not None:
+            outStr += f"\n - At frame {at_frame}:\n"
+            outStr += f"{spacer}sequence_fullpath: {self.sequence_fullpath(at_frame=at_frame)}\n"
+            outStr += f"{spacer}sequence_name:     {self.sequence_name(at_frame=at_frame)}\n"
+            outStr += f"{spacer}sequence_stem:     {self.sequence_stem(at_frame=at_frame)}\n"
+            outStr += f"{spacer}sequence_basename: {self.sequence_basename()}\n"
+            outStr += f"{spacer}sequence_indices:  {self.sequence_indices(at_frame=at_frame)}\n"
 
         print(outStr)
 
 
-def run_sequence_path_tests():
+def run_sequence_path_tests(at_frame=None):
 
     print("\nrun_sequence_path_tests:")
 
     filenames = []
     filenames.append("c:\\root\\seq\\singleImage.jpg")
-    filenames.append("c:\\root\\seq\\seqWitDot.###.jpg")
-    filenames.append("c:\\root\\seq\\seqWithUnderscore_###.jpg")
     filenames.append("c:\\root\\seq\\seqNoExt.###")
+    filenames.append("c:\\root\\seq\\seqWithUnderscore_###.jpg")
+    filenames.append("c:\\root\\seq\\seqWitDot.###.jpg")
 
     for f in filenames:
         print(f"File path: {f}")
         myPath = SequencePath(f)
-        myPath.print(spacer="   ")
+        myPath.print(at_frame=at_frame, spacer="   ")
 
 
-run_sequence_path_tests()
+run_sequence_path_tests(at_frame=25)
 
 # """ Find the name template for the specified images sequence in order to create it
 #    """

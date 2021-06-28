@@ -17,6 +17,7 @@
 
 """
 To do: module description here.
+V1.01 - 28/06/2021
 """
 
 import os
@@ -814,7 +815,7 @@ class UAS_Vse_Render(PropertyGroup):
                     print(f"self.inputBGMediaPath: {mediaDict['bg']}")
                     bgClip = self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
                     print("BG Media OK")
-                except Exception as e:
+                except Exception:
                     print(f" *** Rendered shot not found: {mediaDict['bg']}")
 
                 # bgClip = None
@@ -831,7 +832,7 @@ class UAS_Vse_Render(PropertyGroup):
                 try:
                     overClip = self.createNewClip(sequenceScene, mediaDict["image_sequence"], 3, atFrame)
                     print("Over Media OK")
-                except Exception as e:
+                except Exception:
                     print(f" *** Rendered shot not found: {mediaDict['image_sequence']}")
                 # overClip = None
                 # if os.path.exists(self.inputOverMediaPath):
@@ -873,7 +874,6 @@ class UAS_Vse_Render(PropertyGroup):
             # sequenceScene.frame_end = self.get_frame_end_from_content(sequenceScene) - 1
             # print(f"sequenceScene.frame_end: {sequenceScene.frame_end}")
             atFrame += shotDuration
-            print(f"atFrame: {atFrame}")
 
         # Make "My New Scene" the active one
         # bpy.context.window.scene = vse_scene
@@ -917,7 +917,14 @@ class UAS_Vse_Render(PropertyGroup):
         #     bpy.context.window.scene = sequenceScene
 
     def compositeVideoInVSE(
-        self, fps, frame_start, frame_end, output_filepath, postfixSceneName="", output_resolution=None
+        self,
+        fps,
+        frame_start,
+        frame_end,
+        output_filepath,
+        postfixSceneName="",
+        output_resolution=None,
+        importAtFrame=1,
     ):
         """
             output_resolution: array [width, height]
@@ -963,14 +970,32 @@ class UAS_Vse_Render(PropertyGroup):
         vse_scene.frame_start = frame_start
         vse_scene.frame_end = frame_end
 
-        if specificFrame is None:
-            vse_scene.render.image_settings.file_format = "FFMPEG"
-            vse_scene.render.ffmpeg.format = "MPEG4"
-            vse_scene.render.ffmpeg.constant_rate_factor = "PERC_LOSSLESS"  # "PERC_LOSSLESS"
-            vse_scene.render.ffmpeg.gopsize = 5  # keyframe interval
-            vse_scene.render.ffmpeg.audio_codec = "AAC"
-        else:
-            vse_scene.render.image_settings.file_format = "PNG"  # wkipwkipwkip mettre project info
+        # get output file format from specified output
+        fileExt = str(Path(output_filepath).suffix).upper()
+
+        if 0 < len(fileExt):
+            if "." == fileExt[0]:
+                fileExt = fileExt[1:]
+
+            if "PNG" == fileExt:
+                vse_scene.render.image_settings.file_format = "PNG"
+            elif "JPG" == fileExt:
+                vse_scene.render.image_settings.file_format = "JPG"
+            elif "MP4" == fileExt:
+                vse_scene.render.image_settings.file_format = "FFMPEG"
+                vse_scene.render.ffmpeg.format = "MPEG4"
+                vse_scene.render.ffmpeg.constant_rate_factor = "PERC_LOSSLESS"  # "PERC_LOSSLESS"
+                vse_scene.render.ffmpeg.gopsize = 5  # keyframe interval
+                vse_scene.render.ffmpeg.audio_codec = "AAC"
+
+        # if specificFrame is None:
+        #     vse_scene.render.image_settings.file_format = "FFMPEG"
+        #     vse_scene.render.ffmpeg.format = "MPEG4"
+        #     vse_scene.render.ffmpeg.constant_rate_factor = "PERC_LOSSLESS"  # "PERC_LOSSLESS"
+        #     vse_scene.render.ffmpeg.gopsize = 5  # keyframe interval
+        #     vse_scene.render.ffmpeg.audio_codec = "AAC"
+        # else:
+        #     vse_scene.render.image_settings.file_format = "PNG"  # wkipwkipwkip mettre project info
 
         vse_scene.render.filepath = output_filepath
         vse_scene.render.use_file_extension = False
@@ -982,9 +1007,9 @@ class UAS_Vse_Render(PropertyGroup):
         if "" != self.inputBGMediaPath:
             try:
                 #    print(f"self.inputBGMediaPath: {self.inputBGMediaPath}")
-                bgClip = self.createNewClip(vse_scene, self.inputBGMediaPath, 1, 1)
+                bgClip = self.createNewClip(vse_scene, self.inputBGMediaPath, 1, atFrame=importAtFrame)
             #    print("BG Media OK")
-            except Exception as e:
+            except Exception:
                 print(f" *** Rendered shot not found: {self.inputBGMediaPath}")
 
             # bgClip = None
@@ -1006,9 +1031,9 @@ class UAS_Vse_Render(PropertyGroup):
         if "" != self.inputOverMediaPath:
             overClip = None
             try:
-                overClip = self.createNewClip(vse_scene, self.inputOverMediaPath, 2, 1)
+                overClip = self.createNewClip(vse_scene, self.inputOverMediaPath, 2, atFrame=importAtFrame)
             #    print("Over Media OK")
-            except Exception as e:
+            except Exception:
                 print(f" *** Rendered shot not found: {self.inputOverMediaPath}")
             # overClip = None
             # if os.path.exists(self.inputOverMediaPath):
@@ -1029,7 +1054,7 @@ class UAS_Vse_Render(PropertyGroup):
             if specificFrame is None:
                 audioClip = None
                 if os.path.exists(self.inputAudioMediaPath):
-                    audioClip = self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, 1)
+                    audioClip = self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
                 else:
                     print(f" *** Rendered shot not found: {self.inputAudioMediaPath}")
 
@@ -1042,8 +1067,9 @@ class UAS_Vse_Render(PropertyGroup):
         if specificFrame is None:
             bpy.ops.render.opengl(animation=True, sequencer=True)
         else:
-            vse_scene.frame_set(1)
-            bpy.ops.render.render(write_still=True)
+            # vse_scene.frame_set(1)
+            # bpy.ops.render.render(write_still=True)
+            bpy.ops.render.opengl(animation=False, sequencer=True, write_still=True)
 
         # if not config.uasDebug_keepVSEContent:
         #     bpy.ops.scene.delete()

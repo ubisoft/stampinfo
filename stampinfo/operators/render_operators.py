@@ -19,11 +19,13 @@
 To do: module description here.
 """
 
+from re import A
 import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty
 from ..utils.utils_render import getRenderOutputFilename
 from ..utils.utils_filenames import SequencePath
+from ..utils import utils
 
 from pathlib import Path
 
@@ -77,6 +79,12 @@ class UAS_PT_StampInfo_Render(Operator):
         scene = context.scene
         stampInfoSettings = scene.UAS_StampInfo_Settings
 
+        # abort rendering if the file is not saved
+        if not bpy.data.is_saved:
+            utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+            # if None == (getInfoFileFullPath(scene, -1)[0]):
+            return {"FINISHED"}
+
         if not stampInfoSettings.stampInfoUsed:
             if "STILL" == self.renderMode:
                 bpy.ops.render.render("INVOKE_DEFAULT", use_viewport=True)
@@ -85,11 +93,13 @@ class UAS_PT_StampInfo_Render(Operator):
             return {"FINISHED"}
 
         vse_render = context.window_manager.UAS_vse_render
+        prefs = context.preferences.addons["stampinfo"].preferences
 
         previousRenderPath = scene.render.filepath
+        renderFrame = scene.frame_current
 
         seqPath = SequencePath(bpy.path.abspath(scene.render.filepath))
-        seqPath.print()
+        seqPath.print(at_frame=renderFrame)
 
         print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")
         tempFramedRenderPath = seqPath.parent() + "_tmp_StampInfo_framing" + "\\"
@@ -102,11 +112,19 @@ class UAS_PT_StampInfo_Render(Operator):
         if not Path(tempImgRenderPath).exists():
             Path(tempImgRenderPath).mkdir(parents=True, exist_ok=True)
 
-        scene.render.filepath = f"{tempImgRenderPath}{seqPath.sequence_name()}"
-        print(f" scene.render.filepath: {scene.render.filepath}")
+        tmpFileBasenamePattern = "tmp_StampInfo_"
+        outputStillFile = ""
 
         if "STILL" == self.renderMode:
             print("Render a still image at current frame")
+            if not prefs.write_still:
+                outputStillFile = "_Still_"
+
+            scene.render.filepath = (
+                f"{tempImgRenderPath}{outputStillFile}{seqPath.sequence_name(at_frame=scene.frame_current)}"
+            )
+
+            print(f" scene.render.filepath: {scene.render.filepath}")
 
             displayRenderWindow = False
             #     bpy.ops.render.view_show()
@@ -116,10 +134,22 @@ class UAS_PT_StampInfo_Render(Operator):
             else:
                 bpy.ops.render.render(animation=False, write_still=True, use_viewport=False)
 
-            stampInfoSettings.renderTmpImageWithStampedInfo(scene, scene.frame_current, renderPath=tempFramedRenderPath)
+            tempFramedRenderFilenameStill = (
+                outputStillFile
+                + seqPath.sequence_basename()
+                + tmpFileBasenamePattern
+                + seqPath.sequence_indices(at_frame=renderFrame)
+                + ".png"
+            )
+            stampInfoSettings.renderTmpImageWithStampedInfo(
+                scene, renderFrame, renderPath=tempFramedRenderPath, renderFilename=tempFramedRenderFilenameStill,
+            )
 
         elif "ANIMATION" == self.renderMode:
             print("Render animation")
+
+            scene.render.filepath = f"{tempImgRenderPath}{seqPath.sequence_name()}"
+            print(f" scene.render.filepath: {scene.render.filepath}")
 
             displayRenderWindow = False
             #     bpy.ops.render.view_show()
@@ -132,13 +162,19 @@ class UAS_PT_StampInfo_Render(Operator):
             #    outputFiles = getRenderOutputFilename(scene)
 
             for currentFrame in range(scene.frame_start, scene.frame_end + 1):
-                # scene.frame_current = currentFrame
                 scene.frame_set(currentFrame)
                 # scene.UAS_StampInfo_Settings.renderRootPathUsed = True
                 # scene.UAS_StampInfo_Settings.renderRootPath = tempRenderPath
 
+                tempFramedRenderFilename = (
+                    seqPath.sequence_basename()
+                    + tmpFileBasenamePattern
+                    + seqPath.sequence_indices(at_frame=currentFrame)
+                    + ".png"
+                )
+
                 stampInfoSettings.renderTmpImageWithStampedInfo(
-                    scene, scene.frame_current, renderPath=tempFramedRenderPath
+                    scene, currentFrame, renderPath=tempFramedRenderPath, renderFilename=tempFramedRenderFilename
                 )
 
             # lister images temps stamp info
@@ -146,25 +182,30 @@ class UAS_PT_StampInfo_Render(Operator):
 
         # for some reason this cannot be set right after the call to the render otherwise it is considered as the effective render path
         scene.render.filepath = previousRenderPath
+        scene.frame_current = renderFrame
 
         # compositer
         # use vse_render to store all the elements to composite
+        atSpecificFrame = None
+        if "STILL" == self.renderMode:
+            atSpecificFrame = renderFrame
+
         res = [scene.render.resolution_x, scene.render.resolution_y]
         vse_render.clearMedia()
-        vse_render.inputBGMediaPath = tempImgRenderPath + seqPath.sequence_name()
+        vse_render.inputBGMediaPath = (
+            tempImgRenderPath + outputStillFile + seqPath.sequence_name(at_frame=atSpecificFrame)
+        )
         print(f" vse BG: vse_render.inputBGMediaPath: {vse_render.inputBGMediaPath}")
         vse_render.inputBGResolution = res
 
-        specificFrame = None
-        if "STILL" == self.renderMode:
-            specificFrame = scene.frame_current
-
-        # frameIndStr = "####" if specificFrame is None else f"{specificFrame:04}"
-        # #  _logger.debug(f"\n - specificFrame: {specificFrame}")
-        # infoImgSeq = tempFramedRenderPath + "_tmp_StampInfo." + frameIndStr + ".png"
-
-        dirAndFilename = stamper.getInfoFileFullPath(scene, specificFrame)
-        infoImgSeq = tempFramedRenderPath + dirAndFilename[1]
+        tempFramedRenderFilenameGeneric = (
+            outputStillFile
+            + seqPath.sequence_basename()
+            + tmpFileBasenamePattern
+            + seqPath.sequence_indices(at_frame=atSpecificFrame)
+            + seqPath.extension()
+        )
+        infoImgSeq = tempFramedRenderPath + tempFramedRenderFilenameGeneric
 
         print(f" vse over: infoImgSeq: {infoImgSeq}")
         vse_render.inputOverMediaPath = infoImgSeq
@@ -173,91 +214,27 @@ class UAS_PT_StampInfo_Render(Operator):
         # vse_render.inputAudioMediaPath = audioFilePath
 
         #        compositedMediaPath = renderPath + "FramedOutput" + "\\"
-        compositedMediaPath = f"{seqPath.parent()}"
-        print(f"compositedMediaPath: {compositedMediaPath}")
+        compositedMediaFile = f"{seqPath.parent()}{outputStillFile}{seqPath.sequence_name(at_frame=atSpecificFrame)}"
+        print(f"compositedMediaFile: {compositedMediaFile}")
 
         if "STILL" == self.renderMode:
-            video_frame_end = 1
+            video_frame_start = renderFrame
+            video_frame_end = renderFrame
         else:
-            video_frame_end = scene.frame_end - scene.frame_start + 1
+            video_frame_start = scene.frame_start
+            video_frame_end = scene.frame_end
 
         if True:
             vse_render.compositeVideoInVSE(
                 scene.render.fps,
-                1,
+                video_frame_start,
                 video_frame_end,
-                compositedMediaPath + seqPath.sequence_name(),
-                # compositedMediaPath + "def###.png",
+                compositedMediaFile,
                 "defrender",
                 output_resolution=res,
+                importAtFrame=video_frame_start,
             )
-        # cleaner
 
-        # en bg, ne s'arrete pas
-        # bpy.ops.render.render(animation = True)
-
-        # bpy.ops.render.opengl ( animation = True )
-
-        # props = context.scene.UAS_shot_manager_props
-        # prefs = context.preferences.addons["shotmanager"].preferences
-        # prefs.renderMode = self.renderMode
-
-        # # update UI
-        # if "STILL" == prefs.renderMode:
-        #     props.displayStillProps = True
-        # elif "ANIMATION" == prefs.renderMode:
-        #     props.displayAnimationProps = True
-        # elif "ALL" == prefs.renderMode:
-        #     props.displayAllEditsProps = True
-        # elif "OTIO" == prefs.renderMode:
-        #     props.displayOtioProps = True
-        # elif "PLAYBLAST" == prefs.renderMode:
-        #     props.displayPlayblastProps = True
-
-        # if not props.sceneIsReady():
-        #     return {"CANCELLED"}
-
-        # if "ANIMATION" == prefs.renderMode:
-        #     currentShot = props.getCurrentShot()
-        #     if currentShot is None:
-        #         utils.ShowMessageBox("Current Shot not found - Rendering aborted", "Render aborted")
-        #         return {"CANCELLED"}
-        #     if not currentShot.enabled:
-        #         utils.ShowMessageBox("Current Shot is not enabled - Rendering aborted", "Render aborted")
-        #         return {"CANCELLED"}
-
-        # # renderWarnings = ""
-        # # if props.renderRootPath.startswith("//"):
-        # #     if "" == bpy.data.filepath:
-        # #         renderWarnings = "*** Save file first ***"
-        # # elif "" == props.renderRootPath:
-        # #     renderWarnings = "*** Invalid Output File Name ***"
-
-        # # if "" != renderWarnings:
-        # #     from ..utils.utils import ShowMessageBox
-
-        # #     ShowMessageBox(renderWarnings, "Render Aborted", "ERROR")
-        # #     print("Render aborted before start: " + renderWarnings)
-        # #     return {"CANCELLED"}
-
-        # if "OTIO" == prefs.renderMode:
-        #     bpy.ops.uas_shot_manager.export_otio()
-        # else:
-        #     renderRootPath = props.renderRootPath if "" != props.renderRootPath else "//"
-        #     bpy.path.abspath(renderRootPath)
-        #     if not (renderRootPath.endswith("/") or renderRootPath.endswith("\\")):
-        #         renderRootPath += "\\"
-
-        #     # if props.isRenderRootPathValid():
-        #     launchRender(
-        #         context,
-        #         prefs.renderMode,
-        #         renderRootPath,
-        #         # useStampInfo=props.useStampInfoDuringRendering,
-        #         area=context.area,
-        #     )
-
-        # #   return {"RUNNING_MODAL"}
         return {"FINISHED"}
 
 
