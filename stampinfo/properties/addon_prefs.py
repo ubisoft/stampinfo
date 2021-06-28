@@ -1,5 +1,5 @@
 import bpy
-from bpy.types import AddonPreferences
+from bpy.types import AddonPreferences, FaceMap
 from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty
 
 
@@ -30,15 +30,39 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         options=set(),
     )
 
+    delete_temp_scene: BoolProperty(
+        name="Delete the temporary scene used for VSE rendering",
+        description="Delete temporary scene used for VSE rendering",
+        default=True,
+        options=set(),
+    )
+
+    delete_temp_images: BoolProperty(
+        name="Delete the temporary images used for VSE rendering",
+        description="Delete temporary images used for VSE rendering",
+        default=True,
+        options=set(),
+    )
+
     def draw(self, context):
         layout = self.layout
-        prefs = context.preferences.addons["stampinfo"].preferences
 
         box = layout.box()
-        box.use_property_decorate = False
+        row = box.row()
+        row.separator(factor=3)
+        subCol = row.column()
+        subCol.prop(self, "mediaFirstFrameIsZero")
+        subCol.prop(self, "write_still")
 
-        box.prop(self, "mediaFirstFrameIsZero")
-        box.prop(self, "write_still")
+        layout.separator(factor=0.5)
+        layout.label(text="Technical Settings:")
+        box = layout.box()
+        box.label(text="Stamped Images Compositing:")
+        row = box.row()
+        row.separator(factor=3)
+        subCol = row.column()
+        subCol.prop(self, "delete_temp_scene")
+        subCol.prop(self, "delete_temp_images")
 
 
 _classes = (UAS_StampInfo_AddonPrefs,)

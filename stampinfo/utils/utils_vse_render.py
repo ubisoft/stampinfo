@@ -916,6 +916,48 @@ class UAS_Vse_Render(PropertyGroup):
         # if config.uasDebug:
         #     bpy.context.window.scene = sequenceScene
 
+    def compositeMedia(
+        self,
+        scene,
+        fps=None,
+        bg_file=None,
+        fg_file=None,
+        audio_file=None,
+        output_file=None,
+        frame_start=None,
+        frame_end=None,
+        postfix_scene_name="",
+        output_resolution=None,
+        import_at_frame=1,
+        clean_temp_scene=True,
+    ):
+        """
+            Not set values are taken from scene
+            output_resolution: array [width, height]
+        """
+        # self.clearMedia()
+
+        # wkip add media here
+
+        self.compositeVideoInVSE(
+            scene.render.fps if fps is None else fps,
+            scene.frame_start if frame_start is None else frame_start,
+            scene.frame_end if frame_end is None else frame_end,
+            output_file,
+            postfixSceneName=postfix_scene_name,
+            output_resolution=output_resolution,
+            importAtFrame=import_at_frame,
+        )
+
+        if clean_temp_scene:
+            scenesToDelete = [
+                s
+                for s in bpy.data.scenes
+                if (s.name.startswith("Tmp_VSE_RenderScene") or s.name.startswith("VSE_SequenceRenderScene"))
+            ]
+            for s in scenesToDelete:
+                bpy.data.scenes.remove(s, do_unlink=True)
+
     def compositeVideoInVSE(
         self,
         fps,
@@ -1067,7 +1109,7 @@ class UAS_Vse_Render(PropertyGroup):
         if specificFrame is None:
             bpy.ops.render.opengl(animation=True, sequencer=True)
         else:
-            # vse_scene.frame_set(1)
+            vse_scene.frame_set(specificFrame)
             # bpy.ops.render.render(write_still=True)
             bpy.ops.render.opengl(animation=False, sequencer=True, write_still=True)
 

@@ -39,13 +39,13 @@ class SequencePath:
         - suffix: the file extention
 
     Eg.: myPath = SequencePath("c:\temp\mySequence_####.png")
-        - myPath.fullpath: "c:\temp\mySequence_####.png"
-        - myPath.parent: "c:\temp\"
-        - myPath.name: "mySequence_####.png"
-        - myPath.stem: "mySequence_####"
-        - myPath.seq_name: "mySequence"
-        - myPath.seq_separators: "####"
-        - myPath.suffix: ".png"
+        - myPath.fullpath(): "c:\temp\mySequence_####.png"
+        - myPath.parent(): "c:\temp\"
+        - myPath.name(): "mySequence_####.png"
+        - myPath.stem(): "mySequence_####"
+        - myPath.sequence_name(): "mySequence"
+        - myPath.sequence_indices: "####"
+        - myPath.suffix: ".png"     or myPath.extention(): ".png"
     """
 
     fullpath = None
@@ -127,8 +127,6 @@ class SequencePath:
         If the file name extension contains a # its end will not be considered as an extension
         but as an index.
         """
-        suf = str(Path(self.fullpath).suffix)
-
         # case where there is no file extention but filename ends with '.###'
         if self.isValidFileExtension():
             seq_stem = self.sequence_basename() + self.sequence_indices(at_frame=at_frame)
@@ -217,7 +215,9 @@ def run_sequence_path_tests(at_frame=None):
         myPath.print(at_frame=at_frame, spacer="   ")
 
 
-run_sequence_path_tests(at_frame=25)
+# display test paths for debug and unit tests
+# run_sequence_path_tests(at_frame=25)
+
 
 # """ Find the name template for the specified images sequence in order to create it
 #    """

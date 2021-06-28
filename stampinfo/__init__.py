@@ -17,6 +17,25 @@
 
 """
 Main init
+
+To do:
+
+Log issue for:
+    - write doc and readme
+        - page for utils
+        - page for api
+    - premult
+    - refactor render overlay
+    - known issues:
+        - premult
+    - api
+    - button to recomposite as tool
+    - expose temp folder and seq names in the prefs
+    
+Video tuto:
+    render direct
+    render with api
+
 """
 
 import logging
@@ -44,7 +63,6 @@ from .utils.utils_os import open_folder
 from .utils import utils_vse_render
 from .utils import utils_operators
 
-# from . import handlers
 from . import stamper
 from . import stampInfoSettings
 
@@ -55,7 +73,6 @@ from .operators import debug
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
-# importlib.reload(handlers)
 importlib.reload(debug)
 
 
@@ -64,8 +81,8 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack)",
     "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
-    "blender": (2, 83, 0),
-    "version": (0, 9, 37),
+    "blender": (2, 92, 0),
+    "version": (1, 0, 1),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     # "warning": "BETA Version",
@@ -169,8 +186,6 @@ def module_can_be_imported(name):
 
 
 def register():
-
-    # from .ui import si_ui
     from stampinfo import ui
     from stampinfo import icons
     from .properties import addon_prefs
@@ -190,10 +205,6 @@ def register():
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
         _logger.addHandler(handler)
-
-        # handler = logging.FileHandler(get_log_file())
-        # handler.setFormatter(formatter)
-        # _logger.addHandler(handler)
 
     ###################
     # Pillow lib installation
@@ -218,12 +229,6 @@ def register():
         debug.register()
 
     bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
-
-    # declaration of properties that will not be saved in the scene
-
-    # stampInfoSettings.registerRenderHandlers()
-
-    # handlers.registerPostLoadHandler()
 
 
 def unregister():

@@ -20,6 +20,7 @@ Utility functions that may require os/platform specific adjustments
 """
 
 import subprocess
+import os
 from pathlib import Path
 import sys
 
@@ -36,25 +37,19 @@ def open_folder(path):
         subprocess.Popen(f'explorer "{Path(path)}"')
 
 
-# to do: support of / and \, make abs?
-def decompose_path(filepath):
-    """
-    Split a file path into parts. Dedicated to 
-    Returns a dictionnary made of:
-        - fullpath: the file path and name
-        - parent: the file path without the file name AND with a "\" at the end
-        - name: the name of the file with extention
-        - stem: the name of the file without extention
-        - seq_name: the name of the sequence when # are removed
-        - suffix: the file extention
+def delete_folder(dir_path):
+    if os.path.exists(dir_path):
+        files_in_directory = os.listdir(dir_path)
+        # filtered_files = [file for file in files_in_directory if file.endswith(".png") or file.endswith(".wav")]
 
-    Eg.: res = decompose_path("c:\temp\mySequence_####.png")
-        - res.fullpath: "c:\temp\mySequence_####.png"
-        - res.parent: "c:\temp\"
-        - res.name: "mySequence_####.png"
-        - res.stem: "mySequence_####"
-        - res.seq_name: "mySequence"
-        - res.seq_separators: "####"
-        - res.suffix: ".png"
-    """
-
+        for file in files_in_directory:
+            path_to_file = os.path.join(dir_path, file)
+            try:
+                os.remove(path_to_file)
+            except Exception:
+                # _logger.exception(f"\n*** File locked (by system?): {path_to_file}")
+                print(f"\n*** File locked (by system?): {path_to_file}")
+        try:
+            os.rmdir(dir_path)
+        except Exception:
+            print("Cannot delete Dir: ", dir_path)

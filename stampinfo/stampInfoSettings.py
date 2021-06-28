@@ -131,14 +131,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         _logger.debug(f"\n*** StampInfo is now:  {activated}")
         self.stampInfoUsed = activated
 
-        # if self.stampInfoUsed:
-        #     self.registerRenderHandlers()
-        # else:
-        #     self.clearRenderHandlers()
-        # #    if 2 != bpy.context.scene.UAS_StampInfo_Settings['stampInfoRenderMode']:        # not EXISTINGCOMPO
-        #     if 'USECOMPOSITINGNODES' != bpy.context.scene.UAS_StampInfo_Settings.stampInfoRenderMode:        # not EXISTINGCOMPO
-        #         stamper.clearInfoCompoNodes(bpy.context.scene)
-
     def stampInfoUsed_StateChanged(self, context):
         _logger.debug(f"\n*** Stamp Info updated. New state: {self.stampInfoUsed}")
 
@@ -161,18 +153,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     def get_stampInfoRenderMode(self):
-        # if not "stampInfoRenderMode" in self:
-        #     if 0==value:
-        #         self.stampInfoRenderMode = 'DIRECTTOCOMPOSITE'
-        #     elif 1==value:
-        #         self.stampInfoRenderMode = 'SEPARATEOUTPUT'
-        #     else: self.stampInfoRenderMode = 'USECOMPOSITINGNODES'
-        #     prop = None
-        #     if not "stampInfoRenderMode" in self:
-        #         prop = self.stampInfoRenderMode = 'SEPARATEOUTPUT'
-
-        #     return prop
-        # val = self.get("stampInfoRenderMode", 'SEPARATEOUTPUT')
         val = self.get("stampInfoRenderMode", 0)
         return val
 
@@ -183,11 +163,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         _logger.debug(f" set_stampInfoRenderMode: value: {value}")
 
         self["stampInfoRenderMode"] = value
-        # if 0==value:
-        #     self.stampInfoRenderMode = 'DIRECTTOCOMPOSITE'
-        # elif 1==value:
-        #     self.stampInfoRenderMode = 'SEPARATEOUTPUT'
-        # else: self.stampInfoRenderMode = 'USECOMPOSITINGNODES'
 
     stampInfoRenderMode: EnumProperty(
         name="Mode",
@@ -199,12 +174,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
                 "Creates another render output at the specified resolution and on which the rendered images have the stamped information",
                 1,
             ),
-            (
-                "USECOMPOSITINGNODES",
-                "(Adv.) Use Existing Compo Graph",
-                "Advanced and experimental:\nPreserves the state of the compositing window Use Node checkbox so as to restore it after the rendering",
-                2,
-            ),
         ],
         get=get_stampInfoRenderMode,
         set=set_stampInfoRenderMode,
@@ -213,14 +182,14 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- project properties -------------
 
-    projectUsed: BoolProperty(name="Project", description="Stamp project name", default=True, options=set())
+    projectUsed: BoolProperty(name="Project", description="Stamp project name", default=False, options=set())
 
-    projectName: StringProperty(name="", description="Project name", default="UAS", options=set())
+    projectName: StringProperty(name="", description="Project name", default="My Project", options=set())
 
     # ---------- Logo properties -------------
 
     def buildLogosList(self, context):
-        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
+        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\logos")
         items = list()
         for img in dir.glob("*.png"):
             # print ("    buildLogosList img.stem: " + img.stem )
@@ -231,7 +200,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     def updateLogoPath(self, context):
         #  print("updateLogoPath")
-        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
+        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\logos")
         #  print("  dir: " + str(dir))
         logoFilepath = str(dir) + "\\" + str(self.logoName)
         #  print("  logoFilepath: " + logoFilepath)

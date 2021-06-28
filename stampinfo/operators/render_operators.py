@@ -25,6 +25,7 @@ from bpy.types import Operator
 from bpy.props import EnumProperty
 from ..utils.utils_render import getRenderOutputFilename
 from ..utils.utils_filenames import SequencePath
+from ..utils.utils_os import delete_folder
 from ..utils import utils
 
 from pathlib import Path
@@ -225,15 +226,22 @@ class UAS_PT_StampInfo_Render(Operator):
             video_frame_end = scene.frame_end
 
         if True:
-            vse_render.compositeVideoInVSE(
-                scene.render.fps,
-                video_frame_start,
-                video_frame_end,
-                compositedMediaFile,
-                "defrender",
+            #            vse_render.compositeVideoInVSE(
+            vse_render.compositeMedia(
+                scene,
+                frame_start=video_frame_start,
+                frame_end=video_frame_end,
+                output_file=compositedMediaFile,
+                postfix_scene_name="_StampInfoRender",
                 output_resolution=res,
-                importAtFrame=video_frame_start,
+                import_at_frame=video_frame_start,
+                clean_temp_scene=prefs.delete_temp_scene,
             )
+
+        if prefs.delete_temp_images:
+            print("Cleaning temp dirs")
+            delete_folder(tempFramedRenderPath)
+            delete_folder(tempImgRenderPath)
 
         return {"FINISHED"}
 

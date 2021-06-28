@@ -76,9 +76,6 @@ def getRenderResolutionForStampInfo(scene):
             ),
         )
 
-    else:  # USECOMPOSITINGNODES
-        stampRenderRes = getRenderResolution(scene)
-
     return stampRenderRes
 
 
@@ -101,9 +98,6 @@ def getInnerHeight(scene):
             int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01),
         )
         #      int(getRenderResolutionForStampInfo(scene)[1]) )
-
-    else:  # USECOMPOSITINGNODES
-        innerH = -1
 
     return innerH
 
