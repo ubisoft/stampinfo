@@ -27,7 +27,7 @@ from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, 
 
 from . import infoImage
 from . import stamper
-from . import handlers
+#from . import handlers
 from .utils import utils
 
 import logging
@@ -141,17 +141,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     def stampInfoUsed_StateChanged(self, context):
         _logger.debug(f"\n*** Stamp Info updated. New state: {self.stampInfoUsed}")
 
-        #   self.activateStampInfo(self.stampInfoUsed)
-        if self.stampInfoUsed:
-            self.registerRenderHandlers()
-        else:
-            self.clearRenderHandlers()
-            #    if 2 != bpy.context.scene.UAS_StampInfo_Settings['stampInfoRenderMode']:        # not EXISTINGCOMPO
-            if (
-                "USECOMPOSITINGNODES" != bpy.context.scene.UAS_StampInfo_Settings.stampInfoRenderMode
-            ):  # not EXISTINGCOMPO
-                stamper.clearInfoCompoNodes(bpy.context.scene)
-
     def get_stampInfoUsed(self):
         val = self.get("stampInfoUsed", True)
         return val
@@ -160,20 +149,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         _logger.debug(f"\n*** set_stampInfoUsed: value: {value}")
 
         self["stampInfoUsed"] = value
-
-        bpy.context.scene.UAS_StampInfo_Settings.clearRenderHandlers()
-
-        if "USECOMPOSITINGNODES" != bpy.context.scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # not EXISTINGCOMPO
-            stamper.clearInfoCompoNodes(bpy.context.scene)
-
-        bpy.context.scene.UAS_StampInfo_Settings.registerRenderHandlers()
-
-        # alternative ne marche pas - crashes
-        # if self.stampInfoUsed:
-        #     bpy.context.scene.UAS_StampInfo_Settings.registerRenderHandlers()
-        # else:
-        #     bpy.context.scene.UAS_StampInfo_Settings.clearRenderHandlers()
-        #     stamper.clearInfoCompoNodes(bpy.context.scene)
 
     stampInfoUsed: BoolProperty(
         name="Stamp Info",
@@ -205,10 +180,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     # values are integers
     def set_stampInfoRenderMode(self, value):
         _logger.debug(f" set_stampInfoRenderMode: value: {value}")
-
-        # no clear if we keep the graph with mode USECOMPOSITINGNODES
-        if 2 != value:
-            stamper.clearInfoCompoNodes(bpy.context.scene)
 
         self["stampInfoRenderMode"] = value
         # if 0==value:
@@ -597,8 +568,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="previousResolution_y Dir To Compo", description="previousResolution_y", default=50
     )
 
-    def renderTmpImageWithStampedInfo(self, scene, currentFrame):
-        infoImage.renderTmpImageWithStampedInfo(scene, currentFrame)
+    def renderTmpImageWithStampedInfo(self, scene, currentFrame, renderPath=None, verbose=False):
+        infoImage.renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=renderPath, verbose=verbose)
 
     def restorePreviousValues(self, scene):
         scene.render.resolution_x = self.tmp_previousResolution_x
@@ -617,55 +588,3 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
         # tmp_usePreviousValues = False
 
-    def clearInfoCompoNodes(self, scene):
-        stamper.clearInfoCompoNodes(scene)
-
-    def clearRenderHandlers(self):
-        _logger.debug(f"\n ** -- ** clearRenderHandlers ** -- **")
-
-        from .utils import utils_handlers
-
-        # utils_handlers.displayHandlers()
-
-        utils_handlers.removeAllHandlerOccurences(
-            handlers.uas_stampinfo_renderInitHandler, handlerCateg=bpy.app.handlers.render_init
-        )
-        utils_handlers.removeAllHandlerOccurences(
-            handlers.uas_stampinfo_renderPreHandler, handlerCateg=bpy.app.handlers.render_pre
-        )
-        utils_handlers.removeAllHandlerOccurences(
-            handlers.uas_stampinfo_renderCompleteHandler, handlerCateg=bpy.app.handlers.render_complete
-        )
-        utils_handlers.removeAllHandlerOccurences(
-            handlers.uas_stampinfo_renderCancelHandler, handlerCateg=bpy.app.handlers.render_cancel
-        )
-
-    def registerRenderHandlers(self):
-        _logger.debug(f"\n ** -- ** registerRenderHandlers ** -- **")
-        # register handler
-        # https://docs.blender.org/api/current/bpy.app.handlers.html
-
-        # wkip debug
-        #   if gbWkDebug:
-        self.clearRenderHandlers()
-        _logger.debug(f"\n   (still in registerRenderHandlers)")
-
-        bpy.app.handlers.render_init.append(handlers.uas_stampinfo_renderInitHandler)  # happens once
-
-        bpy.app.handlers.render_pre.append(handlers.uas_stampinfo_renderPreHandler)  # for every frame
-
-        bpy.app.handlers.render_complete.append(handlers.uas_stampinfo_renderCompleteHandler)  # happens once
-        bpy.app.handlers.render_cancel.append(handlers.uas_stampinfo_renderCancelHandler)  # happens once
-
-        _logger.debug(f"\n   registerRenderHandlers ]")
-
-    def handlersRegistered(self):
-        from .utils import utils_handlers
-
-        handlersOk = False
-        funcInHandler = utils_handlers.getHandlerByFunction(
-            handlers.uas_stampinfo_renderInitHandler, handlerCateg=bpy.app.handlers.render_init
-        )
-        handlersOk = funcInHandler is not None
-
-        return handlersOk

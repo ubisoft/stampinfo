@@ -40,10 +40,14 @@ from .config import config
 
 from .utils.utils_render import Utils_LaunchRender
 from .utils.utils import display_addon_registered_version
+from .utils.utils_os import open_folder
+from .utils import utils_vse_render
+from .utils import utils_operators
 
-from . import handlers
+#from . import handlers
 from . import stamper
 from . import stampInfoSettings
+
 
 from .ui import si_ui
 
@@ -51,15 +55,9 @@ from .operators import debug
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
-importlib.reload(handlers)
+#importlib.reload(handlers)
 importlib.reload(debug)
 
-import os
-from pathlib import Path
-import subprocess
-
-
-from stampinfo.utils.utils_os import open_folder
 
 bl_info = {
     "name": "Stamp Info",
@@ -113,32 +111,6 @@ class Formatter(logging.Formatter):
         return s
 
 
-# def get_logs_directory():
-#     def _get_logs_directory():
-#         import tempfile
-
-#         if "MIXER_USER_LOGS_DIR" in os.environ:
-#             username = os.getlogin()
-#             base_shared_path = Path(os.environ["MIXER_USER_LOGS_DIR"])
-#             if os.path.exists(base_shared_path):
-#                 return os.path.join(os.fspath(base_shared_path), username)
-#             logger.error(
-#                 f"MIXER_USER_LOGS_DIR env var set to {base_shared_path}, but directory does not exists. Falling back to default location."
-#             )
-#         return os.path.join(os.fspath(tempfile.gettempdir()), "mixer")
-
-#     dir = _get_logs_directory()
-#     if not os.path.exists(dir):
-#         os.makedirs(dir)
-#     return dir
-
-
-# def get_log_file():
-#     from mixer.share_data import share_data
-
-#     return os.path.join(get_logs_directory(), f"mixer_logs_{share_data.run_id}.log")
-
-
 class UAS_OT_Open_Documentation_Url(Operator):  # noqa 801
     bl_idname = "stampinfo.open_documentation_url"
     bl_label = "Open Documentation Web Page"
@@ -180,79 +152,12 @@ class UAS_OpenFileBrowser(Operator, ImportHelper):
         return {"FINISHED"}
 
 
-class UAS_OpenExplorer(Operator):
-    bl_idname = "stampinfo.openexplorer"
-    bl_label = "Open Explorer"
-    bl_description = "Open an Explorer window located at the render output directory"
-
-    # wkip use icon FILEBROWSER
-
-    def execute(self, context):
-        """Open an Explorer window located at the render output directory"""
-
-        renderPath = stamper.getInfoFileFullPath(context.scene, -1)[0]
-
-        # cf https://stackoverflow.com/questions/281888/open-explorer-on-a-file
-        import subprocess
-
-        # subprocess.Popen(r'explorer "C:\tmp"')
-        subprocess.Popen('explorer "' + renderPath + '"')
-
-        _logger.debug(f" UAS_OpenExplorer: Open {renderPath}")
-
-        return {"FINISHED"}
-
-
-class UAS_ResetHandlers(Operator):
-    bl_idname = "stampinfo.resethandlers"
-    bl_label = "Reset Handlers"
-    bl_description = (
-        "Y if handlers are installed, N if not.\nRed if the status of the handlers is not the expected one according to\n"
-        "the stateof Use Stamp Info.\nButton pressed: Reset Handlers to the expected state"
-    )
-
-    def execute(self, context):
-        """Clear Compo Nodes"""
-        _logger.debug(f" UAS_ResetHandlersAndCompoNodes")
-
-        # stamper.clearInfoCompoNodes(context.scene)
-
-        # context.scene.UAS_StampInfo_Settings.clearRenderHandlers()     # not needed cause also called in registerRenderHandlers
-        context.scene.UAS_StampInfo_Settings.registerRenderHandlers()
-
-        return {"FINISHED"}
-
-
-class UAS_ResetHandlersAndCompoNodes(Operator):
-    bl_idname = "stampinfo.resethandlersandcomponodes"
-    bl_label = "Reset Handlers and Compo"
-    bl_description = "Clear and register again the handlers and clear the Compo Nodes"
-
-    def execute(self, context):
-        """Clear Compo Nodes"""
-        _logger.debug(" UAS_ResetHandlersAndCompoNodes")
-
-        context.scene.UAS_StampInfo_Settings.clearRenderHandlers()
-
-        stamper.clearInfoCompoNodes(context.scene)
-
-        context.scene.UAS_StampInfo_Settings.registerRenderHandlers()
-
-        return {"FINISHED"}
-
-
 classes = (
     stampInfoSettings.UAS_StampInfoSettings,
     Utils_LaunchRender,
     UAS_OT_Open_Documentation_Url,
     UAS_OpenFileBrowser,
-    UAS_OpenExplorer,
-    UAS_ResetHandlersAndCompoNodes,
-    UAS_ResetHandlers,
 )
-# debug:
-#   handlers.UAS_StampInfoCreateHandlers,
-#   handlers.UAS_StampInfoClearHandlers,
 
 
 def module_can_be_imported(name):
@@ -267,6 +172,8 @@ def register():
 
     # from .ui import si_ui
     from stampinfo import ui
+    from stampinfo import icons
+    from .operators import render_operators
 
     display_addon_registered_version("Stamp Info")
 
@@ -297,8 +204,12 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    icons.register()
+    render_operators.register()
     si_ui.register()
     ui.register()
+    utils_vse_render.register()
+    utils_operators.register()
 
     # debug tools
     if config.uasDebug:
@@ -317,24 +228,22 @@ def unregister():
 
     # from .ui import si_ui
     from stampinfo import ui
-
-    ui.unregister()
-    si_ui.unregister()
+    from .operators import render_operators
+    from stampinfo import icons
 
     # debug tools
     if config.uasDebug:
         debug.unregister()
 
+    utils_operators.unregister()
+    utils_vse_render.unregister()
+    ui.unregister()
+    si_ui.unregister()
+    render_operators.unregister()
+    icons.unregister()
+
     for cls in reversed(classes):
         # print(str(cls) + " being unregistered...")
         bpy.utils.unregister_class(cls)
-
-    # clearing handlers
-    # https://blender.stackexchange.com/questions/53894/how-to-avoid-multiple-running-instances-of-same-handler-function-when-running-it
-    # bpy.app.handlers.render_init.clear()
-    # bpy.app.handlers.render_pre.clear()
-    # bpy.app.handlers.render_complete.clear()
-    # bpy.app.handlers.render_cancel.clear()
-    # bpy.app.handlers.render_init.remove(my_handlder)
 
     config.releaseGlobalVariables()

@@ -29,6 +29,8 @@ from urllib.parse import unquote_plus, urlparse
 
 import bpy
 
+import os
+
 
 def convertVersionStrToInt(versionStr):
     """ Convert a string formated like "1.23.48" to a version integer such as 1023048
@@ -140,6 +142,49 @@ def file_path_from_uri(uri):
     return path
 
 
+def openMedia(media_filepath, inExternalPlayer=False):
+    if not Path(media_filepath).exists():
+        print(f"*** Cannot open {media_filepath}")
+        return
+
+    if inExternalPlayer:
+
+        # wkip subprocess is said to be better but cannot make it work...
+        # import subprocess
+        #  p = subprocess.Popen(["display", media_filepath])
+        # subprocess.run(["open", media_filepath], check=True)
+
+        import subprocess, os, platform
+
+        if platform.system() == "Darwin":  # macOS
+            subprocess.call(("open", media_filepath))
+        elif platform.system() == "Windows":  # Windows
+            os.startfile(media_filepath)
+        else:  # linux variants
+            subprocess.call(("xdg-open", media_filepath))
+    else:
+        # Call user prefs window
+        bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+        # Change area type
+        area = bpy.context.window_manager.windows[-1].screen.areas[0]
+        area.type = "IMAGE_EDITOR"
+
+        # bpy.ops.render.view_show()
+        bpy.ops.image.open(
+            filepath=media_filepath, relative_path=False, show_multiview=False,
+        )
+
+        # bpy.data.images.[image_name].reload()
+
+        #  print(f"media_filepath: {media_filepath}")
+        #  print(f"Path(media_filepath).name: {Path(media_filepath).name}")
+        myImg = bpy.data.images[Path(media_filepath).name]
+        #  print("myImg:" + str(myImg))
+        bpy.context.area.spaces.active.image = myImg
+
+    return
+
+
 def add_background_video_to_cam(
     camera: bpy.types.Camera, movie_path, frame_start, alpha=-1, proxyRenderSize="PROXY_50"
 ):
@@ -170,6 +215,11 @@ def add_background_video_to_cam(
         bg.clip_user.proxy_render_size = proxyRenderSize
 
 
+###################
+# Various
+###################
+
+
 def findFirstUniqueName(originalItem, name, itemsArray):
     """ Return a string that correspont to name.xxx as the first unique name in the array
     """
@@ -185,6 +235,55 @@ def findFirstUniqueName(originalItem, name, itemsArray):
         else:
             itemInd += 1
     return newName
+
+
+def getSceneVSE(vsm_sceneName, createVseTab=False):
+    """ Return the scene that has the name held by vsm_sceneName and adds a VSE in it if there is not already one.
+        Use <returned scene>.sequence_editor to get the vse of the scene
+    """
+    # vsm_sceneName = "VideoShotManager"
+    vsm_scene = None
+
+    if vsm_sceneName in bpy.data.scenes:
+        vsm_scene = bpy.data.scenes[vsm_sceneName]
+    else:
+        vsm_scene = bpy.data.scenes.new(name=vsm_sceneName)
+        vsm_scene.render.fps = bpy.context.scene.render.fps
+
+    if not vsm_scene.sequence_editor:
+        vsm_scene.sequence_editor_create()
+
+    bpy.context.window.scene = vsm_scene
+
+    print(f"bpy.context.window.screen.name: {bpy.context.window.screen.name}")
+    if "temp" == bpy.context.window.screen.name:
+        print("pafffffffffffffffffff")
+        bpy.context.window.screen = bpy.context.window_manager.windows[0].screen
+        bpy.context.window.screen = bpy.data.screens["UV Editing"]
+        bpy.context.window_manager.windows[1].screen = bpy.data.screens["UV Editing"]
+
+        #     bpy.ops.wm.window_close()
+    #        bpy.ops.window.remove()
+
+    # if bpy.context.window_manager.windows[#].workspace
+    bpy.context.window.scene = vsm_scene
+    print(f"2bpy.context.window.workspace.name: {bpy.context.window.workspace.name}")
+    print(f"2bpy.context.window.screen.name: {bpy.context.window.screen.name}")
+
+    if createVseTab:
+        startup_blend = os.path.join(
+            bpy.utils.resource_path("LOCAL"),
+            "scripts",
+            "startup",
+            "bl_app_templates_system",
+            "Video_Editing",
+            "startup.blend",
+        )
+
+        if "Video Editing" not in bpy.data.workspaces:
+            bpy.ops.workspace.append_activate(idname="Video Editing", filepath=startup_blend)
+
+    return vsm_scene
 
 
 def duplicateObject(sourceObject):

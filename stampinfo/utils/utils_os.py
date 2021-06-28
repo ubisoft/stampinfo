@@ -19,43 +19,9 @@
 Utility functions that may require os/platform specific adjustments
 """
 
-import getpass
-import os
-import platform
 import subprocess
 from pathlib import Path
 import sys
-from typing import List
-
-# import mixer
-
-import bpy
-import addon_utils
-
-
-# def tech_infos() -> List[str]:
-#     lines = [
-#         f"Platform : {platform.platform()}",
-#         f"Blender  : {bpy.app.version_string}",
-#     ]
-
-#     date = getattr(mixer, "version_date", None)
-#     date_string = f"({date})" if date is not None else ""
-#     lines.append(f"Mixer    : {mixer.display_version} {date_string}")
-#     return lines
-
-
-# def addon_infos() -> List[str]:
-#     lines = []
-#     for bl_module in addon_utils.modules():
-#         name = bl_module.bl_info["name"]
-#         module = sys.modules.get(bl_module.__name__)
-#         enabled = module is not None and getattr(module, "__addon_enabled__", False)
-#         if enabled:
-#             version = bl_module.bl_info.get("version", (-1, -1, -1))
-#             lines.append(f"Addon    : {name} {version}")
-
-#     return lines
 
 
 def open_folder(path):
@@ -68,3 +34,27 @@ def open_folder(path):
         subprocess.check_call(["xdg-open", path])
     elif sys.platform == "win32":
         subprocess.Popen(f'explorer "{Path(path)}"')
+
+
+# to do: support of / and \, make abs?
+def decompose_path(filepath):
+    """
+    Split a file path into parts. Dedicated to 
+    Returns a dictionnary made of:
+        - fullpath: the file path and name
+        - parent: the file path without the file name AND with a "\" at the end
+        - name: the name of the file with extention
+        - stem: the name of the file without extention
+        - seq_name: the name of the sequence when # are removed
+        - suffix: the file extention
+
+    Eg.: res = decompose_path("c:\temp\mySequence_####.png")
+        - res.fullpath: "c:\temp\mySequence_####.png"
+        - res.parent: "c:\temp\"
+        - res.name: "mySequence_####.png"
+        - res.stem: "mySequence_####"
+        - res.seq_name: "mySequence"
+        - res.seq_separators: "####"
+        - res.suffix: ".png"
+    """
+

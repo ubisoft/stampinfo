@@ -55,9 +55,6 @@ class UAS_PT_StampInfoDebug(Panel):
         #    row.prop(scene.UAS_StampInfo_Settings, "offsetToCenterHNorm")
 
         row = layout.row()
-        row.operator("stampinfo.resethandlersandcomponodes", emboss=True)
-
-        row = layout.row()
         row.operator("debug.lauchrrsrender", emboss=True)
 
         if not utils_render.isRenderPathValid(context.scene):
@@ -88,9 +85,6 @@ class UAS_PT_StampInfoDebugCompo(Panel):
         row = layout.row()
         row.prop(scene.UAS_StampInfo_Settings, "debug_DrawTextLines")
         #    row.prop(scene.UAS_StampInfo_Settings, "offsetToCenterHNorm")
-
-        row = layout.row()
-        row.operator("stampinfo.resethandlersandcomponodes", emboss=True)
 
         row = layout.row()
         row.operator("debug.lauchrrsrender", emboss=True)

@@ -19,14 +19,15 @@
 Rendering code
 """
 
-import logging
-
-_logger = logging.getLogger(__name__)
-
 import os
+from pathlib import Path
 
 import bpy
 from bpy.types import Operator
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 def isRenderPathValid(scene):
@@ -37,6 +38,54 @@ def isRenderPathValid(scene):
     filePathIsValid = os.path.exists(head)
 
     return filePathIsValid
+
+
+def getRenderOutputFilename(scene, fileNameOnly=False):
+    """
+    Return the list of the files that are to be rendered by the scene, according to the settings of the specified scene
+    """
+    outputFiles = list()
+
+    filePath = bpy.path.abspath(scene.render.filepath)
+    
+    # print("\n *** images defs:")
+    # print(f"   From {scene.frame_start} to {scene.frame_end} by {scene.frame_step}")
+
+    # note that as strange as the results can be this code perfectly replicates (as far as tested) the
+    # behavior of Blender in terms of file naming
+    for i in range(scene.frame_start, scene.frame_end + 1, scene.frame_step):
+
+        fileName = Path(filePath).stem
+        # print(f"fileName: {fileName}")
+        firstDigitIndex = fileName.find("#")
+        # print(f"firstDigitIndex: {firstDigitIndex}")
+        genericFileName = ""
+        if -1 != firstDigitIndex:
+            numDigits = 0
+            digitIndex = firstDigitIndex
+            while digitIndex < len(fileName) and "#" == fileName[digitIndex]:
+                numDigits += 1
+                digitIndex += 1
+            # print(f"numDigits: {numDigits}")
+            genericFileName = fileName[0:firstDigitIndex] + "{number:0{width}d}".format(width=numDigits, number=i)
+            if not scene.render.use_file_extension:
+                genericFileName += f"{Path(filePath).suffix}"
+        else:
+            genericFileName = str(Path(filePath).name) + "{number:0{width}d}".format(width=4, number=i)
+
+        # explicit file extension
+        if scene.render.use_file_extension:
+            genericFileName += f".{(scene.render.image_settings.file_format).lower()}"
+
+        defFileName = ""
+        if not fileNameOnly:
+            defFileName += str(Path(filePath).parent) + "\\"
+        defFileName += genericFileName
+
+        print(f"      - {defFileName}")
+        outputFiles.append(defFileName)
+
+    return outputFiles
 
 
 class Utils_LaunchRender(Operator):
@@ -69,3 +118,4 @@ class Utils_LaunchRender(Operator):
             # bpy.ops.render.opengl ( animation = True )
 
         return {"FINISHED"}
+

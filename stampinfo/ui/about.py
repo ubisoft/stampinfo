@@ -28,8 +28,8 @@ from bpy.types import Operator
 
 class UAS_StampInfo_OT_About(Operator):
     bl_idname = "uas_stamp_info.about"
-    bl_label = "About UAS Stamp Info..."
-    bl_description = "More information about UAS Stamp Info..."
+    bl_label = "About Stamp Info..."
+    bl_description = "More information about Stamp Info..."
     bl_options = {"INTERNAL"}
 
     def invoke(self, context, event):
@@ -44,9 +44,7 @@ class UAS_StampInfo_OT_About(Operator):
         ###############
         row = box.row()
         row.separator()
-        row.label(
-            text="Version:" + props.version()[0] + "   -    (" + "July 2020" + ")" + "   -    Ubisoft Animation Studio"
-        )
+        row.label(text="Version:  " + props.version()[0] + " -  (" + "May 2021" + ")" + " - Ubisoft")
 
         # Authors
         ###############
@@ -61,9 +59,6 @@ class UAS_StampInfo_OT_About(Operator):
         row = box.row()
         row.separator()
         row.label(text="Write scene information on the rendered images.")
-        # row = box.row()
-        # row.separator()
-        # row.label(text="bla bla.")
 
         # Dependencies
         ###############
@@ -71,15 +66,19 @@ class UAS_StampInfo_OT_About(Operator):
         row.label(text="Dependencies:")
         row = box.row()
         row.separator()
+        splitFactor = 0.3
 
-        row.label(text="- Pillow")
+        split = row.split(factor=splitFactor)
+        split.label(text="- Pillow:")
         try:
             import PIL as pillow
 
             pillowVersion = pillow.__version__
-            row.label(text="V." + pillowVersion)
+            split.label(text=f"V. {pillowVersion}")
         except Exception as e:
-            row.label(text="Module not found")
+            subRow = split.row()
+            subRow.alert = True
+            subRow.label(text="Module not found")
 
         # row = box.row()
         # row.separator()

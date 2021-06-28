@@ -28,9 +28,10 @@ from bpy.types import Panel
 import importlib
 
 from stampinfo.config import config
+from stampinfo import icons
 
 
-from .. import handlers
+# from .. import handlers
 from .. import stamper
 from .. import stampInfoSettings
 
@@ -43,7 +44,7 @@ _logger = logging.getLogger(__name__)
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
-importlib.reload(handlers)
+# importlib.reload(handlers)
 importlib.reload(debug)
 
 
@@ -66,7 +67,7 @@ class UAS_PT_StampInfoAddon(Panel):
         layout.emboss = "NONE"
         row = layout.row(align=True)
 
-        icon = config.icons_col["General_Ubisoft_32"]
+        icon = icons.icons_col["StampInfo_32"]
         row.operator("uas_stamp_info.about", text="", icon_value=icon.icon_id)
 
     def draw_header_preset(self, context):
@@ -128,24 +129,6 @@ class UAS_PT_StampInfoAddon(Panel):
         #    row.operator("stampinfo.createhandlers")
         #    row.menu(SCENECAMERA_MT_SelectMenu.bl_idname,text="Selection",icon='BORDERMOVE')
 
-        row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed")
-
-        # ensure consistency between stampInfoUsed status and handle
-        if not scene.UAS_StampInfo_Settings.handlersRegistered():
-            scene.UAS_StampInfo_Settings.registerRenderHandlers()
-
-        if scene.UAS_StampInfo_Settings.handlersRegistered():
-            row.scale_x = 0.2
-            if not scene.UAS_StampInfo_Settings.stampInfoUsed:
-                row.alert = True
-            row.operator("stampinfo.resethandlers", text="Y")  # , icon = 'CHECKMARK' )
-        else:
-            row.scale_x = 0.2
-            if scene.UAS_StampInfo_Settings.stampInfoUsed:
-                row.alert = True
-            row.operator("stampinfo.resethandlers", text="N")  # , icon = 'ERROR'
-
         # ready to render text
         # if '' == bpy.data.filepath:
         #     row.alert = True
@@ -173,10 +156,28 @@ class UAS_PT_StampInfoAddon(Panel):
             row = layout.row()
             row.label(text="Ready to render")
 
-        row = layout.row()
-        row.alert = True
-        row.label(text="Warning: This version completely clears the compo graph!!")
+        # render buttons
+        renderRow = layout.split(factor=0.45, align=False)
+        renderRow.scale_y = 1.4
+        renderRow.operator("uas_stampinfo.render", text=" Render Image", icon="IMAGE_DATA").renderMode = "STILL"
 
+        renderRow.operator(
+            "uas_stampinfo.render", text=" Render Animation", icon="RENDER_ANIMATION"
+        ).renderMode = "ANIMATION"
+
+        layout.separator(factor=0.2)
+
+        row = layout.row()
+        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed", text="Use Stamp info Framing")
+
+        icon = icons.icons_col["General_Explorer_32"]
+        renderPath = stamper.getInfoFileFullPath(context.scene, -1)[0]
+        row.operator("uas_stampinfo.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
+            renderPath
+        )
+        layout.separator(factor=0.7)
+
+        # main settings
         box = layout.box()
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "stampInfoRenderMode")
@@ -232,9 +233,6 @@ class UAS_PT_StampInfoAddon(Panel):
             )
             resStr += " - Inner: " + str(stamper.getInnerHeight(scene)) + "px"
             row.label(text=resStr)
-
-        row = layout.row()
-        row.operator("stampinfo.openexplorer", emboss=True)
 
 
 # ------------------------------------------------------------------------#

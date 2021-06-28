@@ -21,7 +21,6 @@ Generation of the frame images
 
 
 import os
-import ntpath
 from pathlib import Path
 import getpass
 
@@ -39,9 +38,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-# Called by the Pre renderer callback
 # Preparation of the files
-def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
+def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, verbose=False):
     """  Called by the Pre renderer callback
         Preparation of the files
     """
@@ -632,18 +630,21 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     dirAndFilename = getInfoFileFullPath(scene, currentFrame)
-    filepath = dirAndFilename[0] + dirAndFilename[1]
+    if renderPath is None:
+        renderPath = dirAndFilename[0]
+
+    if not os.path.exists(renderPath):
+        try:
+            path = Path(renderPath)
+            path.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            print(f"\n*** Creation of the directory failed: {renderPath}\n")
+            raise
+
+    filepath = renderPath + dirAndFilename[1]
 
     if verbose:
         print("Info file rendered name: ", (filepath))
-
-    if not os.path.exists(dirAndFilename[0]):
-        try:
-            path = Path(dirAndFilename[0])
-            path.mkdir(parents=True, exist_ok=True)
-        except Exception:  # as e
-            print("\n*** Creation of the directory %s failed" % dirAndFilename[0])
-            print("\n")
 
     try:
         print(f"Rendering StampInfo file: {filepath}...")
