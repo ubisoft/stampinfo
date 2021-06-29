@@ -253,10 +253,17 @@ class UAS_PT_StampInfoMetadata(Panel):
         row.prop(scene.UAS_StampInfo_Settings, "logoUsed")
 
         if scene.UAS_StampInfo_Settings.logoUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoFilepath")
-            row.operator("stampinfo.openfilebrowser", text="", icon="FILEBROWSER", emboss=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoName")
+
+            row = box.row(align=False)
+            row.prop(scene.UAS_StampInfo_Settings, "logoMode", text="")
+
+            if "BUILTIN" == scene.UAS_StampInfo_Settings.logoMode:
+                row.prop(scene.UAS_StampInfo_Settings, "logoBuiltinName", text="")
+
+            else:
+                subRow = row.row(align=True)
+                subRow.prop(scene.UAS_StampInfo_Settings, "logoFilepath")
+                subRow.operator("stampinfo.openfilebrowser", text="", icon="FILEBROWSER", emboss=True)
 
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "logoScaleH")
@@ -266,6 +273,8 @@ class UAS_PT_StampInfoMetadata(Panel):
             row.prop(scene.UAS_StampInfo_Settings, "logoPosNormY")
 
         # ---------- project -------------
+        if scene.UAS_StampInfo_Settings.logoUsed:
+            box.separator(factor=0.3)
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "projectUsed")
         row.prop(scene.UAS_StampInfo_Settings, "projectName")

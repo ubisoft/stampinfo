@@ -43,8 +43,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         """
         return utils.addonVersion("UAS_StampInfo")
 
-    renderRootPath: StringProperty(name="Render Root Path", default="")
     renderRootPathUsed: BoolProperty(default=False)
+    renderRootPath: StringProperty(
+        name="Render Root Path",
+        description="Directory where the temporaty images having the stamped information are rendered.\nThis directory must be manually cleaned after the use of the images",
+        default="",
+    )
 
     innerImageHeight_percentage: FloatProperty(
         name="Inner Height",
@@ -222,9 +226,11 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     projectUsed: BoolProperty(name="Project", description="Stamp project name", default=True, options=set())
 
-    projectName: StringProperty(name="", description="Project name", default="UAS", options=set())
+    projectName: StringProperty(name="", description="Project name", default="My Project", options=set())
 
     # ---------- Logo properties -------------
+
+    logoUsed: BoolProperty(name="Logo", description="Set and draw the specified logo", default=False)
 
     def buildLogosList(self, context):
         dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
@@ -236,22 +242,27 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
         return items
 
-    def updateLogoPath(self, context):
-        #  print("updateLogoPath")
-        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
-        #  print("  dir: " + str(dir))
-        logoFilepath = str(dir) + "\\" + str(self.logoName)
-        #  print("  logoFilepath: " + logoFilepath)
-        self.logoFilepath = logoFilepath
+    # def updateLogoPath(self, context):
+    #     #  print("updateLogoPath")
+    #     dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
+    #     #  print("  dir: " + str(dir))
+    #     logoFilepath = str(dir) + "\\" + str(self.logoBuiltinName)
+    #     #  print("  logoFilepath: " + logoFilepath)
+    #     self.logoFilepath = logoFilepath
 
-    logoName: EnumProperty(
-        name="Logo List",
-        description="List of the logo files installed with this add-on",
-        items=buildLogosList,
-        update=updateLogoPath,
+    logoMode: EnumProperty(
+        name="Logo Mode",
+        description="Use built-in or custom logo",
+        items=(("BUILTIN", "Built-In", ""), ("CUSTOM", "From File", "")),
+        default="BUILTIN",
     )
 
-    logoUsed: BoolProperty(name="Logo", description="Set and draw the specified logo", default=False)
+    logoBuiltinName: EnumProperty(
+        name="Built-In Logo List",
+        description="List of the logo files installed with this add-on",
+        items=buildLogosList,
+        #   update=updateLogoPath,
+    )
 
     logoFilepath: StringProperty(name="", description="File path of the specified logo", default="")
 

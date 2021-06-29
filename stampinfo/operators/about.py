@@ -23,7 +23,12 @@ class UAS_StampInfo_OT_About(Operator):
         row = box.row()
         row.separator()
         row.label(
-            text="Version:" + props.version()[0] + "   -    (" + "July 2020" + ")" + "   -    Ubisoft Animation Studio"
+            text="Version:"
+            + props.version()[0]
+            + "   -    ("
+            + "January 2021"
+            + ")"
+            + "   -    Ubisoft Animation Studio"
         )
 
         # Authors

@@ -254,29 +254,37 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
     # stamp logo
     # if the logo is not found a red fake logo is stamped instead
     # -------------------------------- #
-    logoFile = userSettings.logoFilepath
-    #  print("  Logo: userSettings.logoFilepath: " + userSettings.logoFilepath)
-
-    filename, extension = os.path.splitext(logoFile)
-    # print('Selected file:', self.filepath)
-    # print('File name:', filename)
-    # print('File extension:', extension)
-
-    logoFilePathIsValid = False
-
-    # if path is relative then get the full path
-    if "//" == logoFile[0:2] and bpy.data.is_saved:
-        # print("Logo path is relative")
-        logoFile = bpy.path.abspath(logoFile)
-
-    if os.path.exists(logoFile):
-        logoFilePathIsValid = True
-    else:
-        if userSettings.logoUsed:
-            print("  Logo path is NOT valid")
-            # wkip mettre alert rouge
 
     if userSettings.logoUsed:
+
+        logoFile = ""
+
+        if "BUILTIN" == userSettings.logoMode:
+            dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
+            logoFile = str(dir) + "\\" + str(userSettings.logoBuiltinName)
+        else:
+            logoFile = userSettings.logoFilepath
+        #  print("  Logo: userSettings.logoFilepath: " + userSettings.logoFilepath)
+
+        filename, extension = os.path.splitext(logoFile)
+        # print('Selected file:', self.filepath)
+        # print('File name:', filename)
+        # print('File extension:', extension)
+
+        logoFilePathIsValid = False
+
+        # if path is relative then get the full path
+        if "//" == logoFile[0:2] and bpy.data.is_saved:
+            # print("Logo path is relative")
+            logoFile = bpy.path.abspath(logoFile)
+
+        if os.path.exists(logoFile):
+            logoFilePathIsValid = True
+        else:
+            if userSettings.logoUsed:
+                print("  Logo path is NOT valid")
+                # wkip mettre alert rouge
+
         # logoScaleW = 0.09                                         # logo size is in % of width relatively to the outpur render size. In other words: 1.0 => logo width = renderW
         # logoScaleH = 0.08                                         # logo size is in % of height relatively to the outpur render size. In other words: 1.0 => logo height = renderH
         logoScaleH = userSettings.logoScaleH
@@ -289,10 +297,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, verbose=False):
         if logoFilePathIsValid:
             imgLogoSource = Image.open(logoFile).convert("RGBA")
             if imgLogoSource is None:
-                print("******* Cannot open sepcified logo !!! *********")
+                print(f"******* Cannot open specified logo !!! *** File: {logoFile} *********")
                 logoFilePathIsValid = False
-
-        if not logoFilePathIsValid:
+        else:
             imgLogoSource = Image.new("RGBA", (150, 150), "red")
 
         #   logoScaleH = logoScaleW * imgLogoSource.size[1] * 1.0 / imgLogoSource.size[0]
