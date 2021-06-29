@@ -95,6 +95,32 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     #     description="Inner Image Aspect Ratio (Eg: 16/9, 4/3...).\nIf this line is red then the rendered image ratio\nis the same as the framed image ratio and the\nborders will not be visible; consider\nincreasing the height of the rendered images",
     #     min = 1.0, max = 20.0, step = 0.05, default = 1.777, precision = 3 )
 
+    #   For OVER mode
+    newstampRenderResOver_percentage: FloatProperty(
+        name="Frame Inner Height",
+        subtype="PERCENTAGE",
+        description="Height (in percentage) of the rendered image that will be visible between the top and bottom borders of the frame",
+        min=1.0,
+        # soft_min=30.0,
+        # soft_max=90.0,
+        max=100.0,
+        precision=1,
+        default=86.0,
+    )
+
+    #   For OUTSIDE mode
+    newstampRenderResYOutside_percentage: FloatProperty(
+        name="Frame Outer Height",
+        subtype="PERCENTAGE",
+        description="Height (in percentage) of the rendered image that will be visible between the top and bottom borders of the frame",
+        min=0.0,
+        # soft_min=30.0,
+        soft_max=50.0,
+        max=30.0,
+        precision=1,
+        default=10.0,
+    )
+
     # ----------------------------------
     #   For DIRECTTOCOMPOSITE mode
     stampRenderResYDirToCompo_percentage: FloatProperty(
@@ -180,6 +206,29 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         get=get_stampInfoRenderMode,
         set=set_stampInfoRenderMode,
         default="DIRECTTOCOMPOSITE",
+    )
+
+    newstampInfoRenderMode: EnumProperty(
+        name="Mode",
+        items=[
+            (
+                "OVER",
+                "Over Rendered Images",
+                "The stamped image will have the same height as the rendered image.\n"
+                "It will then hide a part of it. Helpful when borders are not completely opaque.",
+                0,
+            ),
+            (
+                "OUTSIDE",
+                "Outside Rendered Images",
+                "The stamped image will have a greater height than the rendered image and its frame will.\n"
+                "NOT cover it. This can gain time when rendered images are computed since no part of them will be hidden.",
+                1,
+            ),
+        ],
+        get=get_stampInfoRenderMode,
+        set=set_stampInfoRenderMode,
+        default="OUTSIDE",
     )
 
     # ---------- project properties -------------

@@ -56,15 +56,16 @@ def getRenderRatio(scene):
 
 
 # returns the rendered stamp info image output resolution as float tupple (not int !) and with taking into account the render percentage
-def getRenderResolutionForStampInfo(scene):
+def getRenderResolutionForStampInfo(scene, mode=None):
     stampRenderRes = [0.0, 0.0]
+    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode if mode is None else mode
 
     # if   0 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:               # DIRECTTOCOMPOSITE
-    if "DIRECTTOCOMPOSITE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # DIRECTTOCOMPOSITE
+    if "DIRECTTOCOMPOSITE" == modeVal:  # DIRECTTOCOMPOSITE
         #    stampRenderRes = getRenderResolution(scene)
         stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
 
-    elif "SEPARATEOUTPUT" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # SEPARATEOUTPUT
+    elif "SEPARATEOUTPUT" == modeVal:  # SEPARATEOUTPUT
         # elif 1 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:              # SEPARATEOUTPUT
         # stampRenderRes      = ( getRenderResolution(scene)[0] * scene.UAS_StampInfo_Settings.stampRenderResX_percentage * 0.01, \
         #                         getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01 )
@@ -76,7 +77,43 @@ def getRenderResolutionForStampInfo(scene):
             ),
         )
 
+    elif "OVER" == modeVal:
+        stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
+
+    elif "OUTSIDE" == modeVal:
+        stampRenderRes = (
+            getRenderResolution(scene)[0],
+            max(
+                getRenderResolution(scene)[1],
+                getRenderResolution(scene)[1]
+                * (scene.UAS_StampInfo_Settings.newstampRenderResYOutside_percentage + 100.0)
+                * 0.01,
+            ),
+        )
+
     return stampRenderRes
+
+
+# returns the height (integer) in pixels of the image between the 2 borders according to the current mode
+def newgetInnerHeight(scene):
+    innerH = -1
+
+    if "OVER" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:  # DIRECTTOCOMPOSITE
+        #    stampRenderRes = getRenderResolution(scene)
+        innerH = min(
+            int(getRenderResolution(scene)[1]),
+            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.newstampRenderResOver_percentage * 0.01),
+        )
+
+    elif "OUTSIDE" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:  # SEPARATEOUTPUT
+        innerH = min(
+            int(getRenderResolution(scene)[1]),
+            int(getRenderResolution(scene)[1]),
+            # int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01),
+        )
+        #      int(getRenderResolutionForStampInfo(scene)[1]) )
+
+    return innerH
 
 
 # returns the height (integer) in pixels of the image between the 2 borders according to the current mode
