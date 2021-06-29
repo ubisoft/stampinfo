@@ -26,9 +26,7 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
 from . import infoImage
-from . import stamper
 
-# from . import handlers
 from .utils import utils
 
 import logging

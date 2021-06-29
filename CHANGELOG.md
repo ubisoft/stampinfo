@@ -1,6 +1,10 @@
 
-History:
---------
+# History:
+
+# V  1.0.1 - 29/06/2021:
+- Removed handlers and use of the compositing editor that were used to generate the final images
+because code was unstable and complicated
+- Added 2 Render buttons and a batch based on the VSE to create the final images
 
 # V  0.9.x:
 * V  0.9.32 - 23/09/2020:

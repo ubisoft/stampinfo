@@ -18,24 +18,6 @@
 """
 Main init
 
-To do:
-
-Log issue for:
-    - write doc and readme
-        - page for utils
-        - page for api
-    - premult
-    - refactor render overlay
-    - known issues:
-        - premult
-    - api
-    - button to recomposite as tool
-    - expose temp folder and seq names in the prefs
-    
-Video tuto:
-    render direct
-    render with api
-
 """
 
 import logging

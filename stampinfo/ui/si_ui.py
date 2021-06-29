@@ -30,8 +30,6 @@ import importlib
 from stampinfo.config import config
 from stampinfo import icons
 
-
-# from .. import handlers
 from .. import stamper
 from .. import stampInfoSettings
 
@@ -44,7 +42,6 @@ _logger = logging.getLogger(__name__)
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
-# importlib.reload(handlers)
 importlib.reload(debug)
 
 
@@ -463,9 +460,6 @@ classes = (
     UAS_PT_StampInfoLayout,
     UAS_PT_StampInfoSettings,
 )
-# debug:
-#   handlers.UAS_StampInfoCreateHandlers,
-#   handlers.UAS_StampInfoClearHandlers,
 
 
 def module_can_be_imported(name):

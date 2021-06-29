@@ -1,10 +1,16 @@
-
-
-# Stamp Info
-
-## Purpose
-This addon creates a frame around the rendered images and writes scene information on it.
+![](doc/images/Logo_90_A.png)
+# Stamp Info - Blender Add-on
+Stamp Info creates a frame around the rendered images and writes scene information on it.
 It is a flexible alternative to the Metadata post processing integrated system of Blender.
+
+## Disclaimer
+>**This tool is currently supported.**
+>
+>It was initialy developed for an animated TV series production in 2020 on Blender 2.83. It has the features that were needed at the time but it
+may not be considered as feature complete for a more generic purpose. In spite of all our efforts to make it reliable some troubles may occur in use cases we have not faced.
+>
+><br />
+
 
 <br />
 <img src="docs/img/StampInfo_RenderScreen.png" alt="drawing" width="70%"/>
@@ -17,46 +23,53 @@ be downloaded and deployed correctly. Also be sure that your firewall doesn't bl
 
 ## Features
 
-- Can stamp a specified logo.
-	Logo path can be relative to the path of the current blender file. It must then start with //
+- [Features](./doc/features.md)
+- [Limitations](./doc/features.md#limitations)
+- [History](./CHANGELOG.md)
 
-- Support also intergrated Blender Metadata (= text is moved if metadata are used)
+## Principle
 
-[History](./CHANGELOG.md)
+   - When pressing one of the 2 render buttons of the Stamp Info panel 2 temporary sets of images are generated:
+       - The rendered images, as for a classical rendering. They are put in a temporary folder though,
+         at the root of the rendering path;
+       - The "stamped info" images are generated with PIL, the Python Image Library. They received a frame
+         and the text for all the specified metadata to display;
 
-## Possible future improvements:
-       - Display metadata labels
-       - Compositing nodes could be put in a separated scene to avoid breaking any existing compositing graph
+   - Then the 2 sets of images are composited into the VSE thanks to a routine. This produces the final rendering sequence
+     and it is stored in the rendering path specified in the scene.
 
+   - Unless changed in the Preferences both temporary folders are then deleted.
 
-## Principle:
-   - At Prerender Init time:
-       - creation of the postprocess nodes
-           - we detect if there is a Composite note (expected to be the standard output)
-               - if yes: we plug our graph on it with a mix
-               - if not: we create our own graph
-           - The resulting image has:
-               - a large image at the stamp info res fully transparent
-               - the stamped info
-               - a RGB that is the rendered image below the stamped info
-
-   - At Pre render Frame:
-       - Voir si on peut rendre les frames de cadrage à ce moment là seulement
-
-   - At Completed or Cancel:
-       - cleaning of the nodes
-       - the handlers stay in place
+   Note: In order to mimic as much as possible the actual way of working of Blender and so as to avoid frames in a rendered sequences to be
+   overwritten by mistake the still images are saved on disk with a file name starting with the prefix "_Still".
 
 
-## Dev notes:
-   - Handlers are NOT persistent
-   - Compositing nodes are removed at the end of the process
-   - Temp files used for the information are deleted at the next frame
-   - Temp files are created in the render directory
+# FAQ and Troubleshooting
+>
+   - [FAQ and Troubleshooting](./doc/faq)
 
 
+## Dev notes
 
-## Resources:
-   - Renderer:     https://docs.blender.org/api/current/bpy.ops.render.html?highlight=render#module-bpy.ops.render
-   - handlers:     https://docs.blender.org/api/current/bpy.app.handlers.html
-   - Compo nodes:  https://docs.blender.org/api/current/bpy.types.CompositorNodeImage.html
+This add-on requires the Python library PIL. This library is automaticaly downloaded and deployed on the
+Blender instance when Stam Info is installed.
+
+
+# Reusable code
+Files located in the utils\ directory are independent modules that can be re-used in other Blender add-ons.
+>
+The following ones are particularly interesting:
+
+   - [Sequence Path class](./doc/utils_filenames)
+
+
+## Support
+
+The active support repository is on the [StampInfo Github repository](https://github.com/ubisoft/stampinfo) which is part of the [Ubisoft open source](https://github.com/ubisoft) projects group.
+
+
+## License and copyright
+
+The original code is Copyright (C) 2021 Ubisoft.
+
+All code of the `stampinfo` package is under the GPLv3 license.
