@@ -175,12 +175,9 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
 
         if renderFrameInd is None:
             renderedInfoFileName = filenameNoExt
-            renderedInfoFileName += r"_tmp_StampInfo." + "####" + ".png"
-        else:
-            renderedInfoFileName = filenameNoExt
-            renderedInfoFileName += r"_tmp_StampInfo." + f"{(renderFrameInd):04d}" + ".png"
+        renderedInfoFileName += r"_tmp_StampInfo." + "{:05d}".format(renderFrameInd) + ".png"
 
-    #       renderedInfoFileName = r"\_tmp_StampInfo." + '{:04d}'.format(renderFrameInd) + ".png"
+    #       renderedInfoFileName = r"\_tmp_StampInfo." + '{:05d}'.format(renderFrameInd) + ".png"
 
     #  print("    Temp Info Filepath renderPath: ", renderPath)
     #  print("    Temp Info Filepath renderedInfoFileName: ", renderedInfoFileName)
