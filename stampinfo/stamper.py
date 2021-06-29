@@ -173,9 +173,9 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
         #      filenameNoExt, fileExt = os.path.splitext(getRenderFileName(scene))
         filenameNoExt, fileExt = os.path.splitext(tail)
 
+        renderedInfoFileName = filenameNoExt
         if renderFrameInd is None:
-            renderedInfoFileName = filenameNoExt
-        renderedInfoFileName += r"_tmp_StampInfo." + "{:05d}".format(renderFrameInd) + ".png"
+            renderedInfoFileName += r"_tmp_StampInfo." + "{:05d}".format(renderFrameInd) + ".png"
 
     #       renderedInfoFileName = r"\_tmp_StampInfo." + '{:05d}'.format(renderFrameInd) + ".png"
 
