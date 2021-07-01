@@ -112,8 +112,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # variables
     # renderW             = int(getRenderResolution(scene)[0])
     # renderH             = int(getRenderResolution(scene)[1])
-    renderW = int(getRenderResolutionForStampInfo(scene)[0])
-    renderH = int(getRenderResolutionForStampInfo(scene)[1])
+    # renderW = int(getRenderResolutionForStampInfo(scene)[0])
+    # renderH = int(getRenderResolutionForStampInfo(scene)[1])
+    renderW = getRenderResolutionForStampInfo(scene)[0]
+    renderH = getRenderResolutionForStampInfo(scene)[1]
     #  print("   renderW: " + str(renderW) + ", renderH: " + str(renderH))
 
     innerH = getInnerHeight(scene)
@@ -208,9 +210,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         int(textColorRGB[3] * 255),
     )
 
-    textColorWhite = (235, 235, 235, 255)
+    # textColorWhite = (235, 235, 235, 255)
 
-    alertColorRGB = (0.7, 0.2, 0.2, 255)  #  userSettings.textColor
+    # alertColorRGB = userSettings.textColor
+    alertColorRGB = (0.7, 0.2, 0.2, 255)
     alertColorRGBA = (
         int(alertColorRGB[0] * 255),
         int(alertColorRGB[1] * 255),
@@ -354,7 +357,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     col028 = 0.69 * renderW
     col035 = 0.84 * renderW
 
-    col03 = 0.75 * renderW
+    # col03 = 0.75 * renderW
     col04 = 0.8 * renderW
 
     currentTextTop = offsetToCenterH + paddingTopExt
@@ -520,7 +523,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     col01 = paddingLeft
     col02 = 0.19 * renderW
-    col03 = 0.34 * renderW
+    # col03 = 0.34 * renderW
     col04 = 0.7 * renderW
     # col05 = 0.7 * renderW
     lineTextXEnd = col01
@@ -701,7 +704,7 @@ def drawRangesAndFrame(
     textColorGreen = (70, 210, 70, 255)
     textColorOrange = (245, 135, 42, 255)
 
-    stampLabel = userSettings.stampPropertyLabel
+    # stampLabel = userSettings.stampPropertyLabel
     stampValue = userSettings.stampPropertyValue
     textProp = ""
 

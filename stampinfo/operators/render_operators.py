@@ -19,7 +19,6 @@
 To do: module description here.
 """
 
-from re import A
 import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty
@@ -191,13 +190,12 @@ class UAS_PT_StampInfo_Render(Operator):
         if "STILL" == self.renderMode:
             atSpecificFrame = renderFrame
 
-        res = [scene.render.resolution_x, scene.render.resolution_y]
-        vse_render.clearMedia()
-        vse_render.inputBGMediaPath = (
-            tempImgRenderPath + outputStillFile + seqPath.sequence_name(at_frame=atSpecificFrame)
-        )
-        print(f" vse BG: vse_render.inputBGMediaPath: {vse_render.inputBGMediaPath}")
-        vse_render.inputBGResolution = res
+        # vse_render.clearMedia()
+        # vse_render.inputBGMediaPath = (
+        #     tempImgRenderPath + outputStillFile + seqPath.sequence_name(at_frame=atSpecificFrame)
+        # )
+        # print(f" vse BG: vse_render.inputBGMediaPath: {vse_render.inputBGMediaPath}")
+        # vse_render.inputBGResolution = res
 
         tempFramedRenderFilenameGeneric = (
             outputStillFile
@@ -209,8 +207,17 @@ class UAS_PT_StampInfo_Render(Operator):
         infoImgSeq = tempFramedRenderPath + tempFramedRenderFilenameGeneric
 
         print(f" vse over: infoImgSeq: {infoImgSeq}")
-        vse_render.inputOverMediaPath = infoImgSeq
-        vse_render.inputOverResolution = res
+
+        #        res = [scene.render.resolution_x, scene.render.resolution_y]
+        res = stamper.getRenderResolutionForStampInfo(scene)  # wkip float!!
+
+        bgMedia = tempImgRenderPath + outputStillFile + seqPath.sequence_name(at_frame=atSpecificFrame)
+        bgRes = stamper.getRenderResolution(scene)
+        fgMedia = infoImgSeq
+        fgRes = stamper.getRenderResolutionForStampInfo(scene)  # wkip int !!!
+
+        # vse_render.inputOverMediaPath = infoImgSeq
+        # vse_render.inputOverResolution = res
 
         # vse_render.inputAudioMediaPath = audioFilePath
 
@@ -229,6 +236,10 @@ class UAS_PT_StampInfo_Render(Operator):
             #            vse_render.compositeVideoInVSE(
             vse_render.compositeMedia(
                 scene,
+                bg_file=bgMedia,
+                bg_res=bgRes,
+                fg_file=fgMedia,
+                fg_res=fgRes,
                 frame_start=video_frame_start,
                 frame_end=video_frame_end,
                 output_file=compositedMediaFile,
