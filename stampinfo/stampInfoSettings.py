@@ -96,7 +96,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     #     min = 1.0, max = 20.0, step = 0.05, default = 1.777, precision = 3 )
 
     #   For OVER mode
-    newstampRenderResOver_percentage: FloatProperty(
+    stampRenderResOver_percentage: FloatProperty(
         name="Frame Inner Height",
         subtype="PERCENTAGE",
         description="Height (in percentage) of the rendered image that will be visible between the top and bottom borders of the frame",
@@ -109,7 +109,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     #   For OUTSIDE mode
-    newstampRenderResYOutside_percentage: FloatProperty(
+    stampRenderResYOutside_percentage: FloatProperty(
         name="Frame Outer Height",
         subtype="PERCENTAGE",
         description="Height (in percentage) of the rendered image that will be visible between the top and bottom borders of the frame",
@@ -122,38 +122,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     # ----------------------------------
-    #   For DIRECTTOCOMPOSITE mode
-    stampRenderResYDirToCompo_percentage: FloatProperty(
-        name="Y Res. Output",
-        subtype="PERCENTAGE",
-        description="Percentage of resolution of the stamp info images relatively to the scene output\nresolution for Direct To Composite mode.\nIf this line is red then the rendered image will be\npartially hidden by the borders",
-        min=1.0,
-        max=200.0,
-        precision=1,
-        default=86.0,
-    )
-
-    # ----------------------------------
-    #   For SEPARATEOUTPUT mode
-    stampRenderResX_percentage: FloatProperty(
-        name="X Res. Output",
-        subtype="PERCENTAGE",
-        description="Percentage of resolution of the stamp info images relatively to the scene output resolution.\nIf this line is red then the rendered image will be\npartially hidden by the borders",
-        min=1.0,
-        max=200.0,
-        precision=1,
-        default=100.0,
-    )
-
-    stampRenderResY_percentage: FloatProperty(
-        name="Y Res. Output",
-        subtype="PERCENTAGE",
-        description="Percentage of resolution of the stamp info images realatively to the scene output resolution.\nIf this line is red then the rendered image will be\npartially hidden by the borders",
-        min=1.0,
-        max=200.0,
-        precision=1,
-        default=133.34,
-    )
 
     def activateStampInfo(self, activated):
         _logger.debug(f"\n*** StampInfo is now:  {activated}")
@@ -193,22 +161,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         self["stampInfoRenderMode"] = value
 
     stampInfoRenderMode: EnumProperty(
-        name="Mode",
-        items=[
-            ("DIRECTTOCOMPOSITE", "Direct to Composite", "Stamp the information directly to the output", 0),
-            (
-                "SEPARATEOUTPUT",
-                "Separate Output",
-                "Creates another render output at the specified resolution and on which the rendered images have the stamped information",
-                1,
-            ),
-        ],
-        get=get_stampInfoRenderMode,
-        set=set_stampInfoRenderMode,
-        default="DIRECTTOCOMPOSITE",
-    )
-
-    newstampInfoRenderMode: EnumProperty(
         name="Mode",
         items=[
             (
@@ -567,46 +519,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     debug_DontDeleteCompoNodes: BoolProperty(default=False)
 
-    # def filePathAndName_valueChanged(self, context):
-    #     print(" *** filePathAndName Changed !!! ***")
-
-    # filePathAndName : StringProperty(
-    #     name="",
-    #     description="File name",
-    #     default = "-",
-    #     update = filePathAndName_valueChanged )
-
-    # ---------- temp properties -------------
-
-    tmp_usePreviousValues: BoolProperty(name="usePreviousValues", description="usePreviousValues", default=False)
-
-    tmp_previousResolution_x: IntProperty(name="previousResolution_x", description="previousResolution_x", default=1)
-
-    tmp_previousResolution_y: IntProperty(name="previousResolution_y", description="previousResolution_y", default=1)
-
-    tmp_stampRenderResYDirToCompo_percentage: IntProperty(
-        name="previousResolution_y Dir To Compo", description="previousResolution_y", default=50
-    )
-
     def renderTmpImageWithStampedInfo(self, scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
         infoImage.renderTmpImageWithStampedInfo(
             scene, currentFrame, renderPath=renderPath, renderFilename=renderFilename, verbose=verbose
         )
-
-    def restorePreviousValues(self, scene):
-        scene.render.resolution_x = self.tmp_previousResolution_x
-        scene.render.resolution_y = self.tmp_previousResolution_y
-        scene.UAS_StampInfo_Settings.stampRenderResYDirToCompo_percentage = (
-            self.tmp_stampRenderResYDirToCompo_percentage
-        )
-        #   scene.UAS_StampInfo_Settings.stampInfoRenderMode = self.tmp_stampInfoRenderMode
-
-        self.tmp_usePreviousValues = False
-
-        # scene.render.resolution_x = tmp_previousResolution_x
-        # scene.render.resolution_y = tmp_previousResolution_y
-        # scene.UAS_StampInfo_Settings.stampRenderResYDirToCompo_percentage = tmp_stampRenderResYDirToCompo_percentage
-        # scene.UAS_StampInfo_Settings.stampInfoRenderMode = tmp_stampInfoRenderMode
-
-        # tmp_usePreviousValues = False
 

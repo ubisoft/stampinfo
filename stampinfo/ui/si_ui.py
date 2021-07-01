@@ -155,6 +155,7 @@ class UAS_PT_StampInfoAddon(Panel):
 
         # render buttons
         renderRow = layout.split(factor=0.45, align=False)
+        renderRow.enabled = okForRender
         renderRow.scale_y = 1.4
         renderRow.operator("uas_stampinfo.render", text=" Render Image", icon="IMAGE_DATA").renderMode = "STILL"
 
@@ -174,125 +175,57 @@ class UAS_PT_StampInfoAddon(Panel):
         )
         layout.separator(factor=0.7)
 
-        # new main settings
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "newstampInfoRenderMode")
-
-        #    print("   init ui: newstampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings['newstampInfoRenderMode']))
-        #    print("   init ui: newstampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings.newstampInfoRenderMode))
-
-        if "OVER" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:
-            #  if 0 == scene.UAS_StampInfo_Settings['newstampInfoRenderMode']:
-            # row = box.row(align=True)
-            # row.prop(scene.UAS_StampInfo_Settings, "newstampRenderResOver_percentage")
-
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "newstampRenderResOver_percentage")
-
-            row = box.row(align=True)
-            if not (10.0 <= scene.UAS_StampInfo_Settings.newstampRenderResOver_percentage <= 95.0):
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Final Res:  "
-                + str(int(stamper.getRenderResolutionForStampInfo(scene)[0]))
-                + " x "
-                + str(outputResStampInfoH)
-                + " px"
-            )
-            resStr += "  -  Inner Height:  " + str(stamper.newgetInnerHeight(scene)) + " px"
-            row.label(text=resStr)
-
-        if "OUTSIDE" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "newstampRenderResYOutside_percentage")
-
-            row = box.row(align=True)
-            if not (4.0 <= scene.UAS_StampInfo_Settings.newstampRenderResYOutside_percentage <= 18.65):
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Final Res:  "
-                + str(
-                    int(
-                        stamper.getRenderResolutionForStampInfo(
-                            scene, mode=scene.UAS_StampInfo_Settings.newstampInfoRenderMode
-                        )[0]
-                    )
-                )
-                + " x "
-                #                + str(outputResStampInfoH)
-                + str(
-                    int(
-                        stamper.getRenderResolutionForStampInfo(
-                            scene, mode=scene.UAS_StampInfo_Settings.newstampInfoRenderMode
-                        )[1]
-                    )
-                )
-                + " px"
-            )
-            resStr += "  -  Inner Height:  " + str(stamper.newgetInnerHeight(scene)) + " px"
-            row.label(text=resStr)
-
         # main settings
         box = layout.box()
         row = box.row(align=True)
+        row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
         row.prop(scene.UAS_StampInfo_Settings, "stampInfoRenderMode")
 
         #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings['stampInfoRenderMode']))
         #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings.stampInfoRenderMode))
 
-        if "DIRECTTOCOMPOSITE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
-            #  if 0 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:
-            # row = box.row(align=True)
-            # row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYDirToCompo_percentage")
+        if scene.UAS_StampInfo_Settings.stampInfoUsed:
+            outputResStampInfo = stamper.getRenderResolutionForStampInfo(scene)
+            resStr = "Final Res: " + str(outputResStampInfo[0]) + " x " + str(outputResStampInfo[1]) + " px"
+        else:
+            outputResRender = stamper.getRenderResolution(scene)
+            resStr = "Final Res: " + str(outputResRender[0]) + " x " + str(outputResRender[1]) + " px"
+
+        resStr02 = "-  Inner Height: " + str(stamper.getInnerHeight(scene)) + " px"
+
+        if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+            row = box.row(align=True)
+            row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResOver_percentage")
 
             row = box.row(align=True)
-            #   if scene.UAS_StampInfo_Settings.innerImageHeight >= stamper.getRenderResolution(scene)[1]:
-            # row.prop(scene.UAS_StampInfo_Settings, "innerImageHeight")
-            # row.prop(scene.UAS_StampInfo_Settings, "innerImageHeight_percentage")
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYDirToCompo_percentage")
+            innerIsInAcceptableRange = 10.0 <= scene.UAS_StampInfo_Settings.stampRenderResOver_percentage <= 95.0
+            subrowLeft = row.row()
+            #  row.alert = not innerIsInAcceptableRange
+            subrowLeft.alignment = "LEFT"
+            subrowLeft.label(text=resStr)
+            subrowRight = row.row()
+            subrowRight.alert = not innerIsInAcceptableRange and scene.UAS_StampInfo_Settings.stampInfoUsed
+            subrowRight.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+            subrowRight.alignment = "LEFT"
+            subrowRight.label(text=resStr02)
+
+        elif "OUTSIDE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+            row = box.row(align=True)
+            row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYOutside_percentage")
 
             row = box.row(align=True)
-            if scene.UAS_StampInfo_Settings.stampRenderResYDirToCompo_percentage >= 100.0:
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Out: "
-                + str(int(stamper.getRenderResolutionForStampInfo(scene)[0]))
-                + " px x "
-                + str(outputResStampInfoH)
-                + " px"
-            )
-            resStr += " - Inner: " + str(stamper.getInnerHeight(scene)) + "px"
-            row.label(text=resStr)
-
-        if "SEPARATEOUTPUT" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResX_percentage")
-            row.prop(scene.UAS_StampInfo_Settings, "stampRenderResY_percentage")
-
-            row = box.row(align=True)
-            if (
-                scene.UAS_StampInfo_Settings.stampRenderResX_percentage < 100.0
-                or scene.UAS_StampInfo_Settings.stampRenderResY_percentage <= 100.0
-            ):
-                row.alert = True
-            outputResStampInfoH = int(stamper.getRenderResolutionForStampInfo(scene)[1])
-
-            resStr = (
-                "Stamp Res: "
-                + str(int(stamper.getRenderResolutionForStampInfo(scene)[0]))
-                + " px x "
-                + str(outputResStampInfoH)
-                + " px"
-            )
-            resStr += " - Inner: " + str(stamper.getInnerHeight(scene)) + "px"
-            row.label(text=resStr)
+            outsideIsInAcceptableRange = 4.0 <= scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage <= 18.65
+            subrowLeft = row.row()
+            # row.alert = not outsideIsInAcceptableRange
+            subrowLeft.alert = not outsideIsInAcceptableRange and scene.UAS_StampInfo_Settings.stampInfoUsed
+            subrowLeft.alignment = "LEFT"
+            subrowLeft.label(text=resStr)
+            subrowRight = row.row()
+            subrowRight.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+            subrowRight.alignment = "LEFT"
+            subrowRight.label(text=resStr02)
 
 
 # ------------------------------------------------------------------------#

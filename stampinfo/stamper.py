@@ -19,19 +19,14 @@
 All the functions used to write on the output frame images
 """
 
-
-import logging
-
-_logger = logging.getLogger(__name__)
-
-
 import os
 
 import bpy
 import bpy.utils.previews
 
+import logging
 
-from .utils import utils_render
+_logger = logging.getLogger(__name__)
 
 
 # from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance
@@ -43,11 +38,13 @@ def getRenderRange(scene):
 
 
 # returns the rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
+# wk fix: now retunrs an array of ints!
 def getRenderResolution(scene):
     renderResolution = (
         scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
         scene.render.resolution_y * scene.render.resolution_percentage * 0.01,
     )
+    renderResolution = [int(renderResolution[0]), int(renderResolution[1])]
     return renderResolution
 
 
@@ -56,28 +53,12 @@ def getRenderRatio(scene):
 
 
 # returns the rendered stamp info image output resolution as float tupple (not int !) and with taking into account the render percentage
-def getRenderResolutionForStampInfo(scene, mode=None):
-    stampRenderRes = [0.0, 0.0]
-    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode if mode is None else mode
+# wk fix: returns an int array!
+def getRenderResolutionForStampInfo(scene):
+    stampRenderRes = (0.0, 0.0)
+    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
 
-    # if   0 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:               # DIRECTTOCOMPOSITE
-    if "DIRECTTOCOMPOSITE" == modeVal:  # DIRECTTOCOMPOSITE
-        #    stampRenderRes = getRenderResolution(scene)
-        stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
-
-    elif "SEPARATEOUTPUT" == modeVal:  # SEPARATEOUTPUT
-        # elif 1 == scene.UAS_StampInfo_Settings['stampInfoRenderMode']:              # SEPARATEOUTPUT
-        # stampRenderRes      = ( getRenderResolution(scene)[0] * scene.UAS_StampInfo_Settings.stampRenderResX_percentage * 0.01, \
-        #                         getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01 )
-        stampRenderRes = (
-            getRenderResolution(scene)[0] * scene.UAS_StampInfo_Settings.stampRenderResX_percentage * 0.01,
-            max(
-                getRenderResolution(scene)[1],
-                getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01,
-            ),
-        )
-
-    elif "OVER" == modeVal:
+    if "OVER" == modeVal:
         stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
 
     elif "OUTSIDE" == modeVal:
@@ -86,55 +67,27 @@ def getRenderResolutionForStampInfo(scene, mode=None):
             max(
                 getRenderResolution(scene)[1],
                 getRenderResolution(scene)[1]
-                * (scene.UAS_StampInfo_Settings.newstampRenderResYOutside_percentage + 100.0)
+                * (scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage + 100.0)
                 * 0.01,
             ),
         )
 
+    stampRenderRes = [int(stampRenderRes[0]), int(stampRenderRes[1])]
     return stampRenderRes
-
-
-# returns the height (integer) in pixels of the image between the 2 borders according to the current mode
-def newgetInnerHeight(scene):
-    innerH = -1
-
-    if "OVER" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:  # DIRECTTOCOMPOSITE
-        #    stampRenderRes = getRenderResolution(scene)
-        innerH = min(
-            int(getRenderResolution(scene)[1]),
-            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.newstampRenderResOver_percentage * 0.01),
-        )
-
-    elif "OUTSIDE" == scene.UAS_StampInfo_Settings.newstampInfoRenderMode:  # SEPARATEOUTPUT
-        innerH = min(
-            int(getRenderResolution(scene)[1]),
-            int(getRenderResolution(scene)[1]),
-            # int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01),
-        )
-        #      int(getRenderResolutionForStampInfo(scene)[1]) )
-
-    return innerH
 
 
 # returns the height (integer) in pixels of the image between the 2 borders according to the current mode
 def getInnerHeight(scene):
     innerH = -1
 
-    if "DIRECTTOCOMPOSITE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # DIRECTTOCOMPOSITE
-        #    stampRenderRes = getRenderResolution(scene)
+    if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
         innerH = min(
             int(getRenderResolution(scene)[1]),
-            int(
-                getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResYDirToCompo_percentage * 0.01
-            ),
+            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResOver_percentage * 0.01),
         )
 
-    elif "SEPARATEOUTPUT" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:  # SEPARATEOUTPUT
-        innerH = min(
-            int(getRenderResolution(scene)[1]),
-            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResY_percentage * 0.01),
-        )
-        #      int(getRenderResolutionForStampInfo(scene)[1]) )
+    elif "OUTSIDE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+        innerH = int(getRenderResolution(scene)[1])
 
     return innerH
 
@@ -235,8 +188,10 @@ def createTempBGImage(scene):
     filepath = dirAndFilename[0] + getTempBGImageBaseName()
     print("    filepath tmp image in create: " + filepath)
 
-    renderStampInfoResW = int(getRenderResolutionForStampInfo(scene)[0])
-    renderStampInfoResH = int(getRenderResolutionForStampInfo(scene)[1])
+    # renderStampInfoResW = int(getRenderResolutionForStampInfo(scene)[0])
+    # renderStampInfoResH = int(getRenderResolutionForStampInfo(scene)[1])
+    renderStampInfoResW = getRenderResolutionForStampInfo(scene)[0]
+    renderStampInfoResH = getRenderResolutionForStampInfo(scene)[1]
 
     # PIL
     # Black image with transparent alpha

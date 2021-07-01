@@ -165,6 +165,39 @@ class UAS_compositeVideoInVSE(Operator):
 
 
 class UAS_Vse_Render(PropertyGroup):
+    def printMedia(self):
+        mediaStr = ""
+        mediaStr += f"VSE_Render.inputOverMediaPath:  '{self.inputOverMediaPath}'\n"
+        mediaStr += "VSE_Render.inputOverResolution: "
+        mediaStr += (
+            "None"
+            if self.inputOverResolution is None
+            else f"{self.inputOverResolution[0]} x {self.inputOverResolution[1]}"
+        ) + f"  {self.inputOverResolution}\n"
+
+        mediaStr += f"VSE_Render.inputBGMediaPath:    '{self.inputBGMediaPath}'\n"
+        mediaStr += f"VSE_Render.inputBGResolution:   "
+        mediaStr += (
+            "None" if self.inputBGResolution is None else f"{self.inputBGResolution[0]} x {self.inputBGResolution[1]}"
+        ) + f"  {self.inputBGResolution}\n"
+
+        mediaStr += f"VSE_Render.inputAudioMediaPath: '{self.inputAudioMediaPath}'\n"
+        mediaStr += "\n"
+
+        print(mediaStr)
+        # if bg_file is not None:
+        #     self.inputBGMediaPath = bg_file
+        # if bg_res is not None:
+        #     self.inputBGResolution = bg_res
+
+        # if fg_file is not None:
+        #     self.inputOverMediaPath = fg_file
+        # if fg_res is not None:
+        #     self.inputOverResolution = fg_res
+
+        # if audio_file is not None:
+        #     self.inputAudioMediaPath = audio_file
+
     def get_inputOverMediaPath(self):
         val = self.get("inputOverMediaPath", "")
         return val
@@ -921,7 +954,9 @@ class UAS_Vse_Render(PropertyGroup):
         scene,
         fps=None,
         bg_file=None,
+        bg_res=None,
         fg_file=None,
+        fg_res=None,
         audio_file=None,
         output_file=None,
         frame_start=None,
@@ -935,9 +970,20 @@ class UAS_Vse_Render(PropertyGroup):
             Not set values are taken from scene
             output_resolution: array [width, height]
         """
-        # self.clearMedia()
+        self.clearMedia()
 
-        # wkip add media here
+        if bg_file is not None:
+            self.inputBGMediaPath = bg_file
+        if bg_res is not None:
+            self.inputBGResolution = bg_res
+
+        if fg_file is not None:
+            self.inputOverMediaPath = fg_file
+        if fg_res is not None:
+            self.inputOverResolution = fg_res
+
+        if audio_file is not None:
+            self.inputAudioMediaPath = audio_file
 
         self.compositeVideoInVSE(
             scene.render.fps if fps is None else fps,
@@ -971,6 +1017,14 @@ class UAS_Vse_Render(PropertyGroup):
         """
             output_resolution: array [width, height]
         """
+
+        self.printMedia()
+        print(f" output_filepath: {output_filepath}")
+        mediaStr = "VSE_Render  output_resolution:   "
+        mediaStr += (
+            "None" if output_resolution is None else f"{output_resolution[0]} x {output_resolution[1]}"
+        ) + f"  {output_resolution}\n"
+        print(mediaStr)
 
         specificFrame = None
         if frame_start == frame_end:
@@ -1063,7 +1117,8 @@ class UAS_Vse_Render(PropertyGroup):
             #    print(f"self.inputBGMediaPath: {self.inputOverMediaPath}")
 
             if bgClip is not None:
-                if output_res[0] != self.inputBGResolution[0] or output_res[1] != self.inputBGResolution[1]:
+                if output_res[0] < self.inputBGResolution[0] or output_res[1] < self.inputBGResolution[1]:
+                    # if output_res[0] != self.inputBGResolution[0] or output_res[1] != self.inputBGResolution[1]:
                     bgClip.use_crop = True
                     bgClip.crop.min_x = int((self.inputBGResolution[0] - output_res[0]) / 2)
                     bgClip.crop.max_x = bgClip.crop.min_x
