@@ -393,7 +393,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     # regarder https://blender.stackexchange.com/questions/141333/how-controll-rgb-node-with-floatvectorproperty-blender-2-8
     borderColor: bpy.props.FloatVectorProperty(
         name="",
-        subtype="COLOR",
+        subtype="COLOR_GAMMA",
         size=4,
         description="Stamp borders",
         min=0.0,
@@ -423,7 +423,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     textColor: bpy.props.FloatVectorProperty(
         name="Text Color",
-        subtype="COLOR",
+        subtype="COLOR_GAMMA",
         size=4,
         description="Stamp borders",
         default=(0.55, 0.55, 0.55, 1.0),
