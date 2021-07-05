@@ -26,11 +26,56 @@ import subprocess
 import bpy
 from bpy.types import Operator
 from bpy.props import StringProperty
+from .utils_os import open_folder
+
+# for file browser:
+from bpy_extras.io_utils import ImportHelper
 
 
 ###################
 # UI
 ###################
+
+
+class UAS_OT_Open_Documentation_Url(Operator):  # noqa 801
+    bl_idname = "stampinfo.open_documentation_url"
+    bl_label = "Open Documentation Web Page"
+    bl_description = "Open web page.\nShift + Click: Copy the URL into the clipboard"
+
+    path: StringProperty()
+
+    def invoke(self, context, event):
+        if event.shift:
+            # copy path to clipboard
+            cmd = "echo " + (self.path).strip() + "|clip"
+            subprocess.check_call(cmd, shell=True)
+        else:
+            open_folder(self.path)
+
+        return {"FINISHED"}
+
+
+# This operator requires   from bpy_extras.io_utils import ImportHelper
+# See https://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
+class UAS_OpenFileBrowser(Operator, ImportHelper):
+    bl_idname = "stampinfo.openfilebrowser"
+    bl_label = "Open"
+    bl_description = (
+        "Open the file browser to define the image to stamp\n"
+        "Relative path must be set directly in the text field and must start with ''//''"
+    )
+
+    filter_glob: StringProperty(default="*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.tga,*.bmp", options={"HIDDEN"})
+
+    def execute(self, context):
+        """Use the selected file as a stamped logo"""
+        filename, extension = os.path.splitext(self.filepath)
+        #   print('Selected file:', self.filepath)
+        #   print('File name:', filename)
+        #   print('File extension:', extension)
+        bpy.context.scene.UAS_StampInfo_Settings.logoFilepath = self.filepath
+
+        return {"FINISHED"}
 
 
 class UAS_StampInfo_OpenExplorer(Operator):
@@ -70,7 +115,7 @@ class UAS_StampInfo_OpenExplorer(Operator):
         return {"FINISHED"}
 
 
-_classes = (UAS_StampInfo_OpenExplorer,)
+_classes = (UAS_StampInfo_OpenExplorer, UAS_OT_Open_Documentation_Url, UAS_OpenFileBrowser)
 
 
 def register():

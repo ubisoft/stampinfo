@@ -19,10 +19,6 @@
 functions that are not particularly related to the add-on and that could be reused as is
 """
 
-import logging
-
-_logger = logging.getLogger(__name__)
-
 import re
 from pathlib import Path
 from urllib.parse import unquote_plus, urlparse
@@ -30,6 +26,10 @@ from urllib.parse import unquote_plus, urlparse
 import bpy
 
 import os
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 def convertVersionStrToInt(versionStr):

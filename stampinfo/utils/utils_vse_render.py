@@ -846,7 +846,8 @@ class UAS_Vse_Render(PropertyGroup):
             if "bg" in mediaDict and mediaDict["bg"] is not None:
                 try:
                     print(f"self.inputBGMediaPath: {mediaDict['bg']}")
-                    bgClip = self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
+                    # bgClip = self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
+                    self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
                     print("BG Media OK")
                 except Exception:
                     print(f" *** Rendered shot not found: {mediaDict['bg']}")
@@ -896,7 +897,10 @@ class UAS_Vse_Render(PropertyGroup):
                     audioClip = self.createNewClip(
                         sequenceScene, mediaDict["sound"], 1, atFrame, final_duration=shotDuration
                     )
-                    audioClip = self.createNewClipFromRange(sequenceScene, mediaDict["sound"], 1,)
+                    # audioClip = self.createNewClipFromRange(sequenceScene, mediaDict["sound"], 1,)
+                    self.createNewClipFromRange(
+                        sequenceScene, mediaDict["sound"], 1,
+                    )
                 else:
                     print(f" *** Rendered shot not found: {mediaDict['sound']}")
 
@@ -1149,9 +1153,10 @@ class UAS_Vse_Render(PropertyGroup):
 
         if self.inputAudioMediaPath is not None:
             if specificFrame is None:
-                audioClip = None
+                # audioClip = None
                 if os.path.exists(self.inputAudioMediaPath):
-                    audioClip = self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
+                    #    audioClip = self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
+                    self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
                 else:
                     print(f" *** Rendered shot not found: {self.inputAudioMediaPath}")
 

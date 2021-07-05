@@ -19,16 +19,17 @@
 This module is used for debug
 """
 
-import logging
-
-_logger = logging.getLogger(__name__)
-
 import bpy
 from bpy.types import Operator, Panel
 
 from ..utils import utils_render
 
 from .. import stamper
+
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 # ------------------------------------------------------------------------#
 #                                Debug Panel                             #
