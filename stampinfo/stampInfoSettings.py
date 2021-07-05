@@ -90,11 +90,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         default=720,
     )
 
-    # innerImageRatio : FloatProperty(
-    #     name="Inner Ratio",
-    #     description="Inner Image Aspect Ratio (Eg: 16/9, 4/3...).\nIf this line is red then the rendered image ratio\nis the same as the framed image ratio and the\nborders will not be visible; consider\nincreasing the height of the rendered images",
-    #     min = 1.0, max = 20.0, step = 0.05, default = 1.777, precision = 3 )
-
     #   For OVER mode
     stampRenderResOver_percentage: FloatProperty(
         name="Frame Inner Height",
@@ -116,9 +111,9 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         min=0.0,
         # soft_min=30.0,
         soft_max=50.0,
-        max=30.0,
+        max=80.0,
         precision=1,
-        default=10.0,
+        default=33.34,
     )
 
     # ----------------------------------
@@ -149,7 +144,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     def get_stampInfoRenderMode(self):
-        val = self.get("stampInfoRenderMode", 0)
+        val = self.get("stampInfoRenderMode", 1)
         return val
 
     # return self.stampInfoRenderMode     #no
@@ -180,6 +175,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         ],
         get=get_stampInfoRenderMode,
         set=set_stampInfoRenderMode,
+        # also set the default value in get_stampInfoRenderMode
         default="OUTSIDE",
     )
 
@@ -262,12 +258,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         options=set(),
     )
 
-    videoHandlesUsed: BoolProperty(
-        name="Video Handles",
-        description="Stamp the shot handle values in the image sequence range",
-        default=True,
-        options=set(),
-    )
+    # videoHandlesUsed: BoolProperty(
+    #     name="Video Handles",
+    #     description="Stamp the shot handle values in the image sequence range",
+    #     default=True,
+    #     options=set(),
+    # )
 
     # ---------- 3d edit frame -------------
     edit3DFrameUsed: BoolProperty(
@@ -458,7 +454,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         min=0.000,
         max=0.1,
         step=0.01,
-        default=0.015,
+        default=0.005,
         precision=3,
     )
 

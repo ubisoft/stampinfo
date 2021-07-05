@@ -318,28 +318,31 @@ class UAS_PT_StampInfoMetadata(Panel):
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "bottomNote", text="")
 
-        # ---------- Video duration -------------
+        # ---------- Video duration and fps --
         box = layout.box()
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "videoDurationUsed")
+        row.prop(scene.UAS_StampInfo_Settings, "framerateUsed")
 
-        # ---------- video image -------------
+        # ---------- video image --------------
         box = layout.box()
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
         row.prop(scene.UAS_StampInfo_Settings, "videoRangeUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "videoHandlesUsed", text="Handles")
+        row = box.row(align=True)
+        # row.prop(scene.UAS_StampInfo_Settings, "videoHandlesUsed", text="Handles")
+        row.prop(scene.UAS_StampInfo_Settings, "frameHandlesUsed", text="Handles")
+        row.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="")
 
         # ---------- 3d edit frame -------------
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
-        # row.prop(scene.UAS_StampInfo_Settings, "edit3DFrame", text="3D Edit Frame")
-        # row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumberUsed", text="3D Edit Duration")
-        # row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumber", text="3D Edit Duration")
-
-        #  row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "framerateUsed")
+        # wkip to do: link to Shot Manager
+        if False:
+            row = box.row(align=True)
+            row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
+            # row.prop(scene.UAS_StampInfo_Settings, "edit3DFrame", text="3D Edit Frame")
+            # row = box.row(align=True)
+            row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumberUsed", text="3D Edit Duration")
+            # row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumber", text="3D Edit Duration")
 
         layout.separator()
         layout.label(text="Bottom: 3D Info")
@@ -356,10 +359,8 @@ class UAS_PT_StampInfoMetadata(Panel):
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "shotUsed")
         row.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
-        row = box.row(align=True)
-        row.separator(factor=4)
+        # row.separator(factor=4)
         #   row.prop(scene.UAS_StampInfo_Settings, "frameHandlesUsed", text = "")
-        row.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
 
         # ---------- camera -------------
         row = box.row(align=True)
@@ -376,7 +377,9 @@ class UAS_PT_StampInfoMetadata(Panel):
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
         row.prop(scene.UAS_StampInfo_Settings, "frameRangeUsed")
+        row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "frameHandlesUsed", text="Handles")
+        row.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="")
 
         # ---------- file -------------
         box = layout.box()
