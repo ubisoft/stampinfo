@@ -127,19 +127,24 @@ class UAS_PT_StampInfoAddon(Panel):
         #    row.menu(SCENECAMERA_MT_SelectMenu.bl_idname,text="Selection",icon='BORDERMOVE')
 
         # ready to render text
-        # if '' == bpy.data.filepath:
-        #     row.alert = True
-        #     row.label ( text = "*** Save file first ***" )
-        if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
-            row = layout.row()
-            row.alert = True
-            row.label(text="*** Invalid Output Path ***")
-            okForRender = False
-        elif "" == stamper.getRenderFileName(scene):
-            row = layout.row()
-            row.alert = True
-            row.label(text="*** Invalid Output File Name ***")
-            okForRender = False
+        # note: we can also use bpy.data.is_saved
+        if "" == bpy.data.filepath:
+            if config.uasDebug:
+                row = layout.row()
+                row.alert = True
+                row.label(text="*** File Not Saved ***")
+            okForRender = True
+        else:
+            if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
+                row = layout.row()
+                row.alert = True
+                row.label(text="*** Invalid Output Path ***")
+                okForRender = False
+            elif "" == stamper.getRenderFileName(scene):
+                row = layout.row()
+                row.alert = True
+                row.label(text="*** Invalid Output File Name ***")
+                okForRender = False
 
         # if camera doen't exist
         if scene.camera is None:
@@ -149,7 +154,7 @@ class UAS_PT_StampInfoAddon(Panel):
             okForRender = False
 
         # ready to render text
-        if okForRender:
+        if okForRender and config.uasDebug:
             row = layout.row()
             row.label(text="Ready to render")
 

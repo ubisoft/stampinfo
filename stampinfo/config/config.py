@@ -19,8 +19,6 @@
 To do: module description here.
 """
 
-import bpy
-
 import os
 
 
@@ -33,9 +31,10 @@ def initGlobalVariables():
     if "UasDebug" in os.environ.keys():
         uasDebug = bool(int(os.environ["UasDebug"]))
     else:
-        uasDebug = True
+        uasDebug = False
 
-    uasDebug = False
+    # force debug mode
+    uasDebug = True
 
     global uasDebug_keepVSEContent
     uasDebug_keepVSEContent = True and uasDebug

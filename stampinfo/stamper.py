@@ -174,6 +174,20 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
     return (renderPath, renderedInfoFileName)
 
 
+def getStampInfoRenderFilepath(scene):
+    """
+    Return a functional render file path to render the temporary files
+    If the file is not saved and the path is relative then a temporary file path is returned
+    """
+    filepath = scene.render.filepath
+
+    # in case of file not saved and use of a relative path then we use the temp dir
+    if not bpy.data.is_saved and 0 == filepath.find("/"):
+        filepath = bpy.app.tempdir + "TmpSeq.png"
+
+    return filepath
+
+
 def getTempBGImageBaseName():
     return r"_tmp_StampInfo_BGImage.png"
 

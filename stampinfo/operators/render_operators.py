@@ -80,10 +80,11 @@ class UAS_PT_StampInfo_Render(Operator):
         stampInfoSettings = scene.UAS_StampInfo_Settings
 
         # abort rendering if the file is not saved
-        if not bpy.data.is_saved:
-            utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
-            # if None == (getInfoFileFullPath(scene, -1)[0]):
-            return {"FINISHED"}
+        # note: removed: using blender temp dir instead
+        # if not bpy.data.is_saved:
+        #     utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+        #     # if None == (getInfoFileFullPath(scene, -1)[0]):
+        #     return {"FINISHED"}
 
         if not stampInfoSettings.stampInfoUsed:
             if "STILL" == self.renderMode:
@@ -98,8 +99,16 @@ class UAS_PT_StampInfo_Render(Operator):
         previousRenderPath = scene.render.filepath
         renderFrame = scene.frame_current
 
-        seqPath = SequencePath(bpy.path.abspath(scene.render.filepath))
+        # note: if scene.render.filepath is empty the Blender temp folder and a temp filename are used
+        render_filepath = stamper.getStampInfoRenderFilepath(scene)
+
+        seqPath = SequencePath(bpy.path.abspath(render_filepath))
+        # if config.uasDebug:
         seqPath.print(at_frame=renderFrame)
+
+        if "" == seqPath.sequence_name():
+            utils.ShowMessageBox("Invalid sequence name - Rendering aborted", "Render aborted", icon="ERROR")
+            return {"FINISHED"}
 
         print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")
         tempFramedRenderPath = seqPath.parent() + "_tmp_StampInfo_framing" + "\\"

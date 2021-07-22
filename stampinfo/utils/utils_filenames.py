@@ -25,7 +25,7 @@ import bpy
 
 
 class SequencePath:
-    # to do: suppôrt / and \, support creation with file name already with an index (have a parameter
+    # to do: support / and \, support creation with file name already with an index (have a parameter
     # to get generic infos or index specific infos)
     """
     Split a file path into parts. Dedicated to sequence filename management.
@@ -37,9 +37,11 @@ class SequencePath:
         - stem: the name of the file without extention
         - seq_name: the name of the sequence when # are removed
         - suffix: the file extention
+    
+    When the initial sequence path and name is submitted with no extention then it is seen as a path
 
     Eg.: myPath = SequencePath("c:\temp\mySequence_####.png")
-        - myPath.fullpath(): "c:\temp\mySequence_####.png"
+        - myPath._fullpath(): "c:\temp\mySequence_####.png"
         - myPath.parent(): "c:\temp\"
         - myPath.name(): "mySequence_####.png"
         - myPath.stem(): "mySequence_####"
@@ -51,13 +53,14 @@ class SequencePath:
     fullpath = None
 
     def __init__(self, filepath):
-        self.fullpath = filepath
+        self._fullpath = filepath
 
-    def isValidFileExtension(self):
+    def is_file_extension_valid(self, filepath=None):
         """
         Return False if the extension is empty, containts only digits or contains at least one # character
         """
-        suf = str(Path(self.fullpath).suffix)
+        fullpath = self._fullpath if filepath is None else filepath
+        suf = str(Path(fullpath).suffix)
         if 0 == len(suf):
             return False
         if "." == suf[0]:
@@ -75,17 +78,42 @@ class SequencePath:
 
         return True
 
+    # wkip to finish
+    def format_path(self, path, separator_at_end=True):
+        """
+        Return a path made with by the specified separator
+        """
+        formatted_path = path
+
+        if self.is_file_extension_valid(filepath=path):
+            # wkip set here / or \
+            formatted_path = path
+        else:
+            if separator_at_end and not (path.endswith("\\") or path.endswith("/")):
+                # wkip set here / or \
+                formatted_path += "\\"
+        return formatted_path
+
     # ------------------------------
     # standard filepath functions
 
+    def fullpath(self):
+        return self.format_path(self._fullpath)
+
     def parent(self):
-        return str(Path(self.fullpath).parent) + "\\"
+        if not self.is_file_extension_valid():
+            return self.format_path(self._fullpath)
+        return self.format_path(str(Path(self._fullpath).parent))
 
     def name(self):
-        return str(Path(self.fullpath).name)
+        if not self.is_file_extension_valid():
+            return ""
+        return str(Path(self._fullpath).name)
 
     def stem(self):
-        return str(Path(self.fullpath).stem)
+        if not self.is_file_extension_valid():
+            return ""
+        return str(Path(self._fullpath).stem)
 
     def extension(self):
         """
@@ -99,8 +127,8 @@ class SequencePath:
         If the file name extension contains a # its end will not be considered as an extension
         but as an index.
         """
-        suf = str(Path(self.fullpath).suffix)
-        if self.isValidFileExtension():
+        suf = str(Path(self._fullpath).suffix)
+        if self.is_file_extension_valid():
             return suf
         return ""
 
@@ -109,14 +137,18 @@ class SequencePath:
 
     def sequence_fullpath(self, at_frame=None):
         if at_frame is None:
-            return self.fullpath
+            return self.format_path(self._fullpath)
 
         fullp = f"{self.parent()}{self.sequence_name(at_frame=at_frame)}"
         return fullp
 
+    def sequence_root(self, at_frame=None):
+        return self.parent()
+
     def sequence_name(self, at_frame=None):
         if at_frame is None:
-            return str(Path(self.fullpath).name)
+            # return str(Path(self._fullpath).name)
+            return self.name()
 
         indices_pattern = self.sequence_indices(at_frame=at_frame)
         seq_name = f"{self.sequence_basename()}{indices_pattern}{self.suffix()}"
@@ -128,7 +160,7 @@ class SequencePath:
         but as an index.
         """
         # case where there is no file extention but filename ends with '.###'
-        if self.isValidFileExtension():
+        if self.is_file_extension_valid():
             seq_stem = self.sequence_basename() + self.sequence_indices(at_frame=at_frame)
         else:
             seq_stem = self.sequence_basename()
@@ -138,16 +170,16 @@ class SequencePath:
         return seq_stem
 
     def sequence_basename(self):
-        if self.fullpath is None:
+        if self._fullpath is None:
             return None
 
-        lastInd = self.fullpath.rfind("#")
+        lastInd = self._fullpath.rfind("#")
         if -1 == lastInd:
             name = self.stem()
         else:
-            while lastInd > 0 and "#" == self.fullpath[lastInd]:
+            while lastInd > 0 and "#" == self._fullpath[lastInd]:
                 lastInd -= 1
-            name = str(Path(self.fullpath[0 : lastInd + 1]).stem)
+            name = str(Path(self._fullpath[0 : lastInd + 1]).stem)
 
         return name
 
@@ -156,12 +188,12 @@ class SequencePath:
         at_frame: frame infex at which the indices should be set.
             Returns an empty string if there is no indice pattern in the filename.
         """
-        if self.fullpath is None:
+        if self._fullpath is None:
             return ""
 
         indices = ""
-        lastInd = self.fullpath.rfind("#")
-        while lastInd > 0 and "#" == self.fullpath[lastInd]:
+        lastInd = self._fullpath.rfind("#")
+        while lastInd > 0 and "#" == self._fullpath[lastInd]:
             indices += "#"
             lastInd -= 1
 
@@ -175,7 +207,7 @@ class SequencePath:
 
     def print(self, at_frame=None, spacer=""):
         outStr = ""
-        outStr += f"{spacer}fullpath:           {self.fullpath}\n"
+        outStr += f"{spacer}fullpath:           {self.fullpath()}\n"
         outStr += f"{spacer}parent:             {self.parent()}\n"
         outStr += f"{spacer}name:               {self.name()}\n"
         outStr += f"{spacer}stem:               {self.stem()}\n"
@@ -183,6 +215,7 @@ class SequencePath:
 
         outStr += "\n"
         outStr += f"{spacer}sequence_fullpath:  {self.sequence_fullpath()}\n"
+        outStr += f"{spacer}sequence_root:      {self.sequence_root()}\n"
         outStr += f"{spacer}sequence_name:      {self.sequence_name()}\n"
         outStr += f"{spacer}sequence_stem:      {self.sequence_stem()}\n"
         outStr += f"{spacer}sequence_basename:  {self.sequence_basename()}\n"
@@ -191,6 +224,7 @@ class SequencePath:
         if at_frame is not None:
             outStr += f"\n - At frame {at_frame}:\n"
             outStr += f"{spacer}sequence_fullpath: {self.sequence_fullpath(at_frame=at_frame)}\n"
+            outStr += f"{spacer}sequence_root:     {self.sequence_root(at_frame=at_frame)}\n"
             outStr += f"{spacer}sequence_name:     {self.sequence_name(at_frame=at_frame)}\n"
             outStr += f"{spacer}sequence_stem:     {self.sequence_stem(at_frame=at_frame)}\n"
             outStr += f"{spacer}sequence_basename: {self.sequence_basename()}\n"
@@ -208,6 +242,8 @@ def run_sequence_path_tests(at_frame=None):
     filenames.append("c:\\root\\seq\\seqNoExt.###")
     filenames.append("c:\\root\\seq\\seqWithUnderscore_###.jpg")
     filenames.append("c:\\root\\seq\\seqWitDot.###.jpg")
+    filenames.append("c:\\root\\seq")
+    filenames.append("c:\\root\\seq\\")
 
     for f in filenames:
         print(f"File path: {f}")
