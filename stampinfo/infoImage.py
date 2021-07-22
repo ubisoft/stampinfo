@@ -420,8 +420,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         lastFrameInd,
         userSettings.shotHandles,
         userSettings.videoFrameUsed,
-        userSettings.videoRangeUsed,
-        userSettings.videoHandlesUsed,
+        userSettings.animRangeUsed,
+        userSettings.handlesUsed,
         currentTextLeftFor3DFrames,
         currentTextTopFor3DFrames,
         font,
@@ -465,7 +465,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     # ---------- video duration -------------
     # currentTextTop += textLineH + textInterlineH
-    if userSettings.videoDurationUsed:
+    if userSettings.animDurationUsed:
         textProp = "Duration: "
         textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
         img_draw.text((col028, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -578,8 +578,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         scene.frame_end,
         userSettings.shotHandles,
         userSettings.currentFrameUsed,
-        userSettings.frameRangeUsed,
-        userSettings.frameHandlesUsed,
+        userSettings.animRangeUsed,
+        userSettings.handlesUsed,
         currentTextLeftFor3DFrames,
         currentTextTopFor3DFrames,
         font,
@@ -818,13 +818,13 @@ def drawRangesAndFrame(
         currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
         img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorRGBA)
 
-        # if userSettings.frameHandlesUsed:
+        # if userSettings.sceneFrameHandlesUsed:
         #     textProp += " / " + '{:03d}'.format(scene.frame_end - userSettings.shotHandles) + " / " if stampValue else ""
-        # if userSettings.frameRangeUsed:
+        # if userSettings.sceneFrameRangeUsed:
         #     textProp += '{:03d}'.format(scene.frame_end) + "]" if stampValue else ""
         # img_draw.text((currentTextLeftFor3DFrames, currentTextTop ), textProp, font=font, fill=textColorRGBA )
 
-    # if userSettings.frameRangeUsed:
+    # if userSettings.sceneFrameRangeUsed:
     #     textProp = "Range: " if stampLabel else ""
     #     textProp += "[" + str(scene.frame_start) + " / " + str(scene.frame_end) + "]" if stampValue else ""
     #     img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA )

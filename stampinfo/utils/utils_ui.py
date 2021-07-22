@@ -16,33 +16,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-To do: module description here.
+UI utilities
 """
 
-import os
+import bpy
 
 
-def initGlobalVariables():
-
-    # debug ############
-    global uasDebug
-
-    # wkip better code: uasDebug = os.environ.get("UasDebug", "0") == "1"
-    if "UasDebug" in os.environ.keys():
-        uasDebug = bool(int(os.environ["UasDebug"]))
-    else:
-        uasDebug = False
-
-    # force debug mode
-    uasDebug = False
-
-    global uasDebug_keepVSEContent
-    uasDebug_keepVSEContent = True and uasDebug
-
-    if uasDebug:
-        print("UAS debug: ", uasDebug)
-
-
-def releaseGlobalVariables():
-
-    pass
+def collapsable_panel(
+    layout: bpy.types.UILayout, data: bpy.types.AnyType, property: str, alert: bool = False, **kwargs
+):
+    row = layout.row()
+    row.prop(
+        data, property, icon="TRIA_DOWN" if getattr(data, property) else "TRIA_RIGHT", icon_only=True, emboss=False,
+    )
+    if alert:
+        row.alert = True
+        row.label(text="", icon="ERROR")
+    row.label(**kwargs)
+    return getattr(data, property)
