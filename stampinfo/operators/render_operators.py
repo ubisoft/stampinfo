@@ -86,6 +86,10 @@ class UAS_PT_StampInfo_Render(Operator):
         #     # if None == (getInfoFileFullPath(scene, -1)[0]):
         #     return {"FINISHED"}
 
+        if not bpy.data.is_saved and "ANIMATION" == self.renderMode:
+            utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+            return {"FINISHED"}
+
         if not stampInfoSettings.stampInfoUsed:
             if "STILL" == self.renderMode:
                 bpy.ops.render.render("INVOKE_DEFAULT", use_viewport=True)
