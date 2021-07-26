@@ -22,7 +22,8 @@ To do: module description here.
 import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty
-from ..utils.utils_render import getRenderOutputFilename
+
+# from ..utils.utils_render import getRenderOutputFilename
 from ..utils.utils_filenames import SequencePath
 from ..utils.utils_os import delete_folder
 from ..utils import utils
@@ -97,7 +98,7 @@ class UAS_PT_StampInfo_Render(Operator):
                 bpy.ops.render.render("INVOKE_DEFAULT", animation=True, use_viewport=True)
             return {"FINISHED"}
 
-        vse_render = context.window_manager.UAS_vse_render
+        vse_render = context.window_manager.stampinfo_vse_render
         prefs = context.preferences.addons["stampinfo"].preferences
 
         previousRenderPath = scene.render.filepath
@@ -107,6 +108,7 @@ class UAS_PT_StampInfo_Render(Operator):
         render_filepath = stamper.getStampInfoRenderFilepath(scene)
 
         seqPath = SequencePath(bpy.path.abspath(render_filepath))
+        print(f"file path {bpy.path.abspath(render_filepath)}")
         # if config.uasDebug:
         seqPath.print(at_frame=renderFrame)
 

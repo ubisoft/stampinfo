@@ -28,12 +28,7 @@ import subprocess
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Operator
-from bpy.props import StringProperty, PointerProperty
-
-# for file browser:
-from bpy_extras.io_utils import ImportHelper
-
+from bpy.props import PointerProperty
 
 import importlib
 
@@ -41,9 +36,8 @@ from .config import config
 
 from .utils.utils_render import Utils_LaunchRender
 from .utils.utils import display_addon_registered_version
-from .utils.utils_os import open_folder
+
 from .utils import utils_vse_render
-from .utils import utils_operators
 
 from . import stamper
 from . import stampInfoSettings
@@ -64,7 +58,7 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 92, 0),
-    "version": (1, 0, 5),
+    "version": (1, 0, 8),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://mdc-web-tomcat17.ubisoft.org/confluence/display/UASTech/UAS+StampInfo",
     # "warning": "BETA Version",
@@ -110,52 +104,9 @@ class Formatter(logging.Formatter):
         return s
 
 
-class UAS_OT_Open_Documentation_Url(Operator):  # noqa 801
-    bl_idname = "stampinfo.open_documentation_url"
-    bl_label = "Open Documentation Web Page"
-    bl_description = "Open web page.\nShift + Click: Copy the URL into the clipboard"
-
-    path: StringProperty()
-
-    def invoke(self, context, event):
-        if event.shift:
-            # copy path to clipboard
-            cmd = "echo " + (self.path).strip() + "|clip"
-            subprocess.check_call(cmd, shell=True)
-        else:
-            open_folder(self.path)
-
-        return {"FINISHED"}
-
-
-# This operator requires   from bpy_extras.io_utils import ImportHelper
-# See https://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
-class UAS_OpenFileBrowser(Operator, ImportHelper):
-    bl_idname = "stampinfo.openfilebrowser"
-    bl_label = "Open"
-    bl_description = (
-        "Open the file browser to define the image to stamp\n"
-        "Relative path must be set directly in the text field and must start with ''//''"
-    )
-
-    filter_glob: StringProperty(default="*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.tga,*.bmp", options={"HIDDEN"})
-
-    def execute(self, context):
-        """Use the selected file as a stamped logo"""
-        filename, extension = os.path.splitext(self.filepath)
-        #   print('Selected file:', self.filepath)
-        #   print('File name:', filename)
-        #   print('File extension:', extension)
-        bpy.context.scene.UAS_StampInfo_Settings.logoFilepath = self.filepath
-
-        return {"FINISHED"}
-
-
 classes = (
     stampInfoSettings.UAS_StampInfoSettings,
     Utils_LaunchRender,
-    UAS_OT_Open_Documentation_Url,
-    UAS_OpenFileBrowser,
 )
 
 
@@ -172,6 +123,7 @@ def register():
     from stampinfo import icons
     from .properties import addon_prefs
     from .operators import render_operators
+    from .utils import utils_ui
 
     display_addon_registered_version("Stamp Info")
 
@@ -204,7 +156,7 @@ def register():
     si_ui.register()
     ui.register()
     utils_vse_render.register()
-    utils_operators.register()
+    utils_ui.register()
 
     # debug tools
     if config.uasDebug:
@@ -220,12 +172,13 @@ def unregister():
     from stampinfo import icons
     from .operators import render_operators
     from .properties import addon_prefs
+    from .utils import utils_ui
 
     # debug tools
     if config.uasDebug:
         debug.unregister()
 
-    utils_operators.unregister()
+    utils_ui.unregister()
     utils_vse_render.unregister()
     ui.unregister()
     si_ui.unregister()

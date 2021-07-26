@@ -145,7 +145,7 @@ class UAS_PT_StampInfoAddon(Panel):
             elif "" == stamper.getRenderFileName(scene):
                 row = layout.row()
                 row.alert = True
-                row.label(text="*** Invalid Output File Name ***")
+                row.label(text="*** Invalid Output File Name for Animation Rendering***")
                 okForRender = False
 
         # if camera doen't exist
@@ -161,12 +161,15 @@ class UAS_PT_StampInfoAddon(Panel):
             row.label(text="Ready to render")
 
         # render buttons
-        renderRow = layout.split(factor=0.45, align=False)
-        renderRow.enabled = okForRender
-        renderRow.scale_y = 1.4
-        renderRow.operator("uas_stampinfo.render", text=" Render Image", icon="IMAGE_DATA").renderMode = "STILL"
+        renderMainRow = layout.split(factor=0.45, align=False)
+        renderMainRow.scale_y = 1.4
+        renderStillRow = renderMainRow.row()
+        #  renderStillRow.enabled = okForRender
+        renderStillRow.operator("uas_stampinfo.render", text=" Render Image", icon="IMAGE_DATA").renderMode = "STILL"
 
-        renderRow.operator(
+        renderAnimRow = renderMainRow.row()
+        renderAnimRow.enabled = okForRender
+        renderAnimRow.operator(
             "uas_stampinfo.render", text=" Render Animation", icon="RENDER_ANIMATION"
         ).renderMode = "ANIMATION"
 
@@ -256,7 +259,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        prefs = context.preferences.addons["stampinfo"].preferences
+        # prefs = context.preferences.addons["stampinfo"].preferences
 
         def _formatRangeString(current=None, animRange=None, handles=None, start=None, end=None):
             str = ""
@@ -285,7 +288,9 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         # ---------- 3D frame -------------
         box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
+        subRow = row.row(align=True)
+        subRow.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
+
         sceneFrameStr = _formatRangeString(
             current=scene.frame_current,
             animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
@@ -294,8 +299,9 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             end=scene.frame_end,
         )
 
-        row.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
-        row.label(text=sceneFrameStr)
+        subRow = row.row(align=True)
+        subRow.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
+        subRow.label(text=sceneFrameStr)
 
         # ---------- 3D edit frame -------------
         if config.uasDebug:
@@ -317,7 +323,8 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         # ---------- video frame -------------
         #    box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
+        subRow = row.row(align=True)
+        subRow.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
         videoFrameStr = _formatRangeString(
             current=scene.frame_current - scene.frame_start,
             animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
@@ -326,8 +333,9 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             end=scene.frame_end - scene.frame_start,
         )
 
-        row.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
-        row.label(text=videoFrameStr)
+        subRow = row.row(align=True)
+        subRow.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
+        subRow.label(text=videoFrameStr)
 
         # ---------- shared settings -------------
         layout.label(text="Shared Settings:")
@@ -336,12 +344,15 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
 
         row.prop(scene.UAS_StampInfo_Settings, "animRangeUsed")
 
-        handlesRow = box.row()
+        handlesRow = box.split(factor=0.5)
         handlesRow.enabled = scene.UAS_StampInfo_Settings.animRangeUsed
-        handlesRow.separator(factor=4)
-        handlesRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles")
+        handlesSubRow = handlesRow.row()
+        handlesSubRow.separator(factor=4)
+        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles")
         #   row.prop(scene.UAS_StampInfo_Settings, "sceneFrameHandlesUsed", text = "")
-        handlesRow.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
+        handlesSubRow = handlesRow.row()
+        handlesSubRow.enabled = scene.UAS_StampInfo_Settings.handlesUsed
+        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
 
         # ---------- animation duration -------------
         box = layout.box()
@@ -371,7 +382,7 @@ class UAS_PT_StampInfoShot(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        prefs = context.preferences.addons["stampinfo"].preferences
+        # prefs = context.preferences.addons["stampinfo"].preferences
 
         # ---------- shot -------------
         # To be filled by a production script or by UAS Shot Manager
@@ -412,7 +423,7 @@ class UAS_PT_StampInfoMetadata(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        prefs = context.preferences.addons["stampinfo"].preferences
+        # prefs = context.preferences.addons["stampinfo"].preferences
 
         layout.label(text="Top: Project and Editing Info")
         box = layout.box()
@@ -527,6 +538,9 @@ class UAS_PT_StampInfoLayout(Panel):
 
         row = box.row()
         row.prop(scene.UAS_StampInfo_Settings, "extPaddingNorm")
+
+        row = box.row()
+        row.prop(scene.UAS_StampInfo_Settings, "extPaddingHorizNorm")
 
         # ---------- border -------------
         box = layout.box()

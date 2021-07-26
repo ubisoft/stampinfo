@@ -34,7 +34,7 @@ def initGlobalVariables():
         uasDebug = False
 
     # force debug mode
-    uasDebug = False
+    uasDebug = True
 
     global uasDebug_keepVSEContent
     uasDebug_keepVSEContent = True and uasDebug
