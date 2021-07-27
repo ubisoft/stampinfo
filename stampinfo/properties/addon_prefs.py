@@ -1,6 +1,6 @@
 import bpy
-from bpy.types import AddonPreferences, FaceMap
-from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty
+from bpy.types import AddonPreferences
+from bpy.props import BoolProperty
 
 
 class UAS_StampInfo_AddonPrefs(AddonPreferences):
@@ -63,6 +63,13 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         subCol = row.column()
         subCol.prop(self, "delete_temp_scene")
         subCol.prop(self, "delete_temp_images")
+
+    # -----------------------------------------------------------
+    # UI user preferences - Not exposed
+    # -----------------------------------------------------------
+    panelExpanded_mode: BoolProperty(
+        name="Expand Render Mode Properties", default=True,
+    )
 
 
 _classes = (UAS_StampInfo_AddonPrefs,)

@@ -57,13 +57,13 @@ from ..utils import utils
 #         row.separator(factor=3)
 #         # if not props.isRenderRootPathValid():
 #         #     row.alert = True
-#         row.prop(context.window_manager.UAS_vse_render, "inputOverMediaPath")
+#         row.prop(context.window_manager.stampinfo_vse_render, "inputOverMediaPath")
 #         row.alert = False
 #         row.operator("uasvse.openfilebrowser", text="", icon="FILEBROWSER", emboss=True).pathProp = "inputOverMediaPath"
 #         row.separator()
 
 #         row = layout.row(align=True)
-#         row.prop(context.window_manager.UAS_vse_render, "inputOverResolution")
+#         row.prop(context.window_manager.stampinfo_vse_render, "inputOverResolution")
 
 #         #    row.operator ( "uas_shot_manager.render_openexplorer", text="", icon='FILEBROWSER').path = props.renderRootPath
 #         layout.separator()
@@ -72,13 +72,13 @@ from ..utils import utils
 #         row.separator(factor=3)
 #         # if not props.isRenderRootPathValid():
 #         #     row.alert = True
-#         row.prop(context.window_manager.UAS_vse_render, "inputBGMediaPath")
+#         row.prop(context.window_manager.stampinfo_vse_render, "inputBGMediaPath")
 #         row.alert = False
 #         row.operator("uasvse.openfilebrowser", text="", icon="FILEBROWSER", emboss=True).pathProp = "inputBGMediaPath"
 #         row.separator()
 
 #         row = layout.row(align=True)
-#         row.prop(context.window_manager.UAS_vse_render, "inputBGResolution")
+#         row.prop(context.window_manager.stampinfo_vse_render, "inputBGResolution")
 
 #         layout.separator()
 #         row = layout.row()
@@ -88,7 +88,7 @@ from ..utils import utils
 #         # #    row.prop(scene.UAS_StampInfo_Settings, "offsetToCenterHNorm")
 
 #         #     row = layout.row()
-#         row.operator("vse.compositevideoinvse", emboss=True)
+#         row.operator("stampinfovse.compositevideoinvse", emboss=True)
 #         # row.prop ( context.window_manager, "UAS_shot_manager_shots_play_mode",
 
 #         #     row = layout.row()
@@ -129,14 +129,14 @@ class UAS_VSE_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import Impo
         #   print('Selected file:', self.filepath)
         #   print('File name:', filename)
         #   print('File extension:', extension)
-        context.window_manager.UAS_vse_render[self.pathProp] = self.filepath
+        context.window_manager.stampinfo_vse_render[self.pathProp] = self.filepath
 
         return {"FINISHED"}
 
     def invoke(self, context, event):  # See comments at end  [1]
 
-        if self.pathProp in context.window_manager.UAS_vse_render:
-            self.filepath = context.window_manager.UAS_vse_render[self.pathProp]
+        if self.pathProp in context.window_manager.stampinfo_vse_render:
+            self.filepath = context.window_manager.stampinfo_vse_render[self.pathProp]
         else:
             self.filepath = ""
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html
@@ -146,25 +146,25 @@ class UAS_VSE_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import Impo
         return {"RUNNING_MODAL"}
 
 
-class UAS_compositeVideoInVSE(Operator):
-    bl_idname = "vse.compositevideoinvse"
+class StampInfo_compositeVideoInVSE(Operator):
+    bl_idname = "staminfovse.compositevideoinvse"
     bl_label = "CreateSceneAndAddClips"
     bl_description = ""
 
     def execute(self, context):
         """UAS_VSETruc"""
         print("Op compositeVideoInVSE")
-        #   vse_render = context.window_manager.UAS_vse_render
+        #   vse_render = context.window_manager.stampinfo_vse_render
         #   scene = context.scene
 
-        context.window_manager.UAS_vse_render.compositeVideoInVSE(
+        context.window_manager.stampinfo_vse_render.compositeVideoInVSE(
             bpy.context.scene.render.fps, 1, 20, "c:\\tmp\\MyVSEOutput.mp4"
         )
 
         return {"FINISHED"}
 
 
-class UAS_Vse_Render(PropertyGroup):
+class StampInfo_Vse_Render(PropertyGroup):
     def printMedia(self):
         mediaStr = ""
         mediaStr += f"VSE_Render.inputOverMediaPath:  '{self.inputOverMediaPath}'\n"
@@ -176,7 +176,7 @@ class UAS_Vse_Render(PropertyGroup):
         ) + f"  {self.inputOverResolution}\n"
 
         mediaStr += f"VSE_Render.inputBGMediaPath:    '{self.inputBGMediaPath}'\n"
-        mediaStr += f"VSE_Render.inputBGResolution:   "
+        mediaStr += "VSE_Render.inputBGResolution:   "
         mediaStr += (
             "None" if self.inputBGResolution is None else f"{self.inputBGResolution[0]} x {self.inputBGResolution[1]}"
         ) + f"  {self.inputBGResolution}\n"
@@ -391,8 +391,8 @@ class UAS_Vse_Render(PropertyGroup):
             """ Create the camera sequence
             """
             # !!! When the 3D scence range is not starting at zero the camera strip is clipped at the begining...
-            OriRangeStart = cameraScene.frame_start
-            OriRangeEnd = cameraScene.frame_end
+            # OriRangeStart = cameraScene.frame_start
+            # OriRangeEnd = cameraScene.frame_end
             cameraScene.frame_start = 0
             cameraScene.frame_end = offsetEnd
 
@@ -654,36 +654,43 @@ class UAS_Vse_Render(PropertyGroup):
     ):
         """Mode can be FIT_ALL, FIT_WIDTH, FIT_HEIGHT, NO_RESIZE
         """
-        clipRatio = clipWidth / clipHeight
-        canvasRatio = canvasWidth / canvasHeight
+        # clipRatio = clipWidth / clipHeight
+        # canvasRatio = canvasWidth / canvasHeight
 
         clipRealWidth = int(clipWidth * (clipRenderPercentage / 100))
         clipRealHeight = int(clipHeight * (clipRenderPercentage / 100))
 
-        if "FIT_ALL" == mode or (canvasWidth == clipRealWidth and canvasHeight == clipRealHeight):
-            clip.use_crop = True
-            clip.crop.min_x = clip.crop.max_x = clip.crop.min_y = clip.crop.max_y = 0
-            clip.use_crop = False
+        if hasattr(clip, "use_crop"):
+            if "FIT_ALL" == mode or (canvasWidth == clipRealWidth and canvasHeight == clipRealHeight):
+                clip.use_crop = True
+                clip.crop.min_x = clip.crop.max_x = clip.crop.min_y = clip.crop.max_y = 0
+                clip.use_crop = False
 
-        else:
-            clip.use_crop = True
-            clip.crop.min_x = clip.crop.max_x = 0
-            clip.crop.min_y = clip.crop.max_y = 0
+            else:
+                clip.use_crop = True
+                clip.crop.min_x = clip.crop.max_x = 0
+                clip.crop.min_y = clip.crop.max_y = 0
 
-            if "FIT_WIDTH" == mode:
-                clipNewHeight = canvasWidth / clipRealWidth * clipRealHeight
-                clip.crop.min_y = clip.crop.max_y = -0.5 * (clipRenderPercentage / 100) * (canvasHeight - clipNewHeight)
+                if "FIT_WIDTH" == mode:
+                    clipNewHeight = canvasWidth / clipRealWidth * clipRealHeight
+                    clip.crop.min_y = clip.crop.max_y = (
+                        -0.5 * (clipRenderPercentage / 100) * (canvasHeight - clipNewHeight)
+                    )
 
-            if "FIT_HEIGHT" == mode:
-                clipNewWidth = canvasHeight / clipRealHeight * clipRealWidth
-                clip.crop.min_x = clip.crop.max_x = -0.5 * (clipRenderPercentage / 100) * (canvasWidth - clipNewWidth)
+                if "FIT_HEIGHT" == mode:
+                    clipNewWidth = canvasHeight / clipRealHeight * clipRealWidth
+                    clip.crop.min_x = clip.crop.max_x = (
+                        -0.5 * (clipRenderPercentage / 100) * (canvasWidth - clipNewWidth)
+                    )
 
-            if "NO_RESIZE" == mode:
-                clip.crop.min_x = clip.crop.max_x = -0.5 * (clipRenderPercentage / 100) * (canvasWidth - clipRealWidth)
-                clip.crop.min_y = clip.crop.max_y = (
-                    -0.5 * (clipRenderPercentage / 100) * (canvasHeight - clipRealHeight)
-                )
-                pass
+                if "NO_RESIZE" == mode:
+                    clip.crop.min_x = clip.crop.max_x = (
+                        -0.5 * (clipRenderPercentage / 100) * (canvasWidth - clipRealWidth)
+                    )
+                    clip.crop.min_y = clip.crop.max_y = (
+                        -0.5 * (clipRenderPercentage / 100) * (canvasHeight - clipRealHeight)
+                    )
+                    pass
 
     def get_frame_end_from_content(self, scene):
         # wkipwkipwkip erreur ici, devrait etre exclusive pour extre consistant et ne l'est pas
@@ -1188,9 +1195,8 @@ class UAS_Vse_Render(PropertyGroup):
 
 
 _classes = (
-    # UAS_PT_VSERender,
-    UAS_Vse_Render,
-    UAS_compositeVideoInVSE,
+    StampInfo_Vse_Render,
+    StampInfo_compositeVideoInVSE,
     UAS_VSE_OpenFileBrowser,
 )
 
@@ -1199,11 +1205,11 @@ def register():
     for cls in _classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.WindowManager.UAS_vse_render = PointerProperty(type=UAS_Vse_Render)
+    bpy.types.WindowManager.stampinfo_vse_render = PointerProperty(type=StampInfo_Vse_Render)
 
 
 def unregister():
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.WindowManager.UAS_vse_render
+    del bpy.types.WindowManager.stampinfo_vse_render

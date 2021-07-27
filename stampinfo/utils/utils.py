@@ -19,9 +19,6 @@
 functions that are not particularly related to the add-on and that could be reused as is
 """
 
-import logging
-
-_logger = logging.getLogger(__name__)
 
 import re
 from pathlib import Path
@@ -30,6 +27,10 @@ from urllib.parse import unquote_plus, urlparse
 import bpy
 
 import os
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 def convertVersionStrToInt(versionStr):
@@ -154,7 +155,9 @@ def openMedia(media_filepath, inExternalPlayer=False):
         #  p = subprocess.Popen(["display", media_filepath])
         # subprocess.run(["open", media_filepath], check=True)
 
-        import subprocess, os, platform
+        import subprocess
+        import os
+        import platform
 
         if platform.system() == "Darwin":  # macOS
             subprocess.call(("open", media_filepath))

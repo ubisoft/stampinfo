@@ -25,8 +25,11 @@ import bpy
 
 
 class SequencePath:
-    # to do: support / and \, support creation with file name already with an index (have a parameter
-    # to get generic infos or index specific infos)
+    # to do:
+    # - support / and \
+    # - support creation with file name already with an index (have a parameter
+    #   to get generic infos or index specific infos)
+    # - support absolute and relative paths
     """
     Split a file path into parts. Dedicated to sequence filename management.
     

@@ -21,6 +21,7 @@ General settings
 
 import os
 from pathlib import Path
+from stampinfo import stamper
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
@@ -70,26 +71,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         default="",
     )
 
-    innerImageHeight_percentage: FloatProperty(
-        name="Inner Height",
-        description="Inner Image Height in pixels\nIf this line is red then the borders are out of the image",
-        subtype="PERCENTAGE",
-        min=1.0,
-        max=200.0,
-        precision=0,
-        default=100.0,
-    )
-
-    innerImageHeight: IntProperty(
-        name="Inner Height",
-        description="Inner Image Height in pixels\nIf this line is red then the borders are out of the image",
-        subtype="PIXEL",
-        min=0,
-        max=6000,
-        step=1,
-        default=720,
-    )
-
     # innerImageRatio : FloatProperty(
     #     name="Inner Ratio",
     #     description="Inner Image Aspect Ratio (Eg: 16/9, 4/3...).\nIf this line is red then the rendered image ratio\nis the same as the framed image ratio and the\nborders will not be visible; consider\nincreasing the height of the rendered images",
@@ -115,10 +96,10 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         description="Height (in percentage) of the rendered image that will be visible between the top and bottom borders of the frame",
         min=0.0,
         # soft_min=30.0,
-        soft_max=50.0,
-        max=30.0,
+        soft_max=33.34,
+        max=40.0,
         precision=1,
-        default=10.0,
+        default=33.34,
     )
 
     # ----------------------------------
@@ -149,10 +130,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     def get_stampInfoRenderMode(self):
-        val = self.get("stampInfoRenderMode", 0)
+        val = self.get("stampInfoRenderMode", 1)
         return val
-
-    # return self.stampInfoRenderMode     #no
 
     # values are integers
     def set_stampInfoRenderMode(self, value):
@@ -191,7 +170,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- Logo properties -------------
 
-    logoUsed: BoolProperty(name="Logo", description="Set and draw the specified logo", default=False)
+    logoUsed: BoolProperty(name="Logo", description="Set and draw the specified logo", default=True)
 
     def buildLogosList(self, context):
         dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\logos")
@@ -228,20 +207,31 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     logoFilepath: StringProperty(name="", description="File path of the specified logo", default="")
 
     logoScaleH: FloatProperty(
-        name="Scale", description="Set logo scale", min=0.001, max=2.0, step=0.01, default=0.08, precision=3
+        name="Scale", description="Set logo scale", min=0.001, max=2.0, step=0.01, default=0.065, precision=3
     )
 
     logoPosNormX: FloatProperty(
-        name="Pos X", description="Logo Position X", min=-1.0, max=1.0, step=0.01, default=0.02, precision=3
+        name="Pos X", description="Logo Position X", min=-1.0, max=1.0, step=0.01, default=0.012, precision=3
     )
 
     logoPosNormY: FloatProperty(
-        name="Pos Y", description="Logo Position Y", min=-1.0, max=1.0, step=0.01, default=0.02, precision=3
+        name="Pos Y", description="Logo Position Y", min=-1.0, max=1.0, step=0.01, default=0.01, precision=3
     )
 
-    # ---------- video image -------------
-    videoDurationUsed: BoolProperty(
-        name="Video Duration",
+    # ------------------------------------
+    # ---------- time and frames ---------
+    # ------------------------------------
+
+    # ---------- shared settings ---------
+    animRangeUsed: BoolProperty(
+        name="Frame Range", description="Stamp the range of the animation, in frames", default=True,
+    )
+    handlesUsed: BoolProperty(
+        name="Frame Handles", description="Stamp the shot handle values in the image sequence range", default=True,
+    )
+
+    animDurationUsed: BoolProperty(
+        name="Animation Duration",
         description="Total number of frames in the output sequence (handles included)",
         default=False,
         options=set(),
@@ -252,20 +242,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Video Frame",
         description="Stamp the index of the current image in the image sequence",
         default=False,
-        options=set(),
-    )
-
-    videoRangeUsed: BoolProperty(
-        name="Video Range",
-        description="Stamp the index of the current image in the image sequence",
-        default=False,
-        options=set(),
-    )
-
-    videoHandlesUsed: BoolProperty(
-        name="Video Handles",
-        description="Stamp the shot handle values in the image sequence range",
-        default=True,
         options=set(),
     )
 
@@ -303,17 +279,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     currentFrameUsed: BoolProperty(
         name="3D Frame",
         description="Stamp current rendered frame in the 3D scene time context",
-        default=True,
-        options=set(),
-    )
-
-    frameRangeUsed: BoolProperty(
-        name="3D Range", description="Stamp frame range in the 3D scene time context", default=True, options=set()
-    )
-
-    frameHandlesUsed: BoolProperty(
-        name="Shot Handles",
-        description="Stamp the shot handle values in the image sequence range",
         default=True,
         options=set(),
     )
@@ -438,7 +403,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         min=0.001,
         max=1.0,
         step=0.01,
-        default=0.025,
+        default=0.02,
         precision=3,
     )
 
@@ -453,12 +418,22 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     extPaddingNorm: FloatProperty(
-        name="Exterior Padding",
-        description="Set the distance between the text and the border of the image. This size is normalized relatively to the height of the rendered image",
+        name="Vertical Exterior Padding",
+        description="Set the distance between the text and the top and bottom sides of the frame bands of the image. This size is normalized relatively to the height of the rendered image",
         min=0.000,
         max=0.1,
         step=0.01,
         default=0.015,
+        precision=3,
+    )
+
+    extPaddingHorizNorm: FloatProperty(
+        name="Horizontal Exterior Padding",
+        description="Set the distance between the text and the left and right sides of the frame bands of the image. This size is normalized relatively to the height of the rendered image",
+        min=0.000,
+        max=0.1,
+        step=0.01,
+        default=0.02,
         precision=3,
     )
 
@@ -524,3 +499,5 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
             scene, currentFrame, renderPath=renderPath, renderFilename=renderFilename, verbose=verbose
         )
 
+    def getRenderResolutionForStampInfo(self, scene):
+        return stamper.getRenderResolutionForStampInfo(scene)

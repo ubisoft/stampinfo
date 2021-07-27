@@ -182,8 +182,10 @@ def getStampInfoRenderFilepath(scene):
     filepath = scene.render.filepath
 
     # in case of file not saved and use of a relative path then we use the temp dir
-    if not bpy.data.is_saved and 0 == filepath.find("/"):
+    if not bpy.data.is_saved and 0 == filepath.find("/") or 0 == filepath.find("/tmp\\"):
         filepath = bpy.app.tempdir + "TmpSeq.png"
+    # else:
+    #     filepath = bpy.path.abspath(scene.render.filepath)
 
     return filepath
 

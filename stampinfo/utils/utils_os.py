@@ -53,3 +53,4 @@ def delete_folder(dir_path):
             os.rmdir(dir_path)
         except Exception:
             print("Cannot delete Dir: ", dir_path)
+
