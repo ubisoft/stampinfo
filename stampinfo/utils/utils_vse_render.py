@@ -419,7 +419,7 @@ class StampInfo_Vse_Render(PropertyGroup):
             p = Path(images_path)
             folder, name = p.parent, str(p.name)
 
-            mov_name = ""
+            # mov_name = ""
             # Find frame padding. Either using # formating or printf formating
             file_re = ""
             padding_match = re.match(".*?(#+).*", name)
@@ -432,9 +432,9 @@ class StampInfo_Vse_Render(PropertyGroup):
                             "\d" * padding_length, name[: padding_match.start(1) - 1], name[padding_match.end(1) + 1 :]
                         )
                     )
-                    mov_name = (
-                        str(p.stem)[: padding_match.start(1) - 1] + str(p.stem)[padding_match.end(1) + 1 :]
-                    )  # Removes the % and d which are not captured in the re.
+                    # mov_name = (
+                    #     str(p.stem)[: padding_match.start(1) - 1] + str(p.stem)[padding_match.end(1) + 1 :]
+                    # )  # Removes the % and d which are not captured in the re.
             else:
                 padding_length = len(padding_match[1])
                 file_re = re.compile(
@@ -442,7 +442,7 @@ class StampInfo_Vse_Render(PropertyGroup):
                         "\d" * padding_length, name[: padding_match.start(1)], name[padding_match.end(1) :]
                     )
                 )
-                mov_name = str(p.stem)[: padding_match.start(1)] + str(p.stem)[padding_match.end(1) :]
+                # mov_name = str(p.stem)[: padding_match.start(1)] + str(p.stem)[padding_match.end(1) :]
 
             if padding_match:
                 # scene.render.filepath = str(folder.joinpath(mov_name))
@@ -451,7 +451,8 @@ class StampInfo_Vse_Render(PropertyGroup):
                 max_frame = 0
                 min_frame = 999999999
                 for f in sorted(list(folder.glob("*"))):
-                    _folder, _name = f.parent, f.name
+                    # _folder = f.parent
+                    _name = f.name
                     re_match = file_re.match(_name)
                     if re_match:
                         frame_nb = int(re_match[1])
@@ -849,11 +850,10 @@ class StampInfo_Vse_Render(PropertyGroup):
             print("\n---- Importing image sequences ----")
             print(f"  frametopaste: {frameToPaste}")
 
-            bgClip = None
             if "bg" in mediaDict and mediaDict["bg"] is not None:
                 try:
                     print(f"self.inputBGMediaPath: {mediaDict['bg']}")
-                    bgClip = self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
+                    self.createNewClip(sequenceScene, mediaDict["bg"], 2, atFrame)
                     print("BG Media OK")
                 except Exception:
                     print(f" *** Rendered shot not found: {mediaDict['bg']}")
@@ -898,12 +898,11 @@ class StampInfo_Vse_Render(PropertyGroup):
                     shotDuration = overClip.frame_final_duration
 
             if "sound" in mediaDict and mediaDict["sound"] is not None:
-                audioClip = None
                 if os.path.exists(mediaDict["sound"]):
-                    audioClip = self.createNewClip(
-                        sequenceScene, mediaDict["sound"], 1, atFrame, final_duration=shotDuration
+                    self.createNewClip(sequenceScene, mediaDict["sound"], 1, atFrame, final_duration=shotDuration)
+                    self.createNewClipFromRange(
+                        sequenceScene, mediaDict["sound"], 1,
                     )
-                    audioClip = self.createNewClipFromRange(sequenceScene, mediaDict["sound"], 1,)
                 else:
                     print(f" *** Rendered shot not found: {mediaDict['sound']}")
 
@@ -1156,9 +1155,8 @@ class StampInfo_Vse_Render(PropertyGroup):
 
         if self.inputAudioMediaPath is not None:
             if specificFrame is None:
-                audioClip = None
                 if os.path.exists(self.inputAudioMediaPath):
-                    audioClip = self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
+                    self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
                 else:
                     print(f" *** Rendered shot not found: {self.inputAudioMediaPath}")
 

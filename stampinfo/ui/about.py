@@ -75,7 +75,7 @@ class UAS_StampInfo_OT_About(Operator):
 
             pillowVersion = pillow.__version__
             split.label(text=f"V. {pillowVersion}")
-        except Exception as e:
+        except Exception:
             subRow = split.row()
             subRow.alert = True
             subRow.label(text="Module not found")

@@ -21,11 +21,9 @@ This module is used for debug
 
 
 import bpy
-from bpy.types import Operator, Panel
+from bpy.types import Panel
 
 from ..utils import utils_render
-
-from .. import stamper
 
 import logging
 
