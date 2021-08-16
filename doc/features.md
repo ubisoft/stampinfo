@@ -1,7 +1,5 @@
 - [Features](#features)
 - [Limitations](#limitations)
-<br />
-<br />
 
 # Features
 
@@ -57,7 +55,6 @@ in the color defined for the text.
 <br />
 
 # Limitations
->
 
 - The layout for the text and information stamped on the framed image is currenly better fitted for 16:9 ratio.
 Other ratios may produce unpredictable results. We have consideration for that issue for the future.
