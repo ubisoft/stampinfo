@@ -42,7 +42,7 @@ class UAS_MT_StampInfo_Prefs_MainMenu(Menu):
         row = layout.row(align=True)
         row.operator(
             "stampinfo.open_documentation_url", text="Documentation"
-        ).path = "https://gitlab-ncsa.ubisoft.org/animation-studio/blender/stampinfo-addon"
+        ).path = "https://github.com/ubisoft/stampinfo"
 
         layout.separator()
 

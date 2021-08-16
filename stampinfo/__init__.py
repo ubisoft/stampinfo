@@ -54,13 +54,13 @@ importlib.reload(debug)
 
 bl_info = {
     "name": "Stamp Info",
-    "author": "Julien Blervaque (aka Werwack)",
+    "author": "Ubisoft - Julien Blervaque (aka Werwack)",
     "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 92, 0),
     "version": (1, 0, 4),
     "location": "Right panel in the 3D View",
-    "wiki_url": "https://github.com/stampinfo",
+    "wiki_url": "https://github.com/ubisoft/stampinfo",
     # "warning": "BETA Version",
     "category": "Ubisoft",
 }
