@@ -13,7 +13,7 @@ may not be considered as feature complete for a more generic purpose. In spite o
 
 
 <br />
-<img src="docs/img/StampInfo_RenderScreen.png" alt="drawing" width="70%"/>
+<img src="doc/images/StampInfo_RenderScreen.png" alt="drawing" width="70%"/>
 <br /><br />
 
 ## Installation:
@@ -51,7 +51,7 @@ be downloaded and deployed correctly. Also be sure that your firewall doesn't bl
 
 ## Dev notes
 
-This add-on requires the Python library PIL. This library is automaticaly downloaded and deployed on the
+This add-on requires the Python library [Pillow](https://pypi.org/project/Pillow/). This library is automaticaly downloaded and deployed on the
 Blender instance when Stam Info is installed.
 
 
