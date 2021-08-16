@@ -1,17 +1,25 @@
 
 # History:
 
-# V  1.0.1 - 29/06/2021:
-- Removed handlers and use of the compositing editor that were used to generate the final images
+# V  1.0.x
+* V  1.0.9 - 05/07/2021:
+	- Rewamped UI
+	- Improved documentation
+
+* V  1.0.1 - 29/06/2021:
+	- Removed handlers and use of the compositing editor that were used to generate the final images
 because code was unstable and complicated
-- Added 2 Render buttons and a batch based on the VSE to create the final images
+	- Added 2 Render buttons and a batch based on the VSE to create the final images
+
+<br />
 
 # V  0.9.x:
-* V  0.9.32 - 23/09/2020:
-	- Added a Corner Note parameter
 
 ## Known issues:
 - When the handlers are used the compositing graph is completely cleared after each rendering
+
+* V  0.9.32 - 23/09/2020:
+	- Added a Corner Note parameter
 
 * V  0.9.17 - 04/06/2020:
 	- Added color on the range limits
@@ -36,8 +44,6 @@ because code was unstable and complicated
 
 * V 0.9.10:
 	- Added Date and Time medadata
-
-# V  0.9.1.x:
 
 * V 0.9.7:
 	- Added Take medadata
