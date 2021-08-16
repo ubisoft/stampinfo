@@ -1,5 +1,20 @@
 __pycache__
-.venv
 *.pyc
 _PackagesForInstall
-*.history
+*.blend1
+
+# Virtual envs
+.venv
+
+# VS Code
+.vscode
+.vscode/settings.json
+
+.local
+.history
+
+# Docs
+docs/_build
+docs/_html
+docs_dev/_build
+docs_dev/_html
