@@ -1037,6 +1037,17 @@ class StampInfo_Vse_Render(PropertyGroup):
             specificFrame = frame_start
 
         previousScene = bpy.context.window.scene
+        previousWorkspace = bpy.context.workspace.name
+        print(f"Previous Workspace: {previousWorkspace}")
+        previousScreen = bpy.context.window.screen.name
+        print(f"Previous Screen: {previousScreen}")
+        previousRenderView = None
+        region = next(
+            iter([area.spaces[0].region_3d for area in bpy.context.screen.areas if area.type == "VIEW_3D"]), None
+        )
+        if region:
+            # print(f"current view: {region.view_perspective}")
+            previousRenderView = region.view_perspective
 
         # Add new scene
         # vse_scene = bpy.data.scenes.new(name="Tmp_VSE_RenderScene" + postfixSceneName)
@@ -1177,6 +1188,19 @@ class StampInfo_Vse_Render(PropertyGroup):
         #     bpy.ops.scene.delete()
 
         bpy.context.window.scene = previousScene
+
+        print(f" *** Current Workspace: {bpy.context.workspace.name}")
+
+        # bpy.context.window.screen.name = previousScreen
+        bpy.context.window.workspace = bpy.data.workspaces[previousWorkspace]
+        print(f" *** Current Workspace: {bpy.context.workspace.name}")
+
+        bpy.context.window.screen = bpy.context.window_manager.windows[0].screen
+        bpy.context.window.screen = bpy.data.screens[previousScreen]
+        # bpy.context.window_manager.windows[1].screen = bpy.data.screens[previousScreen]
+
+        if region and previousRenderView is not None:
+            region.view_perspective = previousRenderView
 
         # bpy.ops.image.open(filepath="//Main_Take0010.png", directory="Z:\\EvalSofts\\Blender\\DevPython_Data\\UAS_ShotManager_Data\\", files=[{"name":"Main_Take0010.png", "name":"Main_Take0010.png"}], relative_path=True, show_multiview=False)
         # bpy.ops.image.open(

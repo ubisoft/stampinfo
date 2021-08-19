@@ -57,8 +57,8 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack)",
     "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
-    "blender": (2, 93, 0),
-    "version": (1, 0, 8),
+    "blender": (2, 92, 0),
+    "version": (1, 0, 9),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://github.com/ubisoft/stampinfo",
     # "warning": "BETA Version",
