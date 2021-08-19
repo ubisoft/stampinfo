@@ -88,7 +88,9 @@ class UAS_PT_StampInfo_Render(Operator):
         #     return {"FINISHED"}
 
         if not bpy.data.is_saved and "ANIMATION" == self.renderMode:
-            utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+            utils.ShowMessageBox(
+                "The file need to be saved in order to render the animation", "Rendering aborted", icon="ERROR"
+            )
             return {"FINISHED"}
 
         if not stampInfoSettings.stampInfoUsed:
@@ -113,7 +115,7 @@ class UAS_PT_StampInfo_Render(Operator):
         seqPath.print(at_frame=renderFrame)
 
         if "" == seqPath.sequence_name():
-            utils.ShowMessageBox("Invalid sequence name - Rendering aborted", "Render aborted", icon="ERROR")
+            utils.ShowMessageBox("Invalid sequence name - Rendering aborted", "Rendering aborted", icon="ERROR")
             return {"FINISHED"}
 
         print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")

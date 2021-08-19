@@ -109,6 +109,8 @@ def display_addon_registered_version(addon_name):
 
 def ShowMessageBox(message="", title="Message Box", icon="INFO"):
     """
+        A message can be drawn on several lines when containing the separator /n
+
         # #Shows a message box with a specific message 
         # ShowMessageBox("This is a message") 
 
@@ -119,8 +121,13 @@ def ShowMessageBox(message="", title="Message Box", icon="INFO"):
         # ShowMessageBox("This is a message", "This is a custom title", 'ERROR')
     """
 
+    messages = message.split("/n")
+
     def draw(self, context):
-        self.layout.label(text=message)
+        layout = self.layout
+
+        for s in messages:
+            layout.label(text=s)
 
     bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
 
