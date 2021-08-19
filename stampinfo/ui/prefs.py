@@ -36,6 +36,15 @@ class UAS_MT_StampInfo_Prefs_MainMenu(Menu):
     def draw(self, context):
         layout = self.layout
 
+        row = layout.row()
+        row.separator(factor=5)
+        resetOp = row.operator("uas_stamp_info.querybox", text="Reset All to Default Values...", icon="LOOP_BACK")
+        resetOp.width = 400
+        resetOp.message = "Reset all the properties to their default value?"
+        resetOp.function_name = "reset_all_properties"
+
+        layout.separator()
+
         row = layout.row(align=True)
         row.operator("preferences.addon_show", text="Add-on Preferences...").module = "stampinfo"
 

@@ -123,10 +123,10 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     stampInfoUsed: BoolProperty(
         name="Stamp Info",
         description="Stamp info on rendered images",
-        default=False,
         get=get_stampInfoUsed,
         set=set_stampInfoUsed,
         update=stampInfoUsed_StateChanged,
+        default=True,
     )
 
     def get_stampInfoRenderMode(self):
@@ -159,7 +159,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         ],
         get=get_stampInfoRenderMode,
         set=set_stampInfoRenderMode,
-        default="OUTSIDE",
+        default=1,
     )
 
     # ---------- project properties -------------
@@ -202,6 +202,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         description="List of the logo files installed with this add-on",
         items=buildLogosList,
         #   update=updateLogoPath,
+        default=0,
     )
 
     logoFilepath: StringProperty(name="", description="File path of the specified logo", default="")

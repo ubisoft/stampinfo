@@ -118,6 +118,16 @@ def module_can_be_imported(name):
         return False
 
 
+def stampInfo_resetProperties():
+    from .utils.utils_inspectors import resetAttrs
+
+    # print("stampInfo_resetProperties...")
+    # print(f"Scene name: {bpy.context.scene.name}")
+
+    props = bpy.context.scene.UAS_StampInfo_Settings
+    resetAttrs(props)
+
+
 def register():
     from stampinfo import ui
     from stampinfo import icons
