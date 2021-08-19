@@ -136,7 +136,52 @@ class UAS_OpenFileBrowser(Operator, ImportHelper):
         return {"FINISHED"}
 
 
-_classes = (UAS_StampInfo_OpenExplorer, UAS_OT_Open_Documentation_Url, UAS_OpenFileBrowser)
+####################################################################
+
+
+def reset_all_properties():
+    import stampinfo
+
+    print("reset_all_properties")
+    stampinfo.stampInfo_resetProperties()
+
+
+class UAS_StampInfo_OT_Querybox(Operator):
+    bl_idname = "uas_stamp_info.querybox"
+    bl_label = "Please confirm:"
+    # bl_description = "..."
+    bl_options = {"INTERNAL"}
+
+    width: bpy.props.IntProperty(default=400)
+    message: bpy.props.StringProperty(default="Do you confirm the operation?")
+    function_name: bpy.props.StringProperty(default="")
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=self.width)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.separator(factor=1)
+
+        row = layout.row()
+        row.separator(factor=2)
+        row.label(text=self.message)
+
+        layout.separator()
+
+    def execute(self, context):
+        eval(self.function_name + "()")
+        # try:
+        #     eval(self.function_name + "()")
+        # except Exception:
+        #     print(f"*** Function {self.function_name} not found ***")
+
+        return {"FINISHED"}
+
+
+####################################################################
+
+_classes = (UAS_StampInfo_OpenExplorer, UAS_OT_Open_Documentation_Url, UAS_OpenFileBrowser, UAS_StampInfo_OT_Querybox)
 
 
 def register():
