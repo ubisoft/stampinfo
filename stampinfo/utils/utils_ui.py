@@ -88,9 +88,9 @@ class UAS_StampInfo_OpenExplorer(Operator):
                 subprocess.Popen(f'explorer "{Path(absPathToOpen).parent.parent}"')
             else:
                 print(f"Open Explorer failed: Path not found: {Path(absPathToOpen)}")
-                from ..utils.utils import ShowMessageBox
+                from ..utils.utils_ui import show_message_box
 
-                ShowMessageBox(f"{absPathToOpen} not found", "Open Explorer - Directory not found", "ERROR")
+                show_message_box(f"{absPathToOpen} not found", "Open Explorer - Directory not found", "ERROR")
 
         return {"FINISHED"}
 
@@ -139,6 +139,35 @@ class UAS_OpenFileBrowser(Operator, ImportHelper):
 ####################################################################
 
 
+def show_message_box(message="", title="Message Box", icon="INFO"):
+    """Display a message box
+
+    A message can be drawn on several lines when containing the separator \n
+
+    Shows a message box with a specific message:
+    -> show_message_box("This is a message") 
+
+    Shows a message box with a message and custom title
+    -> show_message_box("This is a message", "This is a custom title")
+
+    Shows a message box with a message, custom title, and a specific icon
+    -> show_message_box("This is a message", "This is a custom title", 'ERROR')
+    """
+
+    messages = message.split("\n")
+
+    def draw(self, context):
+        layout = self.layout
+
+        for s in messages:
+            layout.label(text=s)
+
+    bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
+
+
+# TODO: Cleaning
+# Dev note: This function has to be here for the moment cause it is passed
+# in stampinfo code to a call to uas_stamp_info.querybox
 def reset_all_properties():
     import stampinfo
 
@@ -147,6 +176,11 @@ def reset_all_properties():
 
 
 class UAS_StampInfo_OT_Querybox(Operator):
+    """Display a query dialog box
+
+    A message can be drawn on several lines when containing the separator \n
+    """
+
     bl_idname = "uas_stamp_info.querybox"
     bl_label = "Please confirm:"
     # bl_description = "..."
@@ -160,12 +194,18 @@ class UAS_StampInfo_OT_Querybox(Operator):
         return context.window_manager.invoke_props_dialog(self, width=self.width)
 
     def draw(self, context):
+
+        messages = self.message.split("\n")
+
         layout = self.layout
         layout.separator(factor=1)
 
-        row = layout.row()
-        row.separator(factor=2)
-        row.label(text=self.message)
+        for s in messages:
+            layout.label(text=s)
+
+        # row = layout.row()
+        # row.separator(factor=2)
+        # row.label(text=self.message)
 
         layout.separator()
 

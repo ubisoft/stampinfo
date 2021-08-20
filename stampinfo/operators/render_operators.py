@@ -26,6 +26,7 @@ from bpy.props import EnumProperty
 # from ..utils.utils_render import getRenderOutputFilename
 from ..utils.utils_filenames import SequencePath
 from ..utils.utils_os import delete_folder
+from ..utils.utils_ui import show_message_box
 from ..utils import utils
 
 from pathlib import Path
@@ -83,13 +84,15 @@ class UAS_PT_StampInfo_Render(Operator):
         # abort rendering if the file is not saved
         # note: removed: using blender temp dir instead
         # if not bpy.data.is_saved:
-        #     utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+        #     show_message_box("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
         #     # if None == (getInfoFileFullPath(scene, -1)[0]):
         #     return {"FINISHED"}
 
         if not bpy.data.is_saved and "ANIMATION" == self.renderMode:
-            utils.ShowMessageBox(
-                "The file need to be saved in order to render the animation", "Rendering aborted", icon="ERROR"
+            show_message_box(
+                "The file has to be saved and to have a valid rendering path\nin order to render the animation",
+                "Rendering aborted",
+                icon="ERROR",
             )
             return {"FINISHED"}
 
@@ -115,7 +118,7 @@ class UAS_PT_StampInfo_Render(Operator):
         seqPath.print(at_frame=renderFrame)
 
         if "" == seqPath.sequence_name():
-            utils.ShowMessageBox("Invalid sequence name - Rendering aborted", "Rendering aborted", icon="ERROR")
+            show_message_box("Invalid sequence name - Rendering aborted", "Rendering aborted", icon="ERROR")
             return {"FINISHED"}
 
         print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")
