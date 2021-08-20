@@ -29,17 +29,15 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-# from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance
-
-
 def getRenderRange(scene):
     rangeStart, rangeEnd = scene.frame_start, scene.frame_end
     return (rangeStart, rangeEnd)
 
 
-# returns the rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
 # wk fix: now retunrs an array of ints!
 def getRenderResolution(scene):
+    """Get the rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
+    """
     renderResolution = (
         scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
         scene.render.resolution_y * scene.render.resolution_percentage * 0.01,
@@ -52,9 +50,11 @@ def getRenderRatio(scene):
     return scene.render.resolution_x / scene.render.resolution_y
 
 
-# returns the rendered stamp info image output resolution as float tupple (not int !) and with taking into account the render percentage
 # wk fix: returns an int array!
 def getRenderResolutionForStampInfo(scene):
+    """Get the rendered stamp info image output resolution as float tupple (not int !) and with taking
+    into account the render percentage
+    """
     stampRenderRes = (0.0, 0.0)
     modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
 
@@ -76,8 +76,9 @@ def getRenderResolutionForStampInfo(scene):
     return stampRenderRes
 
 
-# returns the height (integer) in pixels of the image between the 2 borders according to the current mode
 def getInnerHeight(scene):
+    """Get the height (integer) in pixels of the image between the 2 borders according to the current mode
+    """
     innerH = -1
 
     if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
@@ -92,7 +93,7 @@ def getInnerHeight(scene):
     return innerH
 
 
-# wkip traiter cas quand aps de nom de fichier
+# TODO wkip traiter cas quand aps de nom de fichier
 def getRenderFileName(scene):
     #   print("\n getRenderFileName ")
     # filename is parsed in order to remove the last block in case it doesn't finish with \ or / (otherwise it is
@@ -106,12 +107,13 @@ def getRenderFileName(scene):
     return filename
 
 
+# TODO wkip cleaning
 def getInfoFileFullPath(scene, renderFrameInd=None):
-    """
-        returns the path of the info image corresponding to the specified frame
-        path of temp info files is the same as the render output files
-        renderFrameInd can be None to get only the path
-        *** Validity of the path is NOT tested
+    """Get the path of the info image corresponding to the specified frame
+
+    Path of temp info files is the same as the render output files
+    renderFrameInd can be None to get only the path
+    *** Validity of the path is NOT tested ***
     """
     #   print("\n getInfoFileFullPath ")
     filepath = ""
@@ -174,15 +176,15 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
     return (renderPath, renderedInfoFileName)
 
 
-def getStampInfoRenderFilepath(scene):
-    """
-    Return a functional render file path to render the temporary files
-    If the file is not saved and the path is relative then a temporary file path is returned
+def getStampInfoRenderFilepath(scene, useTempDir=False):
+    """Get a functional render file path to render the temporary files
+    
+    Returns: If the file is not saved and the path is relative then a temporary file path is returned
     """
     filepath = scene.render.filepath
 
     # in case of file not saved and use of a relative path then we use the temp dir
-    if not bpy.data.is_saved and 0 == filepath.find("/") or 0 == filepath.find("/tmp\\"):
+    if (not bpy.data.is_saved and 0 == filepath.find("/")) or 0 == filepath.find("/tmp\\") or useTempDir:
         filepath = bpy.app.tempdir + "TmpSeq.png"
     # else:
     #     filepath = bpy.path.abspath(scene.render.filepath)
@@ -195,7 +197,7 @@ def getTempBGImageBaseName():
 
 
 def createTempBGImage(scene):
-    """ Create the temporaty image used to set the render size (not the one with the stamped info)
+    """Create the temporaty image used to set the render size (not the one with the stamped info)
     """
     from PIL import Image
 
@@ -233,8 +235,9 @@ def deleteTempImage(scene):
         pass
 
 
-# Delete only the info image file rendered in the previous frame
 def deletePreviousInfoImage(scene, currentFrame):
+    """Delete only the info image file rendered in the previous frame
+    """
     print("\n   deletePreviousInfoImage [ ")
     rangeStart = getRenderRange(scene)[0]
 

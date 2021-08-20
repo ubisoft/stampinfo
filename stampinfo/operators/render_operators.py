@@ -26,11 +26,12 @@ from bpy.props import EnumProperty
 # from ..utils.utils_render import getRenderOutputFilename
 from ..utils.utils_filenames import SequencePath
 from ..utils.utils_os import delete_folder
-from ..utils import utils
+from ..utils.utils_ui import show_message_box
 
 from pathlib import Path
 
 from stampinfo import stamper
+from ..config import config
 
 
 class UAS_PT_StampInfo_Render(Operator):
@@ -79,51 +80,74 @@ class UAS_PT_StampInfo_Render(Operator):
 
         scene = context.scene
         stampInfoSettings = scene.UAS_StampInfo_Settings
+        prefs = context.preferences.addons["stampinfo"].preferences
+        vse_render = context.window_manager.stampinfo_vse_render
 
-        # abort rendering if the file is not saved
-        # note: removed: using blender temp dir instead
-        # if not bpy.data.is_saved:
-        #     utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
-        #     # if None == (getInfoFileFullPath(scene, -1)[0]):
-        #     return {"FINISHED"}
-
-        if not bpy.data.is_saved and "ANIMATION" == self.renderMode:
-            utils.ShowMessageBox("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
-            return {"FINISHED"}
-
+        # Stamp Info not used: Blender standard rendering behavior
+        # --------------------
         if not stampInfoSettings.stampInfoUsed:
             if "STILL" == self.renderMode:
                 bpy.ops.render.render("INVOKE_DEFAULT", use_viewport=True)
             elif "ANIMATION" == self.renderMode:
                 bpy.ops.render.render("INVOKE_DEFAULT", animation=True, use_viewport=True)
+
             return {"FINISHED"}
 
-        vse_render = context.window_manager.stampinfo_vse_render
-        prefs = context.preferences.addons["stampinfo"].preferences
+        # Stamp Info used: Check of the rendering conditions
+        # ----------------
+
+        # abort rendering if the file is not saved
+        # note: removed: using blender temp dir instead
+        # if not bpy.data.is_saved:
+        #     show_message_box("File not saved - Rendering aborted", "Render aborted", icon="ERROR")
+        #     # if None == (getInfoFileFullPath(scene, -1)[0]):
+        #     return {"FINISHED"}
+
+        if not bpy.data.is_saved:
+            if "ANIMATION" == self.renderMode:
+                show_message_box(
+                    "The file has to be saved and to have a valid rendering path\nin order to render the animation",
+                    "Rendering aborted",
+                    icon="ERROR",
+                )
+                return {"FINISHED"}
 
         previousRenderPath = scene.render.filepath
         renderFrame = scene.frame_current
 
         # note: if scene.render.filepath is empty the Blender temp folder and a temp filename are used
-        render_filepath = stamper.getStampInfoRenderFilepath(scene)
+        render_filepath = None
+        seqPath = None
+        if "STILL" == self.renderMode:
+            if not prefs.write_still:
+                # match Blender standard behavior where still images are not saved by default
+                render_filepath = stamper.getStampInfoRenderFilepath(scene, useTempDir=True)
+                seqPath = SequencePath(render_filepath)
+            else:
+                render_filepath = stamper.getStampInfoRenderFilepath(scene)
+                seqPath = SequencePath(bpy.path.abspath(render_filepath))
+                if "" == seqPath.sequence_name():
+                    show_message_box("Please set a valid output file name", "Rendering aborted", icon="ERROR")
+                    return {"FINISHED"}
+        elif "ANIMATION" == self.renderMode:
+            render_filepath = stamper.getStampInfoRenderFilepath(scene)
+            seqPath = SequencePath(bpy.path.abspath(render_filepath))
+            if "" == seqPath.sequence_name():
+                show_message_box("Please set a valid sequence output file name", "Rendering aborted", icon="ERROR")
+                return {"FINISHED"}
 
-        seqPath = SequencePath(bpy.path.abspath(render_filepath))
-        print(f"file path {bpy.path.abspath(render_filepath)}")
-        # if config.uasDebug:
-        seqPath.print(at_frame=renderFrame)
+        if config.uasDebug:
+            print(f"render_filepath :{render_filepath}")
+            seqPath.print(at_frame=renderFrame)
 
-        if "" == seqPath.sequence_name():
-            utils.ShowMessageBox("Invalid sequence name - Rendering aborted", "Render aborted", icon="ERROR")
-            return {"FINISHED"}
-
-        print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")
+        # print(f"seqPath.sequence_name(): {seqPath.sequence_name()}")
         tempFramedRenderPath = seqPath.parent() + "_tmp_StampInfo_framing" + "\\"
-        print(f"tempFramedRenderPath: {tempFramedRenderPath}")
+        # print(f"tempFramedRenderPath: {tempFramedRenderPath}")
         if not Path(tempFramedRenderPath).exists():
             Path(tempFramedRenderPath).mkdir(parents=True, exist_ok=True)
 
         tempImgRenderPath = seqPath.parent() + "_tmp_StampInfo_render" + "\\"
-        print(f"tempImgRenderPath: {tempImgRenderPath}")
+        # print(f"tempImgRenderPath: {tempImgRenderPath}")
         if not Path(tempImgRenderPath).exists():
             Path(tempImgRenderPath).mkdir(parents=True, exist_ok=True)
 

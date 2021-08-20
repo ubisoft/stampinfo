@@ -70,4 +70,3 @@ def resetAttrs(classInstance):
         # print(
         #     f"{prop.identifier}   name: {prop.name}   value: {val}   default: {prop.default}   class: {prop.__class__.__name__}"
         # )
-

@@ -107,34 +107,6 @@ def display_addon_registered_version(addon_name):
     return versionTupple
 
 
-def ShowMessageBox(message="", title="Message Box", icon="INFO"):
-    """
-        # #Shows a message box with a specific message 
-        # ShowMessageBox("This is a message") 
-
-        # #Shows a message box with a message and custom title
-        # ShowMessageBox("This is a message", "This is a custom title")
-
-        # #Shows a message box with a message, custom title, and a specific icon
-        # ShowMessageBox("This is a message", "This is a custom title", 'ERROR')
-    """
-
-    def draw(self, context):
-        self.layout.label(text=message)
-
-    bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
-
-
-# #Shows a message box with a specific message
-# ShowMessageBox("This is a message")
-
-# #Shows a message box with a message and custom title
-# ShowMessageBox("This is a message", "This is a custom title")
-
-# #Shows a message box with a message, custom title, and a specific icon
-# ShowMessageBox("This is a message", "This is a custom title", 'ERROR')
-
-
 def file_path_from_uri(uri):
     path = unquote_plus(urlparse(uri).path).replace("\\", "//")
     if re.match(r"^/\S:.*", path):  # Remove leading /

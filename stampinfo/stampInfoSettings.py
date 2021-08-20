@@ -57,7 +57,7 @@ else:
 
 class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     def version(self):
-        """ Return the add-on version in the form of a tupple made by: 
+        """ Return the add-on version in the form of a tupple made by:
                 - a string x.y.z (eg: "1.21.3")
                 - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
             Return None if the addon has not been found
