@@ -447,41 +447,42 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     #     textProp += getpass.getuser() if stampValue else ""
     #     img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
-    # ---------- image sequence indices -------------
+    # ---------- image sequence indices in video ref system -------------
     # currentTextTop += textLineH + textInterlineH
 
-    # if userSettings.videoFrameUsed:
-    # textProp = "Video: " if stampLabel else ""
-    textProp = "Video Frame: "
-    currentTextTopFor3DFrames = offsetToCenterH + paddingTopExt + textLineH + textInterlineH
-    currentTextLeftFor3DFrames = renderW * (1.0 - paddingLeftNorm)
+    currentTextTopForVideoFrames = offsetToCenterH + paddingTopExt + textLineH + textInterlineH
+    currentTextLeftForVideoFrames = renderW * (1.0 - paddingLeftNorm)
 
-    currentImage = scene.frame_current - scene.frame_start
+    if userSettings.videoFrameUsed:
+        # textProp = "Video: " if stampLabel else ""
+        textProp = "Video Frame: "
 
-    if not prefs.mediaFirstFrameIsZero:
-        currentImage += 1
-    firstFrameInd = 0 if prefs.mediaFirstFrameIsZero else 1
-    lastFrameInd = scene.frame_end - scene.frame_start
-    if not prefs.mediaFirstFrameIsZero:
-        lastFrameInd += 1
+        currentImage = scene.frame_current - scene.frame_start
 
-    drawRangesAndFrame(
-        scene,
-        img_draw,
-        "VIDEOFRAME",
-        currentImage,
-        firstFrameInd,
-        lastFrameInd,
-        userSettings.shotHandles,
-        userSettings.currentFrameUsed,
-        userSettings.animRangeUsed,
-        userSettings.handlesUsed,
-        currentTextLeftFor3DFrames,
-        currentTextTopFor3DFrames,
-        font,
-        fontLarge,
-        textColorRGBA,
-    )
+        if not prefs.mediaFirstFrameIsZero:
+            currentImage += 1
+        firstFrameInd = 0 if prefs.mediaFirstFrameIsZero else 1
+        lastFrameInd = scene.frame_end - scene.frame_start
+        if not prefs.mediaFirstFrameIsZero:
+            lastFrameInd += 1
+
+        drawRangesAndFrame(
+            scene,
+            img_draw,
+            "VIDEOFRAME",
+            currentImage,
+            firstFrameInd,
+            lastFrameInd,
+            userSettings.shotHandles,
+            userSettings.currentFrameUsed,
+            userSettings.animRangeUsed,
+            userSettings.handlesUsed,
+            currentTextLeftForVideoFrames,
+            currentTextTopForVideoFrames,
+            font,
+            fontLarge,
+            textColorRGBA,
+        )
 
     # ------------ corner note ---------------
     currentTextTop = offsetToCenterH + paddingTopExt / 2.0
@@ -495,13 +496,13 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         )
 
     # ---------- fps and 3D edit -------------
-    currentTextTop = currentTextTopFor3DFrames + textLineH + textInterlineH
+    currentTextTop = currentTextTopForVideoFrames + textLineH + textInterlineH
 
     if userSettings.framerateUsed:
         textProp = "Framerate: " if stampLabel else ""
         textProp += str(scene.render.fps) + " fps" if stampValue else ""
         img_draw.text(
-            (currentTextLeftFor3DFrames - (font.getsize(textProp))[0], currentTextTop),
+            (currentTextLeftForVideoFrames - (font.getsize(textProp))[0], currentTextTop),
             textProp,
             font=font,
             fill=textColorRGBA,
@@ -626,25 +627,27 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     # ---------- 3d frames and range -------------
     # currentTextTopFor3DFrames += textLineH + textInterlineH
-    currentTextTopFor3DFrames = currentTextTop  # - fontHeight
-    currentTextLeftFor3DFrames = renderW * (1.0 - paddingLeftNorm)
-    drawRangesAndFrame(
-        scene,
-        img_draw,
-        "3DFRAME",
-        currentFrame,
-        scene.frame_start,
-        scene.frame_end,
-        userSettings.shotHandles,
-        userSettings.currentFrameUsed,
-        userSettings.animRangeUsed,
-        userSettings.handlesUsed,
-        currentTextLeftFor3DFrames,
-        currentTextTopFor3DFrames,
-        font,
-        fontLarge,
-        textColorRGBA,
-    )
+
+    if userSettings.currentFrameUsed:
+        currentTextTopFor3DFrames = currentTextTop  # - fontHeight
+        currentTextLeftFor3DFrames = renderW * (1.0 - paddingLeftNorm)
+        drawRangesAndFrame(
+            scene,
+            img_draw,
+            "3DFRAME",
+            currentFrame,
+            scene.frame_start,
+            scene.frame_end,
+            userSettings.shotHandles,
+            userSettings.currentFrameUsed,
+            userSettings.animRangeUsed,
+            userSettings.handlesUsed,
+            currentTextLeftFor3DFrames,
+            currentTextTopFor3DFrames,
+            font,
+            fontLarge,
+            textColorRGBA,
+        )
 
     currentTextTop += textLineH + 2.0 * textInterlineH
 

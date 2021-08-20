@@ -145,7 +145,7 @@ def show_message_box(message="", title="Message Box", icon="INFO"):
     A message can be drawn on several lines when containing the separator \n
 
     Shows a message box with a specific message:
-    -> show_message_box("This is a message") 
+    -> show_message_box("This is a message")
 
     Shows a message box with a message and custom title
     -> show_message_box("This is a message", "This is a custom title")

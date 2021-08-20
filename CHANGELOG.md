@@ -2,7 +2,14 @@
 # History:
 
 # V  1.0.x
-* V  1.0.9 - 05/07/2021:
+* V  1.0.9 - 20/08/2021:
+	- Refactored messagebox function
+	- Added a query messagebox operator
+	- Added a Reset All Properties function
+	- Improved the rendering usability by reducing the blocking rendering cases
+	- Fix: Frame ranges are now disabled again when unchecked in the UI
+
+* V  1.0.8 - 05/07/2021:
 	- Rewamped UI
 	- Improved documentation
 

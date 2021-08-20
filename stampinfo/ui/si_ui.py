@@ -101,7 +101,8 @@ class UAS_PT_StampInfoAddon(Panel):
         layout = self.layout
         scene = context.scene
         prefs = context.preferences.addons["stampinfo"].preferences
-        okForRender = True
+        okForRenderStill = True
+        okForRenderAnim = True
 
         import addon_utils
 
@@ -135,28 +136,32 @@ class UAS_PT_StampInfoAddon(Panel):
                 row = layout.row()
                 row.alert = True
                 row.label(text="*** File Not Saved ***")
-            okForRender = True
+            okForRenderStill = True
+            okForRenderAnim = True
         else:
             if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
                 row = layout.row()
                 row.alert = True
                 row.label(text="*** Invalid Output Path ***")
-                okForRender = False
+                okForRenderStill = False
+                okForRenderAnim = False
             elif "" == stamper.getRenderFileName(scene):
                 row = layout.row()
                 row.alert = True
                 row.label(text="*** Invalid Output File Name for Animation Rendering***")
-                okForRender = False
+                okForRenderStill = False
+                okForRenderAnim = False
 
         # if camera doen't exist
         if scene.camera is None:
             row = layout.row()
             row.alert = True
             row.label(text="*** No Camera in the Scene ***")
-            okForRender = False
+            okForRenderStill = False
+            okForRenderAnim = False
 
         # ready to render text
-        if okForRender and config.uasDebug:
+        if okForRenderStill and okForRenderAnim and config.uasDebug:
             row = layout.row()
             row.label(text="Ready to render")
 
@@ -164,11 +169,11 @@ class UAS_PT_StampInfoAddon(Panel):
         renderMainRow = layout.split(factor=0.45, align=False)
         renderMainRow.scale_y = 1.4
         renderStillRow = renderMainRow.row()
-        #  renderStillRow.enabled = okForRender
+        renderStillRow.enabled = okForRenderStill
         renderStillRow.operator("uas_stampinfo.render", text=" Render Image", icon="IMAGE_DATA").renderMode = "STILL"
 
         renderAnimRow = renderMainRow.row()
-        renderAnimRow.enabled = okForRender
+        renderAnimRow.enabled = okForRenderAnim
         renderAnimRow.operator(
             "uas_stampinfo.render", text=" Render Animation", icon="RENDER_ANIMATION"
         ).renderMode = "ANIMATION"
