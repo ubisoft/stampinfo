@@ -392,7 +392,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     currentTextTop = borderTopH - paddingTopExt - fontHeight
 
     # ---------- user -------------
-    if True or userSettings.userNameUsed:
+    if userSettings.userNameUsed:
         textProp = "By: "  # if stampLabel else ""
         textProp += getpass.getuser() if stampValue else ""
 
