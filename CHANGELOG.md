@@ -1,6 +1,6 @@
 # Stamp Info - Change log
 
-### V 1.0.10 (wip)
+## V 1.0.10 (wip)
 **Documentation:**
 - Improved documentation
 
