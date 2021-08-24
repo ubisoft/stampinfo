@@ -1,13 +1,11 @@
 # Stamp Info - Change log
 
 ### V 1.0.10 (wip)
-####Documentation:
-
-	- Improved documentation
+**Documentation:**
+- Improved documentation
 
 **Fixes:**
-
-	* The author name was not hidden on the rendered images when name was uncheked
+- The author name was not hidden on the rendered images when name was uncheked
 
 
 ## V 1.0.x
