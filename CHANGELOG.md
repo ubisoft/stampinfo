@@ -1,7 +1,12 @@
+# V  1.0.10 (wip)
+## Documentation
+	- Improved documentation
 
-# History:
+## Fixes
+	- The author name was not hidden on the rendered images when name was uncheked
 
 # V  1.0.x
+
 * V  1.0.9 - 20/08/2021:
 	- Refactored messagebox function
 	- Added a query messagebox operator
