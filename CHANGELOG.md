@@ -1,10 +1,10 @@
 # Stamp Info - Change log
 
 ### V 1.0.10 (wip)
-- **Documentation:**
+**Documentation:**
 	* Improved documentation
 
-- **Fixes:**
+**Fixes:**
 	- The author name was not hidden on the rendered images when name was uncheked
 
 ## V 1.0.x
