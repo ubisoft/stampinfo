@@ -6,10 +6,10 @@
 Stamp Info can display a wide range of custom information on the rendered images. It can be scene properties,
 user and rendering details, safe frame and cross hair... Integrated Blender metadata are also supported.
 
-The following displayed properties may not be self-explainatory and worth to be described.
+The following displayed properties may not be self-explanatory and worth to be described.
 
 Since Stamp Info was designed to keep tracks of the place of images in a rendered animation several properties
-of the add-on are related to frames and time. We will use the term **image sequence** to refer indiferently to
+of the add-on are related to frames and time. We will use the term **image sequence** to refer indifferently to
 an effective image sequence or a video.
 
 ## Logo
