@@ -51,7 +51,7 @@ class UAS_MT_StampInfo_Prefs_MainMenu(Menu):
         row = layout.row(align=True)
         row.operator(
             "stampinfo.open_documentation_url", text="Documentation"
-        ).path = "https://github.com/ubisoft/stampinfo"
+        ).path = "https://ubisoft-stampinfo.readthedocs.io/"
 
         layout.separator()
 

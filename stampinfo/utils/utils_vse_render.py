@@ -838,7 +838,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         # Make "My New Scene" the active one
         #    bpy.context.window.scene = vse_scene
 
-        #    vse_scene = utils.getSceneVSE(vse_scene.name, createVseTab=config.uasDebug)
+        #    vse_scene = utils.getSceneVSE(vse_scene.name, createVseTab=config.devDebug)
         # if not vse_scene.sequence_editor:
         #     vse_scene.sequence_editor_create()
 
@@ -964,7 +964,7 @@ class StampInfo_Vse_Render(PropertyGroup):
             # bpy.ops.render.render(write_still=True)
             bpy.ops.render.opengl(animation=False, sequencer=True, write_still=True)
 
-        # if not config.uasDebug_keepVSEContent:
+        # if not config.devDebug_keepVSEContent:
         #     bpy.ops.scene.delete()
 
         bpy.context.window.scene = previousScene

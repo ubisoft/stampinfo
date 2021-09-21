@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-To do: module description here.
+Global variables
 """
 
 import os
@@ -24,23 +24,27 @@ import os
 
 def initGlobalVariables():
 
-    # debug ############
-    global uasDebug
+    # isntallation ############
+    global installation_errors
+    installation_errors = []
 
-    # wkip better code: uasDebug = os.environ.get("UasDebug", "0") == "1"
-    if "UasDebug" in os.environ.keys():
-        uasDebug = bool(int(os.environ["UasDebug"]))
+    # debug ############
+    global devDebug
+
+    # wkip better code: devDebug = os.environ.get("devDebug", "0") == "1"
+    if "devDebug" in os.environ.keys():
+        devDebug = bool(int(os.environ["devDebug"]))
     else:
-        uasDebug = False
+        devDebug = False
 
     # force debug mode
-    # uasDebug = False
+    # devDebug = False
 
-    global uasDebug_keepVSEContent
-    uasDebug_keepVSEContent = True and uasDebug
+    global devDebug_keepVSEContent
+    devDebug_keepVSEContent = True and devDebug
 
-    if uasDebug:
-        print("UAS debug: ", uasDebug)
+    if devDebug:
+        print("Dev debug: ", devDebug)
 
 
 def releaseGlobalVariables():

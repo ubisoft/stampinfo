@@ -95,7 +95,7 @@ class UAS_PT_StampInfoAddon(Panel):
         row.separator(factor=2)
         row.menu("UAS_MT_StampInfo_prefs_mainmenu", icon="PREFERENCES", text="")
 
-        row.separator(factor=3)
+        row.separator(factor=1.0)
 
     def draw(self, context):
         layout = self.layout
@@ -117,7 +117,7 @@ class UAS_PT_StampInfoAddon(Panel):
             row.label(text=f" ***  {addonWarning[0]}  ***")
             row.alert = False
 
-        if config.uasDebug:
+        if config.devDebug:
             row = layout.row()
             row.alignment = "CENTER"
             row.alert = True
@@ -132,7 +132,7 @@ class UAS_PT_StampInfoAddon(Panel):
         # ready to render text
         # note: we can also use bpy.data.is_saved
         if "" == bpy.data.filepath:
-            if config.uasDebug:
+            if config.devDebug:
                 row = layout.row()
                 row.alert = True
                 row.label(text="*** File Not Saved ***")
@@ -161,7 +161,7 @@ class UAS_PT_StampInfoAddon(Panel):
             okForRenderAnim = False
 
         # ready to render text
-        if okForRenderStill and okForRenderAnim and config.uasDebug:
+        if okForRenderStill and okForRenderAnim and config.devDebug:
             row = layout.row()
             row.label(text="Ready to render")
 
@@ -309,7 +309,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         subRow.label(text=sceneFrameStr)
 
         # ---------- 3D edit frame -------------
-        if config.uasDebug:
+        if config.devDebug:
             #   box = layout.box()
             row = box.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")

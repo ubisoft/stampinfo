@@ -107,6 +107,16 @@ def display_addon_registered_version(addon_name):
     return versionTupple
 
 
+def addonCategory(addonName):
+    import addon_utils
+
+    categ = ""
+    for addon in addon_utils.modules():
+        if addon.bl_info["name"] == addonName:
+            categ = addon.bl_info["category"]
+    return categ
+
+
 def file_path_from_uri(uri):
     path = unquote_plus(urlparse(uri).path).replace("\\", "//")
     if re.match(r"^/\S:.*", path):  # Remove leading /
@@ -216,7 +226,6 @@ def getSceneVSE(vsm_sceneName, createVseTab=False):
     """ Return the scene that has the name held by vsm_sceneName and adds a VSE in it if there is not already one.
         Use <returned scene>.sequence_editor to get the vse of the scene
     """
-    # vsm_sceneName = "VideoShotManager"
     vsm_scene = None
 
     if vsm_sceneName in bpy.data.scenes:

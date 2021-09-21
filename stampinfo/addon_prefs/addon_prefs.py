@@ -23,6 +23,9 @@ import bpy
 from bpy.types import AddonPreferences
 from bpy.props import BoolProperty
 
+from ..config import config
+from ..ui.dependencies_ui import drawDependencies
+
 
 class UAS_StampInfo_AddonPrefs(AddonPreferences):
     """
@@ -33,6 +36,10 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
     # this must match the add-on name, use '__package__'
     # when defining this in a submodule of a python package
     bl_idname = "stampinfo"
+
+    install_failed: BoolProperty(
+        name="Install failed", default=False,
+    )
 
     mediaFirstFrameIsZero: BoolProperty(
         name="Output Media First Frame is 0",
@@ -67,6 +74,7 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        splitFactor = 0.3
 
         box = layout.box()
         row = box.row()
@@ -84,6 +92,36 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         subCol = row.column()
         subCol.prop(self, "delete_temp_scene")
         subCol.prop(self, "delete_temp_images")
+
+        # Dependencies
+        ###############
+        drawDependencies(context, layout)
+
+        # Dev and debug
+        ###############
+        box = layout.box()
+
+        split = box.split(factor=splitFactor)
+        rowLeft = split.row()
+        rowLeft.label(text="Development and Debug:")
+        rowRight = split.row()
+
+        if config.devDebug:
+            strDebug = " *** Debug Mode is On ***"
+            rowRight.alignment = "RIGHT"
+            rowRight.alert = True
+            rowRight.label(text=strDebug)
+
+        split = box.split(factor=splitFactor)
+        rowLeft = split.row()
+        rowLeft.alignment = "RIGHT"
+        rowLeft.label(text="Debug Mode")
+        rowRight = split.row()
+        if config.devDebug:
+            rowRight.alert = True
+            rowRight.operator("uas_stamp_info.enable_debug", text="Turn Off").enable_debug = False
+        else:
+            rowRight.operator("uas_stamp_info.enable_debug", text="Turn On").enable_debug = True
 
     # -----------------------------------------------------------
     # UI user preferences - Not exposed
