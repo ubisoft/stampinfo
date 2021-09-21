@@ -136,7 +136,7 @@ class UAS_PT_StampInfo_Render(Operator):
                 show_message_box("Please set a valid sequence output file name", "Rendering aborted", icon="ERROR")
                 return {"FINISHED"}
 
-        if config.uasDebug:
+        if config.devDebug:
             print(f"render_filepath :{render_filepath}")
             seqPath.print(at_frame=renderFrame)
 

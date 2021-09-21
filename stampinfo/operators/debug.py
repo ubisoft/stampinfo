@@ -21,13 +21,29 @@ This module is used for debug
 
 
 import bpy
-from bpy.types import Panel
+from bpy.types import Panel, Operator
+from bpy.props import BoolProperty
 
+from ..config import config
 from ..utils import utils_render
 
 import logging
 
 _logger = logging.getLogger(__name__)
+
+
+class UAS_Stamp_Info_OT_EnableDebug(Operator):
+    bl_idname = "uas_stamp_info.enable_debug"
+    bl_label = "Enable Debug Mode"
+    bl_description = "Enable or disable debug mode"
+    bl_options = {"INTERNAL"}
+
+    enable_debug: BoolProperty(name="Enable Debug Mode", description="Enable or disable debug mode", default=False)
+
+    def execute(self, context):
+        config.devDebug = self.enable_debug
+        return {"FINISHED"}
+
 
 # ------------------------------------------------------------------------#
 #                                Debug Panel                             #
@@ -41,6 +57,10 @@ class UAS_PT_StampInfoDebug(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(self, context):
+        return config.devDebug
 
     def draw(self, context):
         layout = self.layout
@@ -59,7 +79,10 @@ class UAS_PT_StampInfoDebug(Panel):
             row.label(text="Invalid render path")
 
 
-_classes = (UAS_PT_StampInfoDebug,)
+_classes = (
+    UAS_Stamp_Info_OT_EnableDebug,
+    UAS_PT_StampInfoDebug,
+)
 
 
 def register():

@@ -97,10 +97,17 @@ class UAS_StampInfo_OpenExplorer(Operator):
 
 class UAS_OT_Open_Documentation_Url(Operator):  # noqa 801
     bl_idname = "stampinfo.open_documentation_url"
-    bl_label = "Open Documentation Web Page"
+    bl_label = ""
     bl_description = "Open web page.\nShift + Click: Copy the URL into the clipboard"
 
+    tooltip: StringProperty(default="")
     path: StringProperty()
+
+    @classmethod
+    def description(self, context, properties):
+        descr = properties.tooltip if "" != properties.tooltip else "Open web page."
+        descr += "\nShift + Click: Copy the URL into the clipboard"
+        return descr
 
     def invoke(self, context, event):
         if event.shift:

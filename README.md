@@ -3,14 +3,14 @@
 Stamp Info creates a frame around the rendered images and writes scene information on it.
 It is a flexible alternative to the Metadata post processing integrated system of Blender.
 
+* **Latest <u>GitHub</u> release:** [github.com/ubisoft/stampinfo/releases/latest](https://github.com/ubisoft/stampinfo/releases/latest)
+
 ## Disclaimer
 >**This tool is currently supported for LTS versions of Blender 2.83 and 2.93.**
 >
 >It was initialy developed for an animated TV series production in 2020 on Blender 2.83. It has the features that were needed at the time but it
 may not be considered as feature complete for a more generic purpose. In spite of all our efforts to make it reliable some troubles may occur in use cases we have not faced.
 >
-><br />
-
 
 <br />
 <img src="doc/images/StampInfo_RenderScreen.png" alt="drawing" width="70%"/>
