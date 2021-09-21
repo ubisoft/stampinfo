@@ -22,5 +22,6 @@
     "blender.addon.sourceDirectory": "./stampinfo",
     "python.testing.promptToConfigure": false,
     "python.testing.pytestEnabled": false,
-    "python.testing.nosetestsEnabled": false
+    "python.testing.nosetestsEnabled": false,
+    "restructuredtext.confPath": "${​​​​​​​​workspaceFolder}​​​​​​​​\\docs"
 }
