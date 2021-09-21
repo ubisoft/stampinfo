@@ -26,9 +26,8 @@ from stampinfo import stamper
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
-from . import infoImage
-
-from .utils import utils
+from stampinfo import infoImage
+from stampinfo.utils import utils
 
 import logging
 

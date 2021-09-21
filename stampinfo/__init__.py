@@ -24,7 +24,6 @@ import logging
 
 import os
 from pathlib import Path
-import subprocess
 
 import bpy
 import bpy.utils.previews
@@ -34,18 +33,19 @@ import importlib
 
 from .config import config
 
+from .utils import utils
 from .utils.utils_render import Utils_LaunchRender
-from .utils.utils import display_addon_registered_version
 
 from .utils import utils_vse_render
 
 from . import stamper
-from . import stampInfoSettings
+from .properties import stampInfoSettings
 
 
 from .ui import si_ui
 
 from .operators import debug
+from .install_dependencies import install_dependencies
 
 importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
@@ -58,9 +58,9 @@ bl_info = {
     "description": "Stamp scene information on the rendered images - Ubisoft"
     "\nRequiers (and automatically install if not found) the Python library named Pillow",
     "blender": (2, 92, 0),
-    "version": (1, 0, 9),
+    "version": (1, 0, 10),
     "location": "Right panel in the 3D View",
-    "wiki_url": "https://github.com/ubisoft/stampinfo",
+    "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
     # "warning": "BETA Version",
     "category": "Ubisoft",
 }
@@ -129,13 +129,11 @@ def stampInfo_resetProperties():
 
 
 def register():
-    from stampinfo import ui
-    from stampinfo import icons
-    from .properties import addon_prefs
-    from .operators import render_operators
     from .utils import utils_ui
 
-    display_addon_registered_version("Stamp Info")
+    utils_ui.register()
+
+    utils.display_addon_registered_version("Stamp Info")
 
     config.initGlobalVariables()
 
@@ -150,54 +148,84 @@ def register():
         handler.setFormatter(formatter)
         _logger.addHandler(handler)
 
-    ###################
-    # Pillow lib installation
-    ###################
+    # Install dependencies and required Python libraries
+    ####################################################
+    # try to install dependencies and collect the errors in case of troubles
+    # If some mandatory libraries cannot be loaded then an alternative Add-on Preferences panel
+    # is used and provide some visibility to the user to solve the issue
+    # Pillow lib is installed there
+    config.installation_errors = install_dependencies()
+    # config.installation_errors = []
 
-    if not module_can_be_imported("PIL"):
-        subprocess.run([bpy.app.binary_path_python, "-m", "pip", "install", "pillow"])
+    if 0 < len(config.installation_errors):
+        from .addon_prefs import addon_error_prefs
 
-    for cls in classes:
-        bpy.utils.register_class(cls)
+        print(
+            "\n   !!! Something went wrong during the installation of the add-on - Check the Stamp Info add-on Preferences panel !!!"
+        )
 
-    icons.register()
-    addon_prefs.register()
-    render_operators.register()
-    si_ui.register()
-    ui.register()
-    utils_vse_render.register()
-    utils_ui.register()
+        addon_error_prefs.register()
+
+    else:
+        from stampinfo import ui
+        from stampinfo import icons
+        from .addon_prefs import addon_prefs
+        from .operators import render_operators
+
+        for cls in classes:
+            bpy.utils.register_class(cls)
+
+        icons.register()
+        addon_prefs.register()
+        render_operators.register()
+        si_ui.register()
+        ui.register()
+        utils_vse_render.register()
+
+        bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
 
     # debug tools
-    if config.uasDebug:
-        debug.register()
+    debug.register()
 
-    bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
+    print("")
 
 
 def unregister():
-
     # from .ui import si_ui
-    from stampinfo import ui
-    from stampinfo import icons
-    from .operators import render_operators
-    from .properties import addon_prefs
     from .utils import utils_ui
 
     # debug tools
-    if config.uasDebug:
-        debug.unregister()
+    debug.unregister()
+
+    # unregistering add-on in the case it has been registered with install errors
+    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+    if prefs_addon.install_failed:
+        from .addon_prefs import addon_error_prefs
+
+        print("      **************** Uninstall failed addon ***************")
+        # viewport_3d.unregister()
+        addon_error_prefs.unregister()
+
+        # return ()
+
+    else:
+        from stampinfo import ui
+        from stampinfo import icons
+        from .operators import render_operators
+        from .addon_prefs import addon_prefs
+
+        utils_vse_render.unregister()
+        ui.unregister()
+        si_ui.unregister()
+        render_operators.unregister()
+        addon_prefs.unregister()
+        icons.unregister()
+
+        for cls in reversed(classes):
+            # print(str(cls) + " being unregistered...")
+            bpy.utils.unregister_class(cls)
 
     utils_ui.unregister()
-    utils_vse_render.unregister()
-    ui.unregister()
-    si_ui.unregister()
-    render_operators.unregister()
-    addon_prefs.unregister()
-    icons.unregister()
-
-    for cls in reversed(classes):
-        # print(str(cls) + " being unregistered...")
-        bpy.utils.unregister_class(cls)
-
     config.releaseGlobalVariables()
+
+    print("")

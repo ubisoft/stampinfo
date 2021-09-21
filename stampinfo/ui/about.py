@@ -22,8 +22,8 @@ This module defines the About menu of StampInfo
 import bpy
 from bpy.types import Operator
 
-
-# from stampinfo import display_version
+from ..ui.dependencies_ui import drawDependencies
+from ..utils.utils import addonCategory
 
 
 class UAS_StampInfo_OT_About(Operator):
@@ -39,16 +39,24 @@ class UAS_StampInfo_OT_About(Operator):
         props = context.scene.UAS_StampInfo_Settings
         layout = self.layout
         box = layout.box()
+        col = box.column()
+        col.scale_y = 0.9
 
         # Version
         ###############
-        row = box.row()
+        row = col.row()
         row.separator()
-        row.label(text="Version:  " + props.version()[0] + " -  (" + "May 2021" + ")" + " - Ubisoft")
+        row.label(text="Version:  " + props.version()[0] + " -  (" + "Oct. 2021" + ")" + " - Ubisoft")
+
+        # Category
+        ###############
+        row = col.row()
+        row.separator()
+        row.label(text=f"Add-on Category: {addonCategory('Stamp Info')}")
 
         # Authors
         ###############
-        row = box.row()
+        row = col.row()
         row.separator()
         row.label(text="Written by Julien Blervaque (aka Werwack)")
 
@@ -60,38 +68,31 @@ class UAS_StampInfo_OT_About(Operator):
         row.separator()
         row.label(text="Write scene information on the rendered images.")
 
-        # Dependencies
+        # Documentation
         ###############
         row = box.row()
-        row.label(text="Dependencies:")
+        row.label(text="Documentation:")
         row = box.row()
         row.separator()
-        splitFactor = 0.3
+        doc_op = row.operator("stampinfo.open_documentation_url", text="Online Doc")
+        doc_op.path = "https://ubisoft-stampinfo.readthedocs.io"
+        doc_op.tooltip = "Open online documentation: " + doc_op.path
 
-        split = row.split(factor=splitFactor)
-        split.label(text="- Pillow:")
-        try:
-            import PIL as pillow
+        doc_op = row.operator("stampinfo.open_documentation_url", text="Source Code")
+        doc_op.path = "https://github.com/ubisoft/stampinfo"
+        doc_op.tooltip = "Open GitHub project: " + doc_op.path
 
-            pillowVersion = pillow.__version__
-            split.label(text=f"V. {pillowVersion}")
-        except Exception:
-            subRow = split.row()
-            subRow.alert = True
-            subRow.label(text="Module not found")
+        doc_op = row.operator("stampinfo.open_documentation_url", text="Video Tutorials")
+        doc_op.path = "https://www.youtube.com/channel/UCF6RsOpvCUGQozRlOO_-dDQ"
+        doc_op.tooltip = "Watch video tutorials on Youtube: " + doc_op.path
 
-        # row = box.row()
-        # row.separator()
-        # row.label(text="- UAS Stamp Info")
-        # if props.isStampInfoAvailable():
-        #     versionStr = utils.addonVersion("Stamp Info")
-        #     row.label(text="V." + versionStr[0])
-        # else:
-        #     row.label(text="Add-on not found")
+        box.separator(factor=0.5)
 
-        box.separator()
+        # Dependencies
+        ###############
+        drawDependencies(context, layout)
 
-        layout.separator()
+        layout.separator(factor=1)
 
     def execute(self, context):
         return {"FINISHED"}
