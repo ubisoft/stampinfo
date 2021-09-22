@@ -29,12 +29,12 @@ def drawDependencies(context, layout: bpy.types.UILayout, **kwargs):
     row.label(text="Dependencies:")
     row = box.row()
     row.separator()
-    splitFactor = 0.5
+    splitFactor = 0.45
 
     # Pillow
     ####################
     split = row.split(factor=splitFactor)
-    split.label(text="- Pillow (Python Imaging Library):")
+    split.label(text="- PIL (Python Imaging Library):")
 
     try:
         import PIL as pillow

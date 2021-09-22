@@ -35,6 +35,7 @@ from .. import stamper
 from .. import stampInfoSettings
 
 from stampinfo.utils import utils
+from ..utils.utils_os import module_can_be_imported
 
 from stampinfo.operators import debug
 
@@ -115,14 +116,18 @@ class UAS_PT_StampInfoAddon(Panel):
             row.alignment = "CENTER"
             row.alert = True
             row.label(text=f" ***  {addonWarning[0]}  ***")
-            row.alert = False
+
+        if not module_can_be_imported("PIL"):
+            row = layout.row()
+            row.alignment = "CENTER"
+            row.alert = True
+            row.label(text=" *** PIL Library not found - Stamp Info cannot work normaly ***")
 
         if config.devDebug:
             row = layout.row()
             row.alignment = "CENTER"
             row.alert = True
             row.label(text=" *** Debug Mode ***")
-            row.alert = False
 
         #    row     = layout.row ()
         #    row.operator("stampinfo.clearhandlers")
