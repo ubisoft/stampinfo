@@ -28,8 +28,8 @@ from ..utils.utils import addonCategory
 
 class UAS_StampInfo_OT_About(Operator):
     bl_idname = "uas_stamp_info.about"
-    bl_label = "About Stamp Info..."
-    bl_description = "More information about Stamp Info..."
+    bl_label = "About Ubisoft Stamp Info..."
+    bl_description = "More information about Ubisoft Stamp Info..."
     bl_options = {"INTERNAL"}
 
     def invoke(self, context, event):

@@ -24,10 +24,6 @@ import os
 
 def initGlobalVariables():
 
-    # isntallation ############
-    global installation_errors
-    installation_errors = []
-
     # debug ############
     global devDebug
 

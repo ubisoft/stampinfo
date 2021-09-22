@@ -21,10 +21,9 @@ add-on global preferences
 
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, StringProperty
 
 from ..ui.dependencies_ui import drawDependencies
-from ..config import config
 
 import sys
 
@@ -50,7 +49,10 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
     # ------------------------------
 
     install_failed: BoolProperty(
-        name="Install failed", default=True,
+        name="Install Failed", default=True,
+    )
+    error_message: StringProperty(
+        name="Error Message", default="",
     )
 
     ##################################################################################
@@ -58,7 +60,7 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
     ##################################################################################
     def draw(self, context):
         layout = self.layout
-        # prefs = context.preferences.addons["stampinfo"].preferences
+        prefs_addon = context.preferences.addons["stampinfo"].preferences
 
         box = layout.box()
         box.alert = True
@@ -76,8 +78,9 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
         rowLeft.label(text="Returned Error(s):")
 
         col = split.column()
-        for message in config.installation_errors:
-            col.label(text=f"- {message}")
+        # for message in config.installation_errors:
+        #     col.label(text=f"- {message[0]}")
+        col.label(text=f"- {prefs_addon.error_message}")
 
         row = mainCol.row()
         row.separator(factor=2)

@@ -20,14 +20,15 @@ Dependencies installation
 """
 
 import bpy
-from .utils.utils_os import internet_on, module_can_be_imported, is_admin
+from ..utils.utils_os import internet_on, module_can_be_imported, is_admin
+from . import addon_error_prefs
 
 import logging
 
 _logger = logging.getLogger(__name__)
 
 
-def install_dependencies():
+def install_libraries():
     """Install external libraries: Pillow
     """
     error_messages = []
@@ -38,12 +39,13 @@ def install_dependencies():
     module_name = "PIL"
     if not module_can_be_imported(module_name):
 
-        outputMess = f"*** {module_name} Install Failed: "
+        outputMess = f"   # {module_name} Install Failed: "
         # NOTE: possible issue on Mac OS, check the content of the function internet_on()
         if not internet_on():
-            errorMess = f"Err.{1}: No Internet connection"
+            errorInd = 1
+            errorMess = f"Err.{errorInd}: No Internet connection"
             print(outputMess + errorMess)
-            error_messages.append(errorMess)
+            error_messages.append((errorMess, errorInd))
             return error_messages
 
         import subprocess
@@ -57,9 +59,10 @@ def install_dependencies():
 
         if not is_admin():
             if not os.access(localPyDir, os.W_OK):
-                errorMess = f"Err.{2}: No Admin rights - Cannot write to Blender Python folder"
+                errorInd = 2
+                errorMess = f"Err.{errorInd}: No Admin rights - Cannot write to Blender Python folder"
                 print(outputMess + errorMess)
-                error_messages.append(errorMess)
+                error_messages.append((errorMess, errorInd))
                 return error_messages
 
         try:
@@ -75,16 +78,18 @@ def install_dependencies():
                 if module_can_be_imported(module_name):
                     print("  Pillow Imaging Library (PIL) correctly installed for Ubisoft Stamp Info")
                 else:
-                    errorMess = f"Err.{3}: Library {module_name} installed but cannot be imported"
+                    errorInd = 3
+                    errorMess = f"Err.{errorInd}: Library {module_name} installed but cannot be imported"
                     print(f"    subError: {subError}")
                     print(outputMess + errorMess)
                     print("    Possibly installed in a wrong Python instance folder - Contact the support")
-                    error_messages.append(errorMess)
+                    error_messages.append((errorMess, errorInd))
             else:
-                errorMess = f"Err.{4}: Library {module_name} cannot be imported"
+                errorInd = 4
+                errorMess = f"Err.{errorInd}: Library {module_name} cannot be imported"
                 print(f"    subError: {subError}")
                 print(outputMess + errorMess)
-                error_messages.append(errorMess)
+                error_messages.append((errorMess, errorInd))
 
                 # send the error
                 subError.check_returncode()
@@ -92,10 +97,42 @@ def install_dependencies():
         except subprocess.CalledProcessError as e:
             print(e.output)
             if 0 == e.returncode:
-                errorMess = f"Err.{5}: Error during installation of library {module_name}"
+                errorInd = 5
+                errorMess = f"Err.{errorInd}: Error during installation of library {module_name}"
             else:
-                errorMess = f"Err.{6}: Error during installation of library {module_name}"
+                errorInd = 6
+                errorMess = f"Err.{errorInd}: Error during installation of library {module_name}"
             print(outputMess + errorMess)
-            error_messages.append(errorMess)
+            error_messages.append((errorMess, errorInd))
 
     return error_messages
+
+
+def install_dependencies():
+    """Install the add-on dependecies
+    Return 0 if everything went well, the error code >0 otherwise
+    """
+    installation_errors = install_libraries()
+    # installation_errors = []
+
+    if 0 < len(installation_errors):
+        print(
+            "   !!! Something went wrong during the installation of the add-on - Check the Stamp Info add-on Preferences panel !!!"
+        )
+        addon_error_prefs.register()
+        prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+        prefs_addon.error_message = installation_errors[0][0]
+        return installation_errors[0][1]
+    return 0
+
+
+def unregister_from_failed_install():
+    # unregistering add-on in the case it has been registered with install errors
+    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+    if hasattr(prefs_addon, "install_failed") and prefs_addon.install_failed:
+        from . import addon_error_prefs
+
+        print("      **************** Uninstall failed addon ***************")
+        addon_error_prefs.unregister()
+        return True
+    return False
