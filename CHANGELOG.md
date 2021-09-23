@@ -1,13 +1,10 @@
-# 1.5.65 (WIP)
+# 1.0.12 (WIP)
 
-## Documentation
-
-- done
 
 
 <br><br>
 
-# 1.0.10 (2021-09-21)
+# 1.0.11 (2021-09-23)
 
 ## Documentation
 
@@ -16,10 +13,6 @@
 ## UI and Installation
 
 - Provided better user feedback at install time in case of errors
-
-## Code and Dev Pipeline:
-
-- Enabled code quality check with Flake8
 
 
 <br><br>
