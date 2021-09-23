@@ -62,19 +62,31 @@ def internet_on():
     The returned value has then be forced to True. ***
     See: https://stackoverflow.com/questions/27835619/urllib-and-ssl-certificate-verify-failed-error
     """
-    # Mac specific:
-    if sys.platform == "darwin":
-        return True
-
     import urllib.request
     import urllib.error
 
-    for timeout in [1, 5, 10, 15]:
-        try:
-            urllib.request.urlopen("https://google.com", timeout=timeout)
-            return True
-        except urllib.error.URLError:
-            pass
+    url = "https://google.com"
+
+    # Mac specific:
+    if sys.platform == "darwin":
+        # return True
+        import ssl
+
+        gcontext = ssl.SSLContext()
+        for timeout in [1, 5, 15]:
+            try:
+                urllib.request.urlopen(url, context=gcontext, timeout=timeout)
+                return True
+            except urllib.error.URLError:
+                pass
+    else:
+        for timeout in [1, 5, 15]:
+            try:
+                urllib.request.urlopen(url, timeout=timeout)
+                return True
+            except urllib.error.URLError:
+                pass
+
     return False
 
 
@@ -88,3 +100,15 @@ def module_can_be_imported(name):
         return True
     except ModuleNotFoundError:
         return False
+
+
+def is_admin():
+    """Return True if the current session is run in Admin mode
+    """
+    import ctypes, os
+
+    try:
+        is_user_admin = os.getuid() == 0
+    except AttributeError:
+        is_user_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return is_user_admin
