@@ -73,14 +73,14 @@ def internet_on():
         import ssl
 
         gcontext = ssl.SSLContext()
-        for timeout in [1, 5, 10, 25]:
+        for timeout in [1, 5, 15]:
             try:
                 urllib.request.urlopen(url, context=gcontext, timeout=timeout)
                 return True
             except urllib.error.URLError:
                 pass
     else:
-        for timeout in [1, 5, 10, 25]:
+        for timeout in [1, 5, 15]:
             try:
                 urllib.request.urlopen(url, timeout=timeout)
                 return True

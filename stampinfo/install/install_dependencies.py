@@ -28,22 +28,25 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def install_libraries():
-    """Install external libraries: Pillow
+def install_library(lib_names):
+    """Install the specified external libraries
+    Args:
+        lib_names (tupple): the current name of the library and its package name
+        eg: ("PIL", "pillow")
     """
     error_messages = []
     # return ["Debug message"]
 
     # PIL (or pillow)
     ##########################
-    module_name = "PIL"
-    if not module_can_be_imported(module_name):
+    lib_name = lib_names[0]
+    if not module_can_be_imported(lib_name):
 
-        outputMess = f"   # {module_name} Install Failed: "
+        outputMess = f"   # {lib_name} Install Failed: "
         # NOTE: possible issue on Mac OS, check the content of the function internet_on()
         if not internet_on():
             errorInd = 1
-            errorMess = f"Err.{errorInd}: No Internet connection"
+            errorMess = f"Err.{errorInd}: Cannot connect to Internet. Blocked by firewall?"
             print(outputMess + errorMess)
             error_messages.append((errorMess, errorInd))
             return error_messages
@@ -60,7 +63,7 @@ def install_libraries():
         if not is_admin():
             if not os.access(localPyDir, os.W_OK):
                 errorInd = 2
-                errorMess = f"Err.{errorInd}: No Admin rights - Cannot write to Blender Python folder"
+                errorMess = f"Err.{errorInd}: Cannot write to Blender Python folder. Need Admin rights?"
                 print(outputMess + errorMess)
                 error_messages.append((errorMess, errorInd))
                 return error_messages
@@ -69,24 +72,25 @@ def install_libraries():
             # NOTE: to prevent a strange situation where pip finds and/or installs the library in the OS Python directory
             # we force the installation in the current Blender Python \lib\site-packages with the use of "--ignore-installed"
             subError = subprocess.run(
-                [bpy.app.binary_path_python, "-m", "pip", "install", "pillow", "--ignore-installed"]
+                [bpy.app.binary_path_python, "-m", "pip", "install", lib_names[1], "--ignore-installed"]
             )
             # print(f"    - subError.returncode: {subError.returncode}")
             if 0 == subError.returncode:
                 # NOTE: one possible returned error is "Requirement already satisfied". This case should not appear since
                 # we test is the module is already there with the function module_can_be_imported
-                if module_can_be_imported(module_name):
-                    print("  Pillow Imaging Library (PIL) correctly installed for Ubisoft Stamp Info")
+                if module_can_be_imported(lib_name):
+                    # print(f"Library {lib_name} correctly installed")
+                    pass
                 else:
                     errorInd = 3
-                    errorMess = f"Err.{errorInd}: Library {module_name} installed but cannot be imported"
+                    errorMess = f"Err.{errorInd}: Library {lib_name} installed but cannot be imported"
                     print(f"    subError: {subError}")
                     print(outputMess + errorMess)
                     print("    Possibly installed in a wrong Python instance folder - Contact the support")
                     error_messages.append((errorMess, errorInd))
             else:
                 errorInd = 4
-                errorMess = f"Err.{errorInd}: Library {module_name} cannot be imported"
+                errorMess = f"Err.{errorInd}: Library {lib_name} cannot be imported"
                 print(f"    subError: {subError}")
                 print(outputMess + errorMess)
                 error_messages.append((errorMess, errorInd))
@@ -98,31 +102,35 @@ def install_libraries():
             print(e.output)
             if 0 == e.returncode:
                 errorInd = 5
-                errorMess = f"Err.{errorInd}: Error during installation of library {module_name}"
+                errorMess = f"Err.{errorInd}: Error during installation of library {lib_name}"
             else:
                 errorInd = 6
-                errorMess = f"Err.{errorInd}: Error during installation of library {module_name}"
+                errorMess = f"Err.{errorInd}: Error during installation of library {lib_name}"
             print(outputMess + errorMess)
             error_messages.append((errorMess, errorInd))
 
     return error_messages
 
 
-def install_dependencies():
+def install_dependencies(dependencies_list):
     """Install the add-on dependecies
-    Return 0 if everything went well, the error code >0 otherwise
+    Args:
+        dependencies_list (list): a list of tupples with the display name of the libraries and their package name
+        eg: [("PIL", "pillow")]
+    Returns:
+        0 if everything went well, the error code (>0) otherwise
     """
-    installation_errors = install_libraries()
-    # installation_errors = []
+    for dependencyLib in dependencies_list:
+        installation_errors = install_library(dependencyLib)
 
-    if 0 < len(installation_errors):
-        print(
-            "   !!! Something went wrong during the installation of the add-on - Check the Stamp Info add-on Preferences panel !!!"
-        )
-        addon_error_prefs.register()
-        prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
-        prefs_addon.error_message = installation_errors[0][0]
-        return installation_errors[0][1]
+        if 0 < len(installation_errors):
+            print(
+                "   !!! Something went wrong during the installation of the add-on - Check the Stamp Info add-on Preferences panel !!!\n"
+            )
+            addon_error_prefs.register()
+            prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+            prefs_addon.error_message = installation_errors[0][0]
+            return installation_errors[0][1]
     return 0
 
 
@@ -132,7 +140,7 @@ def unregister_from_failed_install():
     if hasattr(prefs_addon, "install_failed") and prefs_addon.install_failed:
         from . import addon_error_prefs
 
-        print("      **************** Uninstall failed addon ***************")
+        print("\n*** --- Unregistering Failed Install for Stamp Info Add-on --- ***")
         addon_error_prefs.unregister()
         return True
     return False

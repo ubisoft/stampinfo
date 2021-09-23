@@ -47,9 +47,8 @@ import logging
 
 bl_info = {
     "name": "Stamp Info",
-    "author": "Julien Blervaque (aka Werwack)",
-    "description": "Stamp scene information on the rendered images - Ubisoft"
-    "\nRequiers (and automatically install if not found) the Python library named Pillow",
+    "author": "Julien Blervaque (aka Werwack) - Ubisoft",
+    "description": "Stamp scene information on the rendered images",
     "blender": (2, 92, 0),
     "version": (1, 0, 11),
     "location": "Right panel in the 3D View",
@@ -129,7 +128,7 @@ def register():
         handler.setFormatter(formatter)
         _logger.addHandler(handler)
 
-    # Install dependencies and required Python libraries
+    # install dependencies and required Python libraries
     ###################
     # try to install dependencies and collect the errors in case of troubles
     # If some mandatory libraries cannot be loaded then an alternative Add-on Preferences panel
@@ -137,10 +136,13 @@ def register():
     # Pillow lib is installed there
     from .install.install_dependencies import install_dependencies
 
-    installErrorCode = install_dependencies()
+    installErrorCode = install_dependencies([("PIL", "pillow")])
     if 0 != installErrorCode:
         return installErrorCode
+    print("  Pillow Imaging Library (PIL) correctly installed for Ubisoft Stamp Info")
 
+    # if install went right then register other packages
+    ###################
     from stampinfo import ui
     from stampinfo import icons
     from .addon_prefs import addon_prefs
@@ -165,6 +167,7 @@ def register():
 
 
 def unregister():
+    print("\n*** --- Unregistering Stamp Info Add-on --- ***")
     from .utils import utils_ui
 
     # Unregister packages that may have been registered if the install had errors

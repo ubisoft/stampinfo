@@ -54,6 +54,9 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
     error_message: StringProperty(
         name="Error Message", default="",
     )
+    verbose: BoolProperty(
+        name="Verbose", default=False,
+    )
 
     ##################################################################################
     # Draw
@@ -72,7 +75,7 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
         titleRow.label(text="", icon="ERROR")
 
         row = mainCol.row()
-        split = row.split(factor=0.3)
+        split = row.split(factor=0.25)
         rowLeft = split.row()
         rowLeft.separator(factor=1.9)
         rowLeft.label(text="Returned Error(s):")
@@ -125,12 +128,17 @@ _classes = (UAS_StampInfo_AddonErrorPrefs,)
 
 
 def register():
-    print("       - Registering Add-on Installation Error Preferences")
     for cls in _classes:
         bpy.utils.register_class(cls)
 
+    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+    if prefs_addon.verbose:
+        print("       - Registering Add-on Installation Error Preferences\n")
+
 
 def unregister():
-    print("       - Unregistering Add-on Installation Error Preferences")
+    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
+    if prefs_addon.verbose:
+        print("       - Unregistering Add-on Installation Error Preferences")
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)
