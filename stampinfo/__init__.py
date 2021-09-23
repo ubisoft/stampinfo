@@ -18,6 +18,7 @@
 """
 Main init
 """
+import logging
 
 import os
 from pathlib import Path
@@ -42,15 +43,13 @@ importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
 importlib.reload(debug)
 
-import logging
-
 
 bl_info = {
     "name": "Stamp Info",
     "author": "Julien Blervaque (aka Werwack) - Ubisoft",
     "description": "Stamp scene information on the rendered images",
     "blender": (2, 92, 0),
-    "version": (1, 0, 11),
+    "version": (1, 0, 12),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
     # "warning": "BETA Version",
@@ -136,7 +135,7 @@ def register():
     # Pillow lib is installed there
     from .install.install_dependencies import install_dependencies
 
-    installErrorCode = install_dependencies([("PIL", "pillow")])
+    installErrorCode = install_dependencies([("PIL", "pillow")], retries=1, timeout=5)
     if 0 != installErrorCode:
         return installErrorCode
     print("  Pillow Imaging Library (PIL) correctly installed for Ubisoft Stamp Info")
