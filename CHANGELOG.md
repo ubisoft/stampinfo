@@ -1,5 +1,13 @@
-# 1.0.12 (WIP)
+# 1.0.13 (WIP)
 
+
+<br><br>
+
+# 1.0.12 (2021-09-23)
+
+## Installation
+
+- Improved error catching with pip download timeout
 
 
 <br><br>
