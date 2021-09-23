@@ -28,7 +28,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def install_library(lib_names):
+def install_library(lib_names, pip_retries=2, pip_timeout=-100):
     """Install the specified external libraries
     Args:
         lib_names (tupple): the current name of the library and its package name
@@ -51,10 +51,10 @@ def install_library(lib_names):
             error_messages.append((errorMess, errorInd))
             return error_messages
 
+        # print("Internet connection OK - Firewall may still block package downloads")
         import subprocess
         import os
         import sys
-        import subprocess
         from pathlib import Path
 
         pyExeFile = sys.executable
@@ -71,8 +71,20 @@ def install_library(lib_names):
         try:
             # NOTE: to prevent a strange situation where pip finds and/or installs the library in the OS Python directory
             # we force the installation in the current Blender Python \lib\site-packages with the use of "--ignore-installed"
+            # "--default-timeout" has been replaced by "--timeout" (tbc)
             subError = subprocess.run(
-                [bpy.app.binary_path_python, "-m", "pip", "install", lib_names[1], "--ignore-installed"]
+                [
+                    pyExeFile,
+                    "-m",
+                    "pip",
+                    "--default-timeout",
+                    str(pip_timeout),
+                    "--retries",
+                    str(pip_retries),
+                    "install",
+                    lib_names[1],
+                    "--ignore-installed",
+                ]
             )
             # print(f"    - subError.returncode: {subError.returncode}")
             if 0 == subError.returncode:
@@ -90,7 +102,7 @@ def install_library(lib_names):
                     error_messages.append((errorMess, errorInd))
             else:
                 errorInd = 4
-                errorMess = f"Err.{errorInd}: Library {lib_name} cannot be imported"
+                errorMess = f"Err.{errorInd}: Library {lib_name} cannot be downloaded"
                 print(f"    subError: {subError}")
                 print(outputMess + errorMess)
                 error_messages.append((errorMess, errorInd))
@@ -98,12 +110,20 @@ def install_library(lib_names):
                 # send the error
                 subError.check_returncode()
 
-        except subprocess.CalledProcessError as e:
-            print(e.output)
-            if 0 == e.returncode:
+        # except Exception as ex:
+        # except ReadTimeoutError as ex:
+        #     pass
+
+        except subprocess.CalledProcessError as ex:
+            print(ex.output)
+            if 0 == ex.returncode:
                 errorInd = 5
                 errorMess = f"Err.{errorInd}: Error during installation of library {lib_name}"
             else:
+                # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                # message = template.format(type(ex).__name__, ex.args)
+                # print(f"message: {message}")
+
                 errorInd = 6
                 errorMess = f"Err.{errorInd}: Error during installation of library {lib_name}"
             print(outputMess + errorMess)
@@ -112,16 +132,18 @@ def install_library(lib_names):
     return error_messages
 
 
-def install_dependencies(dependencies_list):
+def install_dependencies(dependencies_list, retries=2, timeout=100):
     """Install the add-on dependecies
     Args:
         dependencies_list (list): a list of tupples with the display name of the libraries and their package name
         eg: [("PIL", "pillow")]
+        retries (int): number of times pip will retry downloading a package
+        timeout (int, in seconds): time waited by pip for the download
     Returns:
         0 if everything went well, the error code (>0) otherwise
     """
     for dependencyLib in dependencies_list:
-        installation_errors = install_library(dependencyLib)
+        installation_errors = install_library(dependencyLib, pip_retries=retries, pip_timeout=timeout)
 
         if 0 < len(installation_errors):
             print(

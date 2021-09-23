@@ -73,14 +73,14 @@ def internet_on():
         import ssl
 
         gcontext = ssl.SSLContext()
-        for timeout in [1, 5, 15]:
+        for timeout in [1, 5, 10]:
             try:
                 urllib.request.urlopen(url, context=gcontext, timeout=timeout)
                 return True
             except urllib.error.URLError:
                 pass
     else:
-        for timeout in [1, 5, 15]:
+        for timeout in [1, 5, 10]:
             try:
                 urllib.request.urlopen(url, timeout=timeout)
                 return True
@@ -105,7 +105,8 @@ def module_can_be_imported(name):
 def is_admin():
     """Return True if the current session is run in Admin mode
     """
-    import ctypes, os
+    import ctypes
+    import os
 
     try:
         is_user_admin = os.getuid() == 0
