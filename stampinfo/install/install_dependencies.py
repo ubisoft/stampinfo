@@ -72,6 +72,8 @@ def install_library(lib_names, pip_retries=2, pip_timeout=-100):
             # NOTE: to prevent a strange situation where pip finds and/or installs the library in the OS Python directory
             # we force the installation in the current Blender Python \lib\site-packages with the use of "--ignore-installed"
             # "--default-timeout" has been replaced by "--timeout" (tbc)
+            if 0 >= pip_timeout:
+                pip_timeout = 100
             subError = subprocess.run(
                 [
                     pyExeFile,
