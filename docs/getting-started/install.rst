@@ -15,9 +15,10 @@ Download
 --------
 
 Open the `latest release <https://github.com/ubisoft/stampinfo/releases/latest>`__  page from the Stamp Info Gihub `releases page <https://github.com/ubisoft/stampinfo/releases>`_.
-Download the zip file listed in **Assets** that has the package icon: |package-icon|.
+Download the zip file listed in **Assets** that has the package icon: |package-icon|_.
 
 .. |package-icon| image:: /img/package-icon.png
+.. _package-icon: https://github.com/ubisoft/stampinfo/releases/latest
 
 .. _installing:
 
@@ -28,9 +29,10 @@ Install of Stamp Info
     Stamp Info needs to download some external Python dependencies in order to be fully functionnal. Hence,
     when launching the installation of this add-on, be sure to match these conditions:
 
-        - **Run Blender with elevated priviledges (or in Administrator mode)**
         - **Be connected to the internet**
         - **Be sure the firewall is not blocking the requests (use OpenVPN or equivalent if needed)**
+        - **Launch Blender with elevated priviledges (or in Administrator mode)**
+        - Then install the add-on as ususal
 
 
 Launch Blender, open the **Preferences** panel and go to the **Add-ons** section.
