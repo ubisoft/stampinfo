@@ -106,7 +106,7 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
         col.label(text="      • Close Blender")
         col.label(text="      • Be sure your computer is connected to the internet")
         col.label(text="      • Be sure no firewall is blocking the connection (or use OpenVPN or equivalent)")
-        col.label(text="      • Launch Blender in Admin mode")
+        col.label(text="      • Launch Blender in ADMIN mode")
         col.label(text="      • Restart the install")
         tipsRow.separator(factor=2)
 

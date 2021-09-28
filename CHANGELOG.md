@@ -1,4 +1,8 @@
-# 1.0.13 (WIP)
+# 1.0.13
+
+## Installation
+
+- Improved again error catching for better user feedback when not in admin mode
 
 
 <br><br>
