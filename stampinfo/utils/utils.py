@@ -117,6 +117,12 @@ def addonCategory(addonName):
     return categ
 
 
+def addonPath():
+    # get the path of this file and climb to its parent
+    filePath = Path(os.path.dirname(os.path.abspath(__file__))).parent
+    return str(filePath)
+
+
 def file_path_from_uri(uri):
     path = unquote_plus(urlparse(uri).path).replace("\\", "//")
     if re.match(r"^/\S:.*", path):  # Remove leading /

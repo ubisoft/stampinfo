@@ -1,4 +1,14 @@
-# 1.0.13
+# 1.0.14 (2021-09-29)
+
+
+## Bug fix
+
+- Logos builtin path was broken
+
+
+<br><br>
+
+# 1.0.13 (2021-09-28)
 
 ## Installation
 
