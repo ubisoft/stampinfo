@@ -31,16 +31,23 @@ Install of Stamp Info
 
         - **Be connected to the internet**
         - **Be sure the firewall is not blocking the requests (use OpenVPN or equivalent if needed)**
-        - **Launch Blender with elevated priviledges (or in Administrator mode)**
-        - Then install the add-on as ususal
+        - In the case Blender has been installed from the executable installer package to your OS **launch Blender in Administrator mode**
+        - Then inside Blender install the add-on as ususal
 
+Note that if you are using a verion of Blender coming for a zip file - which is probably the case when working in a studio and the
+application was deployed by the production - the Administrator rights should not be required.
 
-Launch Blender, open the **Preferences** panel and go to the **Add-ons** section.
-Press the **Install** button located at the top of the panel. A dialog box opens, pick the Shot Manager
+Inside Blender
+**************
+
+Once in Blender open the **Preferences** panel and go to the **Add-ons** section.
+Press the **Install** button located at the top of the panel. A dialog box opens, pick the add-on
 zip file you previously downloaded and validate.
-The add-on will be installed. Click on the checkbox at the left side of its name to enable it.
+The add-on header will be displayed in the Preferences panel. **Click on the checkbox at the left side of its name** to proceed to the installation.
 
 Once the addon is enabled, a Stamp Info tab is displayed in the 3D viewport N-Panel.
+
+**If you have any trouble during the installation process check the Troubleshooting FAQ** :ref:`Installation Error <error-during-installation>`
 
 
 Install of complementary add-ons
