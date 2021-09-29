@@ -172,7 +172,8 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     logoUsed: BoolProperty(name="Logo", description="Set and draw the specified logo", default=True)
 
     def buildLogosList(self, context):
-        dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\logos")
+        dir = Path(utils.addonPath() + "\\logos")
+        print(f"Logo dir path: {dir}")
         items = list()
         for img in dir.glob("*.png"):
             # print ("    buildLogosList img.stem: " + img.stem )
