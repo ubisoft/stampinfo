@@ -173,7 +173,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     def buildLogosList(self, context):
         dir = Path(utils.addonPath() + "\\logos")
-        print(f"Logo dir path: {dir}")
         items = list()
         for img in dir.glob("*.png"):
             # print ("    buildLogosList img.stem: " + img.stem )

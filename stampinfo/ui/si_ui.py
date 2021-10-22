@@ -258,6 +258,25 @@ class UAS_PT_StampInfoAddon(Panel):
 # ------------------------------------------------------------------------#
 #                             Time and Frames Panel                       #
 # ------------------------------------------------------------------------#
+
+
+def _getQuickHelp(topic):
+
+    docPath = "https://ubisoft-stampinfo.readthedocs.io/en/latest/"
+
+    if "3D_FRAME" == topic:
+        title = "3D Frame"
+        text = "Mu test"
+        # TODO wkip add doc anchor to each path
+        docPath += ""
+    elif "VIDEO_FRAME" == topic:
+        title = "Video Frame"
+        text = "Mu test"
+
+    tooltip = "Quick tips about " + title
+    return (tooltip, title, text, docPath)
+
+
 class UAS_PT_StampInfoTimeAndFrames(Panel):
     bl_idname = "UAS_PT_StampInfoTimeAndFrames"
     bl_label = "Time and Frames"
@@ -269,6 +288,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        splitFactor = 0.35
         # prefs = context.preferences.addons["stampinfo"].preferences
 
         def _formatRangeString(current=None, animRange=None, handles=None, start=None, end=None):
@@ -297,8 +317,11 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
 
         # ---------- 3D frame -------------
         box = layout.box()
-        row = box.row(align=True)
-        subRow = row.row(align=True)
+        col = box.column(align=False)
+
+        row = col.row(align=True)
+        split = row.split(factor=splitFactor)
+        subRow = split.row(align=True)
         subRow.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
 
         sceneFrameStr = _formatRangeString(
@@ -309,14 +332,27 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             end=scene.frame_end,
         )
 
-        subRow = row.row(align=True)
-        subRow.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
-        subRow.label(text=sceneFrameStr)
+        subRowLeft = split.row(align=True)
+        subRowLeft.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
+        subRowLeft.alignment = "CENTER"
+        subRowLeft.label(text=sceneFrameStr)
+
+        # help tooltip and doc
+        subRowRight = row.row(align=True)
+        subRowRight.emboss = "NONE"
+        subRowRight.alignment = "RIGHT"
+        doc_op = subRowRight.operator("stampinfo.open_documentation_url", text="", icon="INFO")
+        quickHelpInfo = _getQuickHelp("3D_FRAME")
+        doc_op.path = quickHelpInfo[3]
+        tooltipStr = quickHelpInfo[1]
+        tooltipStr += f"\n{quickHelpInfo[2]}"
+        tooltipStr += f"\n\nOpen Stamp Info online documentation:\n     {doc_op.path}"
+        doc_op.tooltip = tooltipStr
 
         # ---------- 3D edit frame -------------
         if config.devDebug:
             #   box = layout.box()
-            row = box.row(align=True)
+            row = col.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
             videoFrameStr = _formatRangeString(
                 current=scene.frame_current - scene.frame_start,
@@ -331,10 +367,11 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         #        row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumberUsed", text="3D Edit Duration")
 
         # ---------- video frame -------------
-        #    box = layout.box()
-        row = box.row(align=True)
-        subRow = row.row(align=True)
+        row = col.row(align=True)
+        split = row.split(factor=splitFactor)
+        subRow = split.row(align=True)
         subRow.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
+
         videoFrameStr = _formatRangeString(
             current=scene.frame_current - scene.frame_start,
             animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
@@ -343,35 +380,52 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             end=scene.frame_end - scene.frame_start,
         )
 
-        subRow = row.row(align=True)
-        subRow.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
-        subRow.label(text=videoFrameStr)
+        subRowLeft = split.row(align=True)
+        subRowLeft.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
+        subRowLeft.alignment = "CENTER"
+        subRowLeft.label(text=videoFrameStr)
+
+        # help tooltip and doc
+        subRowRight = row.row(align=True)
+        subRowRight.emboss = "NONE"
+        subRowRight.alignment = "RIGHT"
+        doc_op = subRowRight.operator("stampinfo.open_documentation_url", text="", icon="INFO")
+        quickHelpInfo = _getQuickHelp("VIDEO_FRAME")
+        doc_op.path = quickHelpInfo[3]
+        tooltipStr = quickHelpInfo[1]
+        tooltipStr += f"\n{quickHelpInfo[2]}"
+        tooltipStr += f"\n\nOpen Stamp Info online documentation:\n     {doc_op.path}"
+        doc_op.tooltip = tooltipStr
 
         # ---------- shared settings -------------
         layout.label(text="Shared Settings:")
         box = layout.box()
-        row = box.row(align=True)
+        col = box.column(align=False)
+        row = col.row(align=True)
 
         row.prop(scene.UAS_StampInfo_Settings, "animRangeUsed")
 
-        handlesRow = box.split(factor=0.5)
+        handlesRow = col.row()
         handlesRow.enabled = scene.UAS_StampInfo_Settings.animRangeUsed
-        handlesSubRow = handlesRow.row()
+        # handlesRow = col.split(factor=0.5)
+        split = handlesRow.split(factor=0.5)
+        handlesSubRow = split.row()
         handlesSubRow.separator(factor=4)
         handlesSubRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles")
         #   row.prop(scene.UAS_StampInfo_Settings, "sceneFrameHandlesUsed", text = "")
-        handlesSubRow = handlesRow.row()
+        handlesSubRow = split.row()
         handlesSubRow.enabled = scene.UAS_StampInfo_Settings.handlesUsed
         handlesSubRow.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
 
         # ---------- animation duration -------------
         box = layout.box()
-        row = box.row(align=True)
+        col = box.column(align=False)
+        row = col.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "animDurationUsed")
         subrow = row.row(align=True)
         subrow.enabled = scene.UAS_StampInfo_Settings.animDurationUsed
         subrow.label(text=f"{scene.frame_end - scene.frame_start + 1} frames")
-        row = box.row(align=True)
+        row = col.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "framerateUsed")
         subrow = row.row(align=True)
         subrow.enabled = scene.UAS_StampInfo_Settings.framerateUsed
@@ -392,26 +446,28 @@ class UAS_PT_StampInfoShot(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        splitFactor = 0.35
         # prefs = context.preferences.addons["stampinfo"].preferences
 
         # ---------- shot -------------
         # To be filled by a production script or by UAS Shot Manager
         box = layout.box()
-        row = box.row(align=True)
+        col = box.column(align=False)
+        row = col.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "sceneUsed")
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "takeUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
 
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "shotUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
-        row = box.row(align=True)
+        split = col.split(factor=splitFactor)
+        split.prop(scene.UAS_StampInfo_Settings, "takeUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
+
+        split = col.split(factor=splitFactor)
+        split.prop(scene.UAS_StampInfo_Settings, "shotUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
 
         # ---------- camera -------------
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "cameraUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "cameraLensUsed")
+        split = col.split(factor=splitFactor)
+        split.prop(scene.UAS_StampInfo_Settings, "cameraUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "cameraLensUsed")
 
         # ---------- Shot duration -------------
         box = layout.box()
@@ -470,22 +526,20 @@ class UAS_PT_StampInfoMetadata(Panel):
         row.prop(scene.UAS_StampInfo_Settings, "projectUsed")
         row.prop(scene.UAS_StampInfo_Settings, "projectName")
 
-        # ---------- date -------------
+        # ---------- date and user ----
         box = layout.box()
-        row = box.row(align=True)
+        col = box.column(align=False)
+        row = col.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "dateUsed")
         row.prop(scene.UAS_StampInfo_Settings, "timeUsed")
+        row = col.row(align=True)
+        row.prop(scene.UAS_StampInfo_Settings, "userNameUsed")
 
         # ---------- file -------------
         box = layout.box()
         row = box.row(align=True)
         row.prop(scene.UAS_StampInfo_Settings, "filenameUsed")
         row.prop(scene.UAS_StampInfo_Settings, "filepathUsed")
-
-        # ---------- user -------------
-        box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "userNameUsed")
 
         # ---------- notes -------------
         box = layout.box()
