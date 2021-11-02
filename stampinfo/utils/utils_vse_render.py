@@ -969,11 +969,11 @@ class StampInfo_Vse_Render(PropertyGroup):
 
         bpy.context.window.scene = previousScene
 
-        print(f" *** Current Workspace: {bpy.context.workspace.name}")
+        # print(f" *** Current Workspace: {bpy.context.workspace.name}")
 
         # bpy.context.window.screen.name = previousScreen
         bpy.context.window.workspace = bpy.data.workspaces[previousWorkspace]
-        print(f" *** Current Workspace: {bpy.context.workspace.name}")
+        # print(f" *** Current Workspace: {bpy.context.workspace.name}")
 
         bpy.context.window.screen = bpy.context.window_manager.windows[0].screen
         bpy.context.window.screen = bpy.data.screens[previousScreen]

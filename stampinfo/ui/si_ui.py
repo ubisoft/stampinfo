@@ -262,16 +262,29 @@ class UAS_PT_StampInfoAddon(Panel):
 
 def _getQuickHelp(topic):
 
-    docPath = "https://ubisoft-stampinfo.readthedocs.io/en/latest/"
+    docPath = "https://ubisoft-stampinfo.readthedocs.io/"
 
     if "3D_FRAME" == topic:
         title = "3D Frame"
-        text = "Mu test"
+        text = "Stamp the current frame index and the animation range on the output images."
+        text += "\nFrames will be in the 3D time, which is the time of the current scene."
+        text += "\n\nIf Frame Range property is checked then the animation range will be displayed as:"
+        text += "\n    [ Start  /  current frame  /  End ]"
+        text += "\n\nIf Handles property is also checked then the display will be:"
+        text += "\n    [ Start  /  Start + Handle  / current frame  /  End - Handle  /  End ]"
+        text += "\n\nUI text is displayed in red when the current time is out of the animation range"
+
         # TODO wkip add doc anchor to each path
         docPath += ""
     elif "VIDEO_FRAME" == topic:
         title = "Video Frame"
-        text = "Mu test"
+        text = "Stamp the current frame index and the animation range on the output images"
+        text += "\nIN THE TIME OF THE VIDEO."
+        text += "\n\nIf Frame Range property is checked then the animation range will be displayed as:"
+        text += "\n    [ 0  /  current frame - Start  /  End - Start ]"
+        text += "\n\nIf Handles property is also checked then the display will be:"
+        text += "\n    [ 0  /  Handle  / current frame - Start  /  End - Start - Handle  /  End - Start ]"
+        text += "\n\nUI text is displayed in red when the current time is out of the animation range"
 
     tooltip = "Quick tips about " + title
     return (tooltip, title, text, docPath)
@@ -311,7 +324,16 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
                     str += f" / {end:03d}"
                 str += "]"
 
-            return str
+            # return True if current frame is in the animation range
+            isInRange = True
+            if current is not None and animRange is not None:
+                # this is not dependent on handles
+                # if handles is not None:
+                isInRange = start <= current <= end
+                # else:
+                #     isInRange = start + handles <= current <= end + handles
+
+            return str, isInRange
 
         #        layout.label(text="Top: Project and Editing Info")
 
@@ -324,7 +346,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         subRow = split.row(align=True)
         subRow.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
 
-        sceneFrameStr = _formatRangeString(
+        sceneFrameStr, isInRange = _formatRangeString(
             current=scene.frame_current,
             animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
             handles=None if not scene.UAS_StampInfo_Settings.handlesUsed else scene.UAS_StampInfo_Settings.shotHandles,
@@ -335,6 +357,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         subRowLeft = split.row(align=True)
         subRowLeft.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
         subRowLeft.alignment = "CENTER"
+        subRowLeft.alert = not isInRange
         subRowLeft.label(text=sceneFrameStr)
 
         # help tooltip and doc
@@ -346,7 +369,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         doc_op.path = quickHelpInfo[3]
         tooltipStr = quickHelpInfo[1]
         tooltipStr += f"\n{quickHelpInfo[2]}"
-        tooltipStr += f"\n\nOpen Stamp Info online documentation:\n     {doc_op.path}"
+        tooltipStr += f"\n\nOpen Stamp Info online documentation for a more detailed explaination:\n     {doc_op.path}"
         doc_op.tooltip = tooltipStr
 
         # ---------- 3D edit frame -------------
@@ -354,7 +377,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             #   box = layout.box()
             row = col.row(align=True)
             row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
-            videoFrameStr = _formatRangeString(
+            videoFrameStr, isInRange = _formatRangeString(
                 current=scene.frame_current - scene.frame_start,
                 animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
                 handles=None
@@ -372,7 +395,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         subRow = split.row(align=True)
         subRow.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
 
-        videoFrameStr = _formatRangeString(
+        videoFrameStr, isInRange = _formatRangeString(
             current=scene.frame_current - scene.frame_start,
             animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
             handles=None if not scene.UAS_StampInfo_Settings.handlesUsed else scene.UAS_StampInfo_Settings.shotHandles,
@@ -383,6 +406,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         subRowLeft = split.row(align=True)
         subRowLeft.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
         subRowLeft.alignment = "CENTER"
+        subRowLeft.alert = not isInRange
         subRowLeft.label(text=videoFrameStr)
 
         # help tooltip and doc
@@ -410,8 +434,8 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         # handlesRow = col.split(factor=0.5)
         split = handlesRow.split(factor=0.5)
         handlesSubRow = split.row()
-        handlesSubRow.separator(factor=4)
-        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles")
+        handlesSubRow.separator(factor=2)
+        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles (Advanced)")
         #   row.prop(scene.UAS_StampInfo_Settings, "sceneFrameHandlesUsed", text = "")
         handlesSubRow = split.row()
         handlesSubRow.enabled = scene.UAS_StampInfo_Settings.handlesUsed

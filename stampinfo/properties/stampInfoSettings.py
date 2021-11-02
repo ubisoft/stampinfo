@@ -227,7 +227,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Frame Range", description="Stamp the range of the animation, in frames", default=True,
     )
     handlesUsed: BoolProperty(
-        name="Frame Handles", description="Stamp the shot handle values in the image sequence range", default=True,
+        name="Frame Handles",
+        description="***Advanced parameter ***"
+        "\nStamp the shot handle values in the animation ranges."
+        "\n\nIt is recommended to let the add-on Ubisoft Shot Manager automatically cope with handles."
+        "\nRead the online documentation for details",
+        default=False,
     )
 
     animDurationUsed: BoolProperty(
@@ -315,11 +320,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     shotHandles: IntProperty(
-        name="Shot Handles Duration",
-        description="Duration of the handles of the shot",
-        default=0,
-        soft_min=0,
-        soft_max=50,
+        name="Shot Handles Duration", description="Duration of the handles of the shot", default=10, min=0, soft_max=50,
     )
 
     # ---------- Camera properties -------------
@@ -373,13 +374,13 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- Date properties -------------
 
-    dateUsed: BoolProperty(name="Date", description="Stamp rendering date", default=False, options=set())
-    timeUsed: BoolProperty(name="Time", description="Stamp rendering time", default=False, options=set())
+    dateUsed: BoolProperty(name="Date", description="Stamp rendering date", default=True, options=set())
+    timeUsed: BoolProperty(name="Time", description="Stamp rendering time", default=True, options=set())
 
     # ---------- User properties -------------
 
     userNameUsed: BoolProperty(
-        name="User Name", description="Name of the current user of the OS session", default=True, options=set()
+        name="User Name", description="Name of the current user of the OS session", default=False, options=set()
     )
     # userName: StringProperty(
     #     name="User Name", description="Name of the current user of the OS session", default="", options=set()
