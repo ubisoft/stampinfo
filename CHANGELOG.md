@@ -1,5 +1,14 @@
-# 1.0.14 (2021-09-29)
+# 1.0.15 (2021-11-02)
 
+## Features
+
+- Improved tooltips and explainations about animation ranges
+- Added a text field for Sequence
+- Set date and time on by default
+
+<br><br>
+
+# 1.0.14 (2021-10-29)
 
 ## Bug fix
 

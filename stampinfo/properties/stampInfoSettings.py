@@ -173,7 +173,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     def buildLogosList(self, context):
         dir = Path(utils.addonPath() + "\\logos")
-        print(f"Logo dir path: {dir}")
         items = list()
         for img in dir.glob("*.png"):
             # print ("    buildLogosList img.stem: " + img.stem )
@@ -228,7 +227,12 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         name="Frame Range", description="Stamp the range of the animation, in frames", default=True,
     )
     handlesUsed: BoolProperty(
-        name="Frame Handles", description="Stamp the shot handle values in the image sequence range", default=True,
+        name="Frame Handles",
+        description="***Advanced parameter ***"
+        "\nStamp the shot handle values in the animation ranges."
+        "\n\nIt is recommended to let the add-on Ubisoft Shot Manager automatically cope with handles."
+        "\nRead the online documentation for details",
+        default=False,
     )
 
     animDurationUsed: BoolProperty(
@@ -297,27 +301,26 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- shot manager -------------
     sceneUsed: BoolProperty(name="Scene", description="Stamp scene name", default=True, options=set())
-
-    takeUsed: BoolProperty(name="Take", description="Stamp take index", default=False, options=set())
-
+    sequenceUsed: BoolProperty(name="Sequence", description="Stamp sequence name", default=False, options=set())
     shotUsed: BoolProperty(name="Shot", description="Stamp shot name", default=False, options=set())
+    takeUsed: BoolProperty(name="Take", description="Stamp take name", default=False, options=set())
 
-    # To be filled by a production script or by UAS Shot Manager
+    # To be filled by a production script or by Shot Manager
+    sequenceName: StringProperty(
+        name="Sequence Name",
+        description="Enter the name of the sequence the shot belongs to",
+        default="Sequence Name",
+        options=set(),
+    )
     shotName: StringProperty(
         name="Shot Name", description="Enter the name of the current shot", default="Shot Name", options=set()
     )
-
-    shotHandles: IntProperty(
-        name="Shot Handles Duration",
-        description="Duration of the handles of the shot",
-        default=0,
-        soft_min=0,
-        soft_max=50,
-    )
-
-    # To be filled by a production script or by UAS Shot Manager
     takeName: StringProperty(
         name="Take Name", description="Enter the name of the current take", default="Take Name", options=set()
+    )
+
+    shotHandles: IntProperty(
+        name="Shot Handles Duration", description="Duration of the handles of the shot", default=10, min=0, soft_max=50,
     )
 
     # ---------- Camera properties -------------
@@ -371,13 +374,13 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- Date properties -------------
 
-    dateUsed: BoolProperty(name="Date", description="Stamp rendering date", default=False, options=set())
-    timeUsed: BoolProperty(name="Time", description="Stamp rendering time", default=False, options=set())
+    dateUsed: BoolProperty(name="Date", description="Stamp rendering date", default=True, options=set())
+    timeUsed: BoolProperty(name="Time", description="Stamp rendering time", default=True, options=set())
 
     # ---------- User properties -------------
 
     userNameUsed: BoolProperty(
-        name="User Name", description="Name of the current user of the OS session", default=True, options=set()
+        name="User Name", description="Name of the current user of the OS session", default=False, options=set()
     )
     # userName: StringProperty(
     #     name="User Name", description="Name of the current user of the OS session", default="", options=set()
