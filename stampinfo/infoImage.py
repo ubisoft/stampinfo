@@ -617,6 +617,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
         lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
+    # ---------- sequence -------------
+    if userSettings.sequenceUsed:
+        textProp = "Seq: " if stampLabel3D else ""
+        textProp += userSettings.sequenceName if stampValue else ""
+        yPos = currentTextTop + -1.0 * fontHeight + 1.0 * textInterlineH
+        img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
+        lineTextXEnd += (font.getsize(textProp))[0] + separatorX
+
     # ---------- take -------------
     if userSettings.takeUsed:
         textProp = "Take: " if stampLabel3D else ""

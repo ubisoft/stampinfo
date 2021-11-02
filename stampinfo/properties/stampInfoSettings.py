@@ -296,14 +296,22 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- shot manager -------------
     sceneUsed: BoolProperty(name="Scene", description="Stamp scene name", default=True, options=set())
-
-    takeUsed: BoolProperty(name="Take", description="Stamp take index", default=False, options=set())
-
+    sequenceUsed: BoolProperty(name="Sequence", description="Stamp sequence name", default=False, options=set())
     shotUsed: BoolProperty(name="Shot", description="Stamp shot name", default=False, options=set())
+    takeUsed: BoolProperty(name="Take", description="Stamp take name", default=False, options=set())
 
-    # To be filled by a production script or by UAS Shot Manager
+    # To be filled by a production script or by Shot Manager
+    sequenceName: StringProperty(
+        name="Sequence Name",
+        description="Enter the name of the sequence the shot belongs to",
+        default="Sequence Name",
+        options=set(),
+    )
     shotName: StringProperty(
         name="Shot Name", description="Enter the name of the current shot", default="Shot Name", options=set()
+    )
+    takeName: StringProperty(
+        name="Take Name", description="Enter the name of the current take", default="Take Name", options=set()
     )
 
     shotHandles: IntProperty(
@@ -312,11 +320,6 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         default=0,
         soft_min=0,
         soft_max=50,
-    )
-
-    # To be filled by a production script or by UAS Shot Manager
-    takeName: StringProperty(
-        name="Take Name", description="Enter the name of the current take", default="Take Name", options=set()
     )
 
     # ---------- Camera properties -------------

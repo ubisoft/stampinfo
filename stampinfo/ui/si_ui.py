@@ -457,12 +457,16 @@ class UAS_PT_StampInfoShot(Panel):
         row.prop(scene.UAS_StampInfo_Settings, "sceneUsed")
 
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "takeUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
+        split.prop(scene.UAS_StampInfo_Settings, "sequenceUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "sequenceName", text="")
 
         split = col.split(factor=splitFactor)
         split.prop(scene.UAS_StampInfo_Settings, "shotUsed")
         split.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
+
+        split = col.split(factor=splitFactor)
+        split.prop(scene.UAS_StampInfo_Settings, "takeUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
 
         # ---------- camera -------------
         split = col.split(factor=splitFactor)
