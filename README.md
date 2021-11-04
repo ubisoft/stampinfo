@@ -1,11 +1,26 @@
-![](doc/images/Logo_90_A.png)
-# Stamp Info - Blender Add-on
-Stamp Info creates a frame around the rendered images and writes scene information on it.
-It is a flexible alternative to the Metadata post processing integrated system of Blender.
+<img align="left" width="auto" height="auto" src="doc/images/Logo_90_A.png">
 
-**User documentation:** [ubisoft-stampinfo.readthedocs.io](https://ubisoft-stampinfo.readthedocs.io)
+# Ubisoft Stamp Info - Blender Add-on
 
-**Latest <u>GitHub</u> release:** [github.com/ubisoft/stampinfo/releases/latest](https://github.com/ubisoft/stampinfo/releases/latest)
+</br>
+
+**Stamp Info creates a frame around the rendered images and writes scene information on it.
+It is a flexible alternative to the Metadata post processing integrated system of Blender.**
+
+<p align="center">
+  <a href="https://ubisoft-stampinfo.readthedocs.io" title="Consult the online documentation" target="_blank">
+  <img src="doc/images/Documentation.png" width="160" />
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/ubisoft/stampinfo/releases/latest" title="Download latest version">
+  <img src="doc/images/Download.png" width="160" />
+  </a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/ubisoft/stampinfo/issues" title="Report and follow issues">
+  <img src="doc/images/Issues.png" width="160" />
+  </a>
+</p>
+
 
 ## Disclaimer
 >**This tool is currently supported for LTS versions of Blender 2.83 and 2.93.**
