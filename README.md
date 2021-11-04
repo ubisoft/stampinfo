@@ -31,7 +31,7 @@ may not be considered as feature complete for a more generic purpose. In spite o
 
 <br />
 <img src="doc/images/StampInfo_RenderScreen.png" alt="drawing" width="70%"/>
-<br /><br />
+<br />
 
 ## Installation:
 Stamp Info can be installed as any standard Blender add-on. Nevertheless:
