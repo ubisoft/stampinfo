@@ -25,7 +25,7 @@ Video Tracks
 
 Mixer
 -----
-    Real-time collaboration between Blender users, enableling them to work together on the same data, on different computers.
+    Real-time collaboration between Blender users, enabling them to work together on the same data, on different computers.
     |br| `Mixer <https://ubisoft-mixer.readthedocs.io>`_
     
 
