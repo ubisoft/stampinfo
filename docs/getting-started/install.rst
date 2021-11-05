@@ -32,7 +32,7 @@ Install of Stamp Info
         - **Be connected to the internet**
         - **Be sure the firewall is not blocking the requests (use OpenVPN or equivalent if needed)**
         - In the case Blender has been installed from the executable installer package to your OS **launch Blender in Administrator mode**
-        - Then inside Blender install the add-on as ususal
+        - Then inside Blender install the add-on as usual
 
 Note that if you are using a verion of Blender coming for a zip file - which is probably the case when working in a studio and the
 application was deployed by the production - the Administrator rights should not be required.
@@ -54,7 +54,7 @@ Install of complementary add-ons
 --------------------------------
 
 Stamp Info can work as is. Nevertheless we've developed 2 additional add-ons that are considerably 
-expanding the features and capabilitie of this tool. It is strongly advised to install them too
+expanding the features and capabilities of this tool. It is strongly advised to install them too
 to get the full experience.
 
     - Download Ubisoft Shot Manager here: `Shot Manager latest release <https://github.com/ubisoft/shotmanager/releases/latest>`_
