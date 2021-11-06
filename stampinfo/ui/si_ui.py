@@ -121,7 +121,7 @@ class UAS_PT_StampInfoAddon(Panel):
             row = layout.row()
             row.alignment = "CENTER"
             row.alert = True
-            row.label(text=" *** PIL Library not found - Stamp Info cannot work normaly ***")
+            row.label(text=" *** PIL Library not found - Stamp Info cannot work normally ***")
 
         if config.devDebug:
             row = layout.row()
@@ -369,7 +369,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         doc_op.path = quickHelpInfo[3]
         tooltipStr = quickHelpInfo[1]
         tooltipStr += f"\n{quickHelpInfo[2]}"
-        tooltipStr += f"\n\nOpen Stamp Info online documentation for a more detailed explaination:\n     {doc_op.path}"
+        tooltipStr += f"\n\nOpen Stamp Info online documentation for a more detailed explanation:\n     {doc_op.path}"
         doc_op.tooltip = tooltipStr
 
         # ---------- 3D edit frame -------------
