@@ -279,7 +279,7 @@ class StampInfo_Vse_Render(PropertyGroup):
 
     def getMediaType(self, filePath):
         """ Return the type of media according to the extension of the provided file path
-            Rturned types: 'MOVIE', 'IMAGES_SEQUENCE', 'IMAGE', 'SOUND', 'UNKNOWN'
+            Returned types: 'MOVIE', 'IMAGES_SEQUENCE', 'IMAGE', 'SOUND', 'UNKNOWN'
         """
         mediaType = "UNKNOWN"
 
