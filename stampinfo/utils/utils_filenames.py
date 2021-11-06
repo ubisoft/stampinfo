@@ -36,12 +36,12 @@ class SequencePath:
     Returns an instance made of:
         - fullpath: the file path and name
         - parent: the file path without the file name AND with a "\" at the end
-        - name: the name of the file with extention
-        - stem: the name of the file without extention
+        - name: the name of the file with extension
+        - stem: the name of the file without extension
         - seq_name: the name of the sequence when # are removed
-        - suffix: the file extention
+        - suffix: the file extension
     
-    When the initial sequence path and name is submitted with no extention then it is seen as a path
+    When the initial sequence path and name is submitted with no extension then it is seen as a path
 
     Eg.: myPath = SequencePath("c:\temp\mySequence_####.png")
         - myPath._fullpath(): "c:\temp\mySequence_####.png"
@@ -50,7 +50,7 @@ class SequencePath:
         - myPath.stem(): "mySequence_####"
         - myPath.sequence_name(): "mySequence"
         - myPath.sequence_indices: "####"
-        - myPath.suffix: ".png"     or myPath.extention(): ".png"
+        - myPath.suffix: ".png"     or myPath.extension(): ".png"
     """
 
     fullpath = None
@@ -69,13 +69,13 @@ class SequencePath:
         if "." == suf[0]:
             suf = suf[1:]
             try:
-                # if suf can be converted to an int then the extention is not valid
+                # if suf can be converted to an int then the extension is not valid
                 int(suf)
                 return False
             except Exception:
                 pass
 
-        # case where there is no file extention but filename ends with '.###'
+        # case where there is no file extension but filename ends with '.###'
         if -1 != suf.find("#"):
             return False
 
@@ -120,13 +120,13 @@ class SequencePath:
 
     def extension(self):
         """
-        Same as function self.suffix(). Available for consistensy with operating systems.
+        Same as function self.suffix(). Available for consistency with operating systems.
         """
         return self.suffix()
 
     def suffix(self):
         """
-        Same as function self.extension(). Available for consistensy with Python pathlib terminology.
+        Same as function self.extension(). Available for consistency with Python pathlib terminology.
         If the file name extension contains a # its end will not be considered as an extension
         but as an index.
         """
