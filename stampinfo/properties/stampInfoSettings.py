@@ -66,7 +66,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     renderRootPathUsed: BoolProperty(default=False)
     renderRootPath: StringProperty(
         name="Render Root Path",
-        description="Directory where the temporaty images having the stamped information are rendered.\nThis directory must be manually cleaned after the use of the images",
+        description="Directory where the temporary images having the stamped information are rendered.\nThis directory must be manually cleaned after the use of the images",
         default="",
     )
 
