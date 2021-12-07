@@ -6,8 +6,18 @@ Supported versions
 
 Stamp Info is developed and actively tested on Windows 10. Community users reported successful usage on Linux platform. 
 
-stamp Info loads successfully and should work on 2.83 LTS up to 2.93.
+Stamp Info is supported on Blender 2.93 and 3.0.
 
+Current version is 1.0. The currently supported Blender versions are 2.93.x and 3.0.x.
+
+
+.. raw:: html
+
+   <div style="position: relative; padding-bottom: 45%; height: 0; overflow: hidden; max-width: 80%; border:solid 0.1em; border-color:#4d4d4d; align=center; margin: auto;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/Q6jTkiRtUKY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+   </div>
+   <br />
+   <br />
 
 .. _download:
 
