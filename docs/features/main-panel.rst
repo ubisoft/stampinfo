@@ -5,7 +5,7 @@ Main panel
 
 
 
-..  image:: /img/StampInfoPanel_Main.png
+..  image:: /docs/img/StampInfoPanel_Main.png
     :align: center
     :width: 100%
 
