@@ -31,7 +31,7 @@ that will report the error and provide the steps to fix the issue.
 Here is how the panel will look like:
 
 
-..  image:: /img/install/StampInfo_ErrorPrefs_Error1.png
+..  image:: /docs/img/install/StampInfo_ErrorPrefs_Error1.png
     :align: center
 
 
