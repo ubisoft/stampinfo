@@ -2,7 +2,7 @@
 
   <br/>
 
-..  image:: /img/ubisoft_logo.png
+..  image:: /docs/img/ubisoft_logo.png
     :align: center
 
 Ubisoft Stamp Info: Write text on images rendered with Blender
@@ -10,7 +10,7 @@ Ubisoft Stamp Info: Write text on images rendered with Blender
 
 **Print all the scene and animation information required to understand the context of an image directly onto the rendered outputs.**
 
-..  image:: /img/StampInfo_Screen.jpg
+..  image:: /docs/img/StampInfo_Screen.jpg
     :align: center
     :width: 80%
 
