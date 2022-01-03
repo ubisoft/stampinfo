@@ -24,7 +24,7 @@ Current version is 1.0. The currently supported Blender versions are 2.93.x and 
 Download
 --------
 
-Open the `latest release <https://github.com/ubisoft/stampinfo/releases/latest>`__  page from the Stamp Info Gihub `releases page <https://github.com/ubisoft/stampinfo/releases>`_.
+Open the `latest release <https://github.com/ubisoft/stampinfo/releases/latest>`__  page from the Stamp Info GitHub `releases page <https://github.com/ubisoft/stampinfo/releases>`_.
 Download the zip file listed in **Assets** that has the package icon: |package-icon|_.
 
 .. |package-icon| image:: /img/package-icon.png
