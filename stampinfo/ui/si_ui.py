@@ -186,7 +186,7 @@ class UAS_PT_StampInfoAddon(Panel):
         layout.separator(factor=0.2)
 
         row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed", text="Use Stamp info Framing")
+        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed", text="Use Stamp Info")
 
         icon = icons.icons_col["General_Explorer_32"]
         renderPath = stamper.getInfoFileFullPath(context.scene, -1)[0]
@@ -485,12 +485,12 @@ class UAS_PT_StampInfoShot(Panel):
         split.prop(scene.UAS_StampInfo_Settings, "sequenceName", text="")
 
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "shotUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
-
-        split = col.split(factor=splitFactor)
         split.prop(scene.UAS_StampInfo_Settings, "takeUsed")
         split.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
+
+        split = col.split(factor=splitFactor)
+        split.prop(scene.UAS_StampInfo_Settings, "shotUsed")
+        split.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
 
         # ---------- camera -------------
         split = col.split(factor=splitFactor)

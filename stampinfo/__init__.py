@@ -49,7 +49,7 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack) - Ubisoft",
     "description": "Stamp scene information on the rendered images",
     "blender": (2, 92, 0),
-    "version": (1, 0, 15),
+    "version": (1, 0, 16),
     "location": "Right panel in the 3D View",
     "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
     "tracker_url": "https://github.com/ubisoft/stampinfo/issues",

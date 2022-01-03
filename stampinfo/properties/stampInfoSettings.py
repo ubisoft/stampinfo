@@ -121,7 +121,7 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     stampInfoUsed: BoolProperty(
         name="Stamp Info",
-        description="Stamp info on rendered images",
+        description="Toggle the use of Stamp Info on rendered images",
         get=get_stampInfoUsed,
         set=set_stampInfoUsed,
         update=stampInfoUsed_StateChanged,
