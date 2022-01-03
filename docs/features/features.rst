@@ -1,3 +1,8 @@
+.. |br| raw:: html
+   
+  <br/>
+
+
 .. _features:
 
 
@@ -16,6 +21,7 @@ than the rendering output image.
     :align: center
 
 
+|br|
 * **Outside Rendered images:**
 
 In this second mode the metadata are written outside the rendering output image, making the final composited
@@ -25,6 +31,7 @@ image higher than the resolution specified in the Blender Rendering panel.
     :align: center
 
 
+|br|
 Both have advantages and inconvenients. We suggest to use the mode "Outside Rendered Images" when in a production context,
 it saves rendering time while preserving the same aspect ratio for the cameras in the viewports.
 
@@ -52,6 +59,7 @@ Animation range
         :align: center
 
 
+|br|
 
 Handles
 +++++++
@@ -67,6 +75,7 @@ Handles
 
 
 
+|br|
 
 Shot and camera
 ---------------

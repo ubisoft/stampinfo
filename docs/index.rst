@@ -1,5 +1,5 @@
 .. |br| raw:: html
-
+   
   <br/>
 
 ..  image:: /img/ubisoft_logo.png
