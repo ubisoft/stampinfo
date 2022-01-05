@@ -23,5 +23,13 @@
     "python.testing.promptToConfigure": false,
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
-    "restructuredtext.confPath": "${​​​​​​​​workspaceFolder}​​​​​​​​\\docs"
+    "restructuredtext.confPath": "${​​​​​​​​workspaceFolder}​​​​​​​​\\docs",
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext"
+    ]
 }

@@ -23,9 +23,10 @@ It is a flexible alternative to the Metadata post processing integrated system o
 
 
 ## Disclaimer
->**This tool is currently supported for LTS versions of Blender 2.83 and 2.93.**
+
+>**This tool is currently supported for LTS version of Blender 2.93 and up to Blender 3.0**
 >
->It was initialy developed for an animated TV series production in 2020 on Blender 2.83. It has the features that were needed at the time but it
+>It was initially developed for an animated TV series production in 2020 on Blender 2.83. It has the features that were needed at the time but it
 may not be considered as feature complete for a more generic purpose. In spite of all our efforts to make it reliable some troubles may occur in use cases we have not faced.
 >
 
@@ -39,17 +40,8 @@ Stamp Info can be installed as any standard Blender add-on. Nevertheless:
 >The addon must be installed in Administrator mode so that the Pillow Python library can
 >be downloaded and deployed correctly. Also be sure that your firewall doesn't block the download (or use OpenVPN or equivalent).
 
-Launch Blender, open the Preferences panel and go to the Add-ons section. Press the Install button located at the top of the panel. A dialog box opens, pick the Stamp Info zip file you previously downloaded and validate. The add-on will be installed. Click on the checkbox at the left side of its name to enable it.
-Once the addon is enabled, a Stamp Info tab is displayed in the 3D viewport N-Panel.
+Refer to the documentation for the detailed installation steps: [https://ubisoft-stampinfo.readthedocs.io/en/latest/getting-started/install.html](https://ubisoft-stampinfo.readthedocs.io/en/latest/getting-started/install.html)
 
-Now close Blender to save your user preferences with the Stamp Info installation.
-
-
-## Features
-
-- [Features](./doc/features.md)
-- [Limitations](./doc/features.md#limitations)
-- [History](./CHANGELOG.md)
 
 ## Principle
 
@@ -67,6 +59,11 @@ Now close Blender to save your user preferences with the Stamp Info installation
 
    Note: In order to mimic as much as possible the actual way of working of Blender and so as to avoid frames in a rendered sequences to be
    overwritten by mistake the still images are saved on disk with a file name starting with the prefix "_Still".
+
+## Features
+
+- [Features and limitations](https://ubisoft-stampinfo.readthedocs.io/en/latest/features/features.html)
+- [History](./CHANGELOG.md)
 
 
 # FAQ and Troubleshooting

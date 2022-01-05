@@ -1,5 +1,5 @@
 .. |br| raw:: html
-   
+
   <br/>
 
 ..  image:: /img/ubisoft_logo.png
@@ -10,12 +10,13 @@ Ubisoft Stamp Info: Write text on images rendered with Blender
 
 **Print all the scene and animation information required to understand the context of an image directly onto the rendered outputs.**
 
+**Current version is 1.0. The currently supported Blender versions are 2.93.x and 3.0.x.**
+
 ..  image:: /img/StampInfo_Screen.jpg
     :align: center
     :width: 80%
 
 
-|br|
 See how this tool was used in production: `User Stories - Blender and the Rabbids <https://www.blender.org/user-stories/blender-and-the-rabbids/?utm_source=www-homepage>`__.
 
 
@@ -67,6 +68,9 @@ Then:
    :caption: Features
 
    /features/features
+   /features/time-and-frame-info
+   /features/shot-and-camera-info
+   /features/metadata-info
    
 
 .. toctree::

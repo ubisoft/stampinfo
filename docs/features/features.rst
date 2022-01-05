@@ -5,9 +5,24 @@
 
 .. _features:
 
+Features and limitations
+========================
+
+
+
+
+Information categories
+----------------------
+
+* :ref:`Time and frames information <time-and-frame-info>`
+* :ref:`Shot and camera information <shot-and-camera-info>`
+* :ref:`Metadata information <metadata-info>`
+
+
+
 
 Setting up the final resolution
-===============================
+-------------------------------
 
 The Final Resolution Mode defines how the metadata will be arranged over the rendered image.
 
@@ -38,59 +53,7 @@ it saves rendering time while preserving the same aspect ratio for the cameras i
 For a more detailed description of these values watch `this part of the video tutorial <https://youtu.be/Sj2GyYhxFX4?t=272>`__.
 
 
-Information categories
-======================
 
-Time and frames
-----------------
-
-Information related to the frame index, animation range and framerate...
-
-Animation range
-+++++++++++++++
-
-    ..  image:: /img/features/SI_Range__0001_Conventions-02.jpg
-        :align: center
-
-    ..  image:: /img/features/SI_Range__0004_Consequences-on-range-03.jpg
-        :align: center
-
-    ..  image:: /img/features/SI_Range__0005_Consequences-on-duration.jpg
-        :align: center
-
-
-|br|
-
-Handles
-+++++++
-
-    ..  image:: /img/features/SI_Hand__0002_Handles-03.jpg
-        :align: center
-
-    ..  image:: /img/features/SI_Hand__0005_Handles-Tips-03.jpg
-        :align: center
-
-    ..  image:: /img/features/SI_Hand__0007_Handles-Tips-05.jpg
-        :align: center
-
-
-
-|br|
-
-Shot and camera
----------------
-
-Scene, sequence, take and shot names, as well as camera name and lens value.
-
-
-Metadata
---------
-
-Project name and logo, user name, rendering date and time, custom notes.
-
-
-Layout categories
-=================
 
 Text and layout
 ---------------
