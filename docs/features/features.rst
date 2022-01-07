@@ -20,6 +20,7 @@ Information categories
 
 
 
+.. _final-resolution:
 
 Setting up the final resolution
 -------------------------------
@@ -53,10 +54,15 @@ it saves rendering time while preserving the same aspect ratio for the cameras i
 For a more detailed description of these values watch `this part of the video tutorial <https://youtu.be/Sj2GyYhxFX4?t=272>`__.
 
 
-
-
 Text and layout
 ---------------
 
 How information is organised on the rendered frame.
+
+
+Limitations
+-----------
+
+The layout for the text and information stamped on the framed image is currenly better fitted for 16:9 ratio.
+Other ratios may produce unpredictable results. We have consideration for that issue for the future.
 

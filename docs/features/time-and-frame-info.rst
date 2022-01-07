@@ -7,12 +7,19 @@
 
 
 Time and frame information
---------------------------
+==========================
 
 Information related to the frame index, animation range and framerate...
 
-Animation range
-+++++++++++++++
+
+Animation Duration
+------------------
+
+The **Animation Duration** is the exact number of frames contained in the image sequence.
+
+
+Frame Range
+-----------
 
     ..  image:: /img/features/SI_Range__0001_Conventions-02.jpg
         :align: center
@@ -24,10 +31,14 @@ Animation range
         :align: center
 
 
-|br|
-
 Handles
-+++++++
+-------
+
+The **Handles** are defining a set of frames at the begining and at the end of the image sequence that
+are used as additional in and out frames at edit time. When the frame index of the image is in the "in" set
+it is displayed in green. When it is in the "out" set it is displayed in orange. When inbetween it is displayed
+in the color defined for the text.
+
 
     ..  image:: /img/features/SI_Hand__0002_Handles-03.jpg
         :align: center

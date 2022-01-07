@@ -8,3 +8,4 @@
 Shot and camera information
 ===========================
 
+Information relative to what and how the scene content is filmed: sequence and shot names, camera name and lens...

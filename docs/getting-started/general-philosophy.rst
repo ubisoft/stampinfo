@@ -49,13 +49,16 @@ Printable data are sorted in several panels, gathered by theme. The list is avai
 :ref:`Stamp Info Features page <features>` 
 
 
-One setting is very different from the others though, it is the Final Resolution Mode.
+One setting is very different from the others though, it is the :ref:`Final Resolution Mode <final-resolution>`.
 Basically it allows you to define if you want the data to be written over the rendered image,
 hidding a part of it at the top and bottom, or outside the rendered image, making the final composited
 image higher than the rendered output.
 Both have advantages and inconvenients. We suggest to use the mode "Outside Rendered Images" when in a production context,
 it saves rendering time while preserving the same aspect ratio for the cameras in the viewports.
 
+
+Help and feedback
+-----------------
 
 If you have any question or feedback please enter an issue on `the add-on GitHub <https://github.com/ubisoft/stampinfo/issues>`_.
 

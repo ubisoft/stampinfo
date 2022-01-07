@@ -73,8 +73,8 @@ Refer to the documentation for the detailed installation steps: [https://ubisoft
 
 ## Dev notes
 
-This add-on requires the Python library [Pillow](https://pypi.org/project/Pillow/). This library is automaticaly downloaded and deployed on the
-Blender instance when Stam Info is installed.
+This add-on requires the Python library [Pillow](https://pypi.org/project/Pillow/). This library is automatically downloaded and deployed on the
+Blender instance when Stamp Info is installed.
 
 
 # Reusable code
@@ -87,7 +87,7 @@ The following ones are particularly interesting:
 
 # Support
 
-The active support repository is on the [StampInfo Github repository](https://github.com/ubisoft/stampinfo) which is part of the [Ubisoft open source](https://github.com/ubisoft) projects group.
+The active support repository is on the [StampInfo GitHub repository](https://github.com/ubisoft/stampinfo) which is part of the [Ubisoft open source](https://github.com/ubisoft) projects group.
 
 
 # License and copyright

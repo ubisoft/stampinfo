@@ -15,3 +15,13 @@ to clearly understand the purpose of this tool.
    <br />
    <br />
 
+Once the add-on is installed open the Stamp Info panel. You will find it among the right tab panels.
+
+The first thing to do, for each new scene, is to define how the stamped information will be written
+onto the rendered image. To do so choose between the 2 avalable modes of the :ref:`Final Resolution Mode <final-resolution>`
+dropdown list.
+
+Check the information you want to see displayed in the rendered images in the various category rollouts.
+
+Then press one of the Render buttons at the top of the Stamp Info panel. This will compute the final image(s) according
+to the render settings of the scene.
