@@ -262,7 +262,7 @@ class UAS_PT_StampInfoAddon(Panel):
 
 def _getQuickHelp(topic):
 
-    docPath = "https://ubisoft-stampinfo.readthedocs.io/"
+    docPath = "https://ubisoft-stampinfo.readthedocs.io/en/latest/features/time-and-frame-info.html"
 
     if "3D_FRAME" == topic:
         title = "3D Frame"

@@ -36,7 +36,7 @@ def getRenderRange(scene):
 
 # wk fix: now retunrs an array of ints!
 def getRenderResolution(scene):
-    """Get the rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
+    """Get the current scene rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
     """
     renderResolution = (
         scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
@@ -52,8 +52,8 @@ def getRenderRatio(scene):
 
 # wk fix: returns an int array!
 def getRenderResolutionForStampInfo(scene):
-    """Get the rendered stamp info image output resolution as float tupple (not int !) and with taking
-    into account the render percentage
+    """Get the rendered stamp info image output resolution - based on the current scene render settings! -
+    as float tupple (not int !) and with taking into account the render percentage
     """
     stampRenderRes = (0.0, 0.0)
     modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
@@ -73,6 +73,44 @@ def getRenderResolutionForStampInfo(scene):
         )
 
     stampRenderRes = [int(stampRenderRes[0]), int(stampRenderRes[1])]
+    return stampRenderRes
+
+
+def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
+    """Compute the stamp info image output resolution for the specified resolution
+    as float tupple (not int !)
+    Note: percentage_resolution is not involed here
+    The purtpose of this function is to evaluate the output resolution for a given input
+    resolution, this independently from the context in the scene (that may not be up-to-date
+    for the need)
+
+    Args:
+        resPercentage: use the scene render property named resolutionPercentage, or 100 to ignore it
+        imageRes:   tupple 2 (width, height)
+    """
+    stampRenderRes = (0.0, 0.0)
+    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
+
+    # if "OVER" == modeVal:
+    finalRenderResolutionFramed = [imageRes[0], imageRes[1]]
+    if 100 != resPercentage:
+        finalRenderResolutionFramed[0] = int(imageRes[0] * resPercentage / 100)
+        finalRenderResolutionFramed[1] = int(imageRes[1] * resPercentage / 100)
+
+    if "OUTSIDE" == modeVal:
+        finalRenderResolutionFramed = (
+            int(finalRenderResolutionFramed[0]),
+            int(
+                max(
+                    finalRenderResolutionFramed[1],
+                    finalRenderResolutionFramed[1]
+                    * (scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage + 100.0)
+                    * 0.01,
+                )
+            ),
+        )
+
+    stampRenderRes = (finalRenderResolutionFramed[0], finalRenderResolutionFramed[1])
     return stampRenderRes
 
 

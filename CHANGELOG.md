@@ -1,8 +1,12 @@
+
+# 1.0.17 (2022-01-15)
+evaluateRenderResolutionForStampInfo
+
 # 1.0.15 (2021-11-02)
 
 ## Features
 
-- Improved tooltips and explainations about animation ranges
+- Improved tooltips and explanations about animation ranges
 - Added a text field for Sequence
 - Set date and time on by default
 
@@ -12,7 +16,7 @@
 
 ## Bug fix
 
-- Logos builtin path was broken
+- Logos built-in path was broken
 
 
 <br><br>
