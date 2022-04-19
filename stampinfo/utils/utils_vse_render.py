@@ -122,16 +122,6 @@ class UAS_VSE_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import Impo
 
     filter_glob: StringProperty(default="*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.tga;*.mp4", options={"HIDDEN"})
 
-    def execute(self, context):
-        """Use the selected file as a stamped logo"""
-        filename, extension = os.path.splitext(self.filepath)
-        #   print('Selected file:', self.filepath)
-        #   print('File name:', filename)
-        #   print('File extension:', extension)
-        context.window_manager.stampinfo_vse_render[self.pathProp] = self.filepath
-
-        return {"FINISHED"}
-
     def invoke(self, context, event):  # See comments at end  [1]
 
         if self.pathProp in context.window_manager.stampinfo_vse_render:
@@ -143,6 +133,16 @@ class UAS_VSE_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import Impo
         context.window_manager.fileselect_add(self)
 
         return {"RUNNING_MODAL"}
+
+    def execute(self, context):
+        """Use the selected file as a stamped logo"""
+        filename, extension = os.path.splitext(self.filepath)
+        #   print('Selected file:', self.filepath)
+        #   print('File name:', filename)
+        #   print('File extension:', extension)
+        context.window_manager.stampinfo_vse_render[self.pathProp] = self.filepath
+
+        return {"FINISHED"}
 
 
 class StampInfo_compositeVideoInVSE(Operator):
@@ -235,9 +235,9 @@ class StampInfo_Vse_Render(PropertyGroup):
         self.inputAudioMediaPath = ""
 
     def getMediaList(self, scene, listVideo=True, listAudio=True):
-        """ Return the list of the media used in the VSE
-            Return a dictionary made of "media_video" and "media_audio", both having an array of media filepaths
-            Movies are not listed in audio media !
+        """Return the list of the media used in the VSE
+        Return a dictionary made of "media_video" and "media_audio", both having an array of media filepaths
+        Movies are not listed in audio media !
         """
         mediaList = {"media_video": None, "media_audio": None}
         audioFiles = []
@@ -278,8 +278,8 @@ class StampInfo_Vse_Render(PropertyGroup):
         return bpy.path.abspath(mediaPath)
 
     def getMediaType(self, filePath):
-        """ Return the type of media according to the extension of the provided file path
-            Returned types: 'MOVIE', 'IMAGES_SEQUENCE', 'IMAGE', 'SOUND', 'UNKNOWN'
+        """Return the type of media according to the extension of the provided file path
+        Returned types: 'MOVIE', 'IMAGES_SEQUENCE', 'IMAGE', 'SOUND', 'UNKNOWN'
         """
         mediaType = "UNKNOWN"
 
@@ -376,19 +376,18 @@ class StampInfo_Vse_Render(PropertyGroup):
         importAudio=False,
     ):
         """
-            A strip is placed at a specified time in the edit by putting its media start at the place where
-            it will be, in an absolute approach, and then by changing the handles of the clip with offsetStart
-            and offsetEnd. None of these parameters change the position of the media frames in the edit time (it
-            is like changing the position of the sides of a window, but not what the window sees).
-            Both offsetStart and offsetEnd are relative to the start time of the media.
-            audio_volume_keyframes is a list of paired values (Frame, Value)
+        A strip is placed at a specified time in the edit by putting its media start at the place where
+        it will be, in an absolute approach, and then by changing the handles of the clip with offsetStart
+        and offsetEnd. None of these parameters change the position of the media frames in the edit time (it
+        is like changing the position of the sides of a window, but not what the window sees).
+        Both offsetStart and offsetEnd are relative to the start time of the media.
+        audio_volume_keyframes is a list of paired values (Frame, Value)
         """
 
         def _new_camera_sequence(
             scene, name, channelInd, atFrame, offsetStart, offsetEnd, cameraScene, cameraObject, final_duration=-1
         ):
-            """ Create the camera sequence
-            """
+            """Create the camera sequence"""
             # !!! When the 3D scence range is not starting at zero the camera strip is clipped at the begining...
             # OriRangeStart = cameraScene.frame_start
             # OriRangeEnd = cameraScene.frame_end
@@ -409,8 +408,7 @@ class StampInfo_Vse_Render(PropertyGroup):
             return camSeq
 
         def _new_images_sequence(scene, clipName, images_path, channelInd, atFrame):
-            """ Find the name template for the specified images sequence in order to create it
-            """
+            """Find the name template for the specified images sequence in order to create it"""
             import re
             from pathlib import Path
 
@@ -544,7 +542,14 @@ class StampInfo_Vse_Render(PropertyGroup):
         elif "CAMERA" == mediaType:
             newClipName = clipName if "" != clipName else "myCamera"
             newClip = _new_camera_sequence(
-                scene, newClipName, channelInd, atFrame, offsetStart, offsetEnd, cameraScene, cameraObject,
+                scene,
+                newClipName,
+                channelInd,
+                atFrame,
+                offsetStart,
+                offsetEnd,
+                cameraScene,
+                cameraObject,
             )
             newClip.blend_type = "ALPHA_OVER"
 
@@ -604,8 +609,8 @@ class StampInfo_Vse_Render(PropertyGroup):
 
     # wkip mettre les mute: faut il les selectionner?
     def selectChannelClips(self, scene, channelIndex, mode="CLEARANDSELECT"):
-        """ Modes: "CLEARANDSELECT", "ADD", "REMOVE"
-            Returns the resulting selected clips belonging to the track
+        """Modes: "CLEARANDSELECT", "ADD", "REMOVE"
+        Returns the resulting selected clips belonging to the track
         """
         sequencesList = list()
         for seq in scene.sequence_editor.sequences:
@@ -652,8 +657,7 @@ class StampInfo_Vse_Render(PropertyGroup):
     def cropClipToCanvas(
         self, canvasWidth, canvasHeight, clip, clipWidth, clipHeight, clipRenderPercentage=100, mode="FIT_ALL"
     ):
-        """Mode can be FIT_ALL, FIT_WIDTH, FIT_HEIGHT, NO_RESIZE
-        """
+        """Mode can be FIT_ALL, FIT_WIDTH, FIT_HEIGHT, NO_RESIZE"""
         # clipRatio = clipWidth / clipHeight
         # canvasRatio = canvasWidth / canvasHeight
 
@@ -694,8 +698,7 @@ class StampInfo_Vse_Render(PropertyGroup):
 
     def get_frame_end_from_content(self, scene):
         # wkipwkipwkip erreur ici, devrait etre exclusive pour extre consistant et ne l'est pas
-        """get_frame_end is exclusive in order to follow the Blender implementation of get_frame_end for its clips
-        """
+        """get_frame_end is exclusive in order to follow the Blender implementation of get_frame_end for its clips"""
         videoChannelClips = self.getChannelClips(scene, 1)
         scene_frame_start = scene.frame_start  # scene.sequence_editor.sequences
 
@@ -756,7 +759,7 @@ class StampInfo_Vse_Render(PropertyGroup):
 
         This function will set the internal bg and fg media of the vse_render class and will call compositeVideoInVSE()
         Not set values are taken from scene
-        
+
         Args:
             output_resolution: array [width, height]
         """
@@ -806,7 +809,7 @@ class StampInfo_Vse_Render(PropertyGroup):
     ):
         """Low level function that will use the bg and fg media already held by this vse_render class to generate
         a media
-        
+
         Args:
             output_resolution: array [width, height]
         """
@@ -1008,7 +1011,7 @@ class StampInfo_Vse_Render(PropertyGroup):
 _classes = (
     StampInfo_Vse_Render,
     StampInfo_compositeVideoInVSE,
-    UAS_VSE_OpenFileBrowser,
+    #  UAS_VSE_OpenFileBrowser,
 )
 
 
@@ -1016,11 +1019,15 @@ def register():
     for cls in _classes:
         bpy.utils.register_class(cls)
 
+    bpy.utils.register_class(UAS_VSE_OpenFileBrowser)
+
     bpy.types.WindowManager.stampinfo_vse_render = PointerProperty(type=StampInfo_Vse_Render)
 
 
 def unregister():
+    del bpy.types.WindowManager.stampinfo_vse_render
+
+    bpy.utils.unregister_class(UAS_VSE_OpenFileBrowser)
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)
-
-    del bpy.types.WindowManager.stampinfo_vse_render
