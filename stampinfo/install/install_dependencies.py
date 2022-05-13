@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@ import bpy
 from ..utils.utils_os import internet_on, module_can_be_imported, is_admin
 from . import addon_error_prefs
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 def install_library(lib_names, pip_retries=2, pip_timeout=-100):

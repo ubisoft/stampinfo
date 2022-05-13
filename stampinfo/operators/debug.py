@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@ from bpy.props import BoolProperty
 from ..config import config
 from ..utils import utils_render
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 class UAS_Stamp_Info_OT_EnableDebug(Operator):
@@ -86,10 +86,14 @@ _classes = (
 
 
 def register():
+    _logger.debug_ext("       - Registering Debug Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Debug Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

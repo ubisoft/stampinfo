@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ import os
 import bpy
 import bpy.utils.previews
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 def getRenderRange(scene):
@@ -36,8 +36,7 @@ def getRenderRange(scene):
 
 # wk fix: now retunrs an array of ints!
 def getRenderResolution(scene):
-    """Get the current scene rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
-    """
+    """Get the current scene rendered image output resolution as float tupple (not int !) and with taking into account the render percentage"""
     renderResolution = (
         scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
         scene.render.resolution_y * scene.render.resolution_percentage * 0.01,
@@ -115,8 +114,7 @@ def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
 
 
 def getInnerHeight(scene):
-    """Get the height (integer) in pixels of the image between the 2 borders according to the current mode
-    """
+    """Get the height (integer) in pixels of the image between the 2 borders according to the current mode"""
     innerH = -1
 
     if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
@@ -216,7 +214,7 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
 
 def getStampInfoRenderFilepath(scene, useTempDir=False):
     """Get a functional render file path to render the temporary files
-    
+
     Returns: If the file is not saved and the path is relative then a temporary file path is returned
     """
     filepath = scene.render.filepath
@@ -235,8 +233,7 @@ def getTempBGImageBaseName():
 
 
 def createTempBGImage(scene):
-    """Create the temporaty image used to set the render size (not the one with the stamped info)
-    """
+    """Create the temporaty image used to set the render size (not the one with the stamped info)"""
     from PIL import Image
 
     print("\n createTempBGImage ")
@@ -274,8 +271,7 @@ def deleteTempImage(scene):
 
 
 def deletePreviousInfoImage(scene, currentFrame):
-    """Delete only the info image file rendered in the previous frame
-    """
+    """Delete only the info image file rendered in the previous frame"""
     print("\n   deletePreviousInfoImage [ ")
     rangeStart = getRenderRange(scene)[0]
 

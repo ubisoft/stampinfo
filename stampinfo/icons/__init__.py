@@ -25,8 +25,13 @@ import os
 from pathlib import Path
 import bpy.utils.previews
 
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
+
 
 def register():
+    _logger.debug_ext("       - Registering Icons Package", form="REG")
 
     global icons_col
 
@@ -39,6 +44,7 @@ def register():
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Icons Package", form="UNREG")
 
     global icons_col
 

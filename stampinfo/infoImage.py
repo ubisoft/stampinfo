@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,15 +33,15 @@ from .stamper import (
     getInfoFileFullPath,
 )
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 # Preparation of the files
 def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
-    """  Called by the Pre renderer callback
-        Preparation of the files
+    """Called by the Pre renderer callback
+    Preparation of the files
     """
     # Notes
     #   - Image origine is at TOP LEFT corner
@@ -492,7 +492,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         # textProp = "Corner Note: " if stampLabel else ""
         textProp = userSettings.cornerNote if stampValue else ""
         img_draw.text(
-            (currentTextRight - (font.getsize(textProp))[0], currentTextTop), textProp, font=font, fill=alertColorRGBA,
+            (currentTextRight - (font.getsize(textProp))[0], currentTextTop),
+            textProp,
+            font=font,
+            fill=alertColorRGBA,
         )
 
     # ---------- fps and 3D edit -------------
@@ -561,7 +564,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
         # draw box
         img_draw.line(
-            [(colBoxLeft, currentBoxTop), (colBoxRight, currentBoxTop)], fill=textColorGray, width=boxLineThickness,
+            [(colBoxLeft, currentBoxTop), (colBoxRight, currentBoxTop)],
+            fill=textColorGray,
+            width=boxLineThickness,
         )
         img_draw.line(
             [(colBoxLeft, currentBoxBottom), (colBoxRight, currentBoxBottom)],
@@ -569,10 +574,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             width=boxLineThickness,
         )
         img_draw.line(
-            [(colBoxLeft, currentBoxTop), (colBoxLeft, currentBoxBottom)], fill=textColorGray, width=boxLineThickness,
+            [(colBoxLeft, currentBoxTop), (colBoxLeft, currentBoxBottom)],
+            fill=textColorGray,
+            width=boxLineThickness,
         )
         img_draw.line(
-            [(colBoxRight, currentBoxTop), (colBoxRight, currentBoxBottom)], fill=textColorGray, width=boxLineThickness,
+            [(colBoxRight, currentBoxTop), (colBoxRight, currentBoxBottom)],
+            fill=textColorGray,
+            width=boxLineThickness,
         )
 
     # ---------------------------------
@@ -704,7 +713,10 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         #     (currentTextRight - (font.getsize(textProp))[0], currentTextTop), textProp, font=font, fill=textColorRGBA,
         # )
         img_draw.text(
-            (col04, currentTextTop), textProp, font=font, fill=textColorRGBA,
+            (col04, currentTextTop),
+            textProp,
+            font=font,
+            fill=textColorRGBA,
         )
 
     # ---------- file -------------
@@ -778,7 +790,7 @@ def drawRangesAndFrame(
     color,
 ):
     """
-        framemode can be '3DFRAME' or 'VIDEOFRAME'
+    framemode can be '3DFRAME' or 'VIDEOFRAME'
     """
     userSettings = scene.UAS_StampInfo_Settings
 

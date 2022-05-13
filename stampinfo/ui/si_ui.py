@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 Main panel UI
 """
 
-import logging
+from stampinfo.config import sm_logging
 
 import bpy
 import bpy.utils.previews
@@ -39,7 +39,7 @@ from ..utils.utils_os import module_can_be_imported
 
 from stampinfo.operators import debug
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 importlib.reload(stampInfoSettings)
@@ -70,6 +70,7 @@ class UAS_PT_StampInfoAddon(Panel):
         row.operator("uas_stamp_info.about", text="", icon_value=icon.icon_id)
 
     def draw_header_preset(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
         layout = self.layout
         layout.emboss = "NONE"
         row = layout.row(align=True)
@@ -95,6 +96,12 @@ class UAS_PT_StampInfoAddon(Panel):
 
         row.separator(factor=2)
         row.menu("UAS_MT_StampInfo_prefs_mainmenu", icon="PREFERENCES", text="")
+
+        if prefs.newAvailableVersion:
+            row.separator(factor=0.5)
+            subRow = row.row()
+            subRow.alert = True
+            subRow.operator("uas_shot_manager.update_dialog", text="", icon="WORLD_DATA")
 
         row.separator(factor=1.0)
 
@@ -695,10 +702,14 @@ def module_can_be_imported(name):
 
 
 def register():
+    _logger.debug_ext("       - Registering Main UI Package", form="REG")
+
     for cls in classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Main UI Package", form="UNREG")
+
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

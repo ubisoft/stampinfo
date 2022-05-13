@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ def initGlobalVariables():
     else:
         devDebug = False
 
-    # force debug mode
-    # devDebug = False
+    # change this value to force debug at start time
+    devDebug = True
 
     global devDebug_keepVSEContent
     devDebug_keepVSEContent = True and devDebug
@@ -42,7 +42,19 @@ def initGlobalVariables():
     if devDebug:
         print("Dev debug: ", devDebug)
 
+    global devDebug_ignoreLoggerFormatting
+    devDebug_ignoreLoggerFormatting = True and devDebug
+
 
 def releaseGlobalVariables():
 
     pass
+
+
+def getLoggingTags():
+    tags = dict()
+
+    # debug tags
+    tags["DEPRECATED"] = False
+
+    return tags

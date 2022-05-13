@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,23 @@
 add-on global preferences
 """
 
+import sys
+
 import bpy
 from bpy.types import AddonPreferences
 from bpy.props import BoolProperty, StringProperty
 
 from ..ui.dependencies_ui import drawDependencies
 
-import sys
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
 
 
 class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
     """
-        Use this to get these prefs:
-        prefs = context.preferences.addons["stampinfo"].preferences
+    Use this to get these prefs:
+    prefs = context.preferences.addons["stampinfo"].preferences
     """
 
     # this must match the add-on name, use '__package__'
@@ -49,13 +53,16 @@ class UAS_StampInfo_AddonErrorPrefs(AddonPreferences):
     # ------------------------------
 
     install_failed: BoolProperty(
-        name="Install Failed", default=True,
+        name="Install Failed",
+        default=True,
     )
     error_message: StringProperty(
-        name="Error Message", default="",
+        name="Error Message",
+        default="",
     )
     verbose: BoolProperty(
-        name="Verbose", default=False,
+        name="Verbose",
+        default=False,
     )
 
     ##################################################################################
@@ -128,17 +135,14 @@ _classes = (UAS_StampInfo_AddonErrorPrefs,)
 
 
 def register():
+    _logger.debug_ext("       - Registering Addon Error Prefs Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
-    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
-    if prefs_addon.verbose:
-        print("       - Registering Add-on Installation Error Preferences\n")
-
 
 def unregister():
-    prefs_addon = bpy.context.preferences.addons["stampinfo"].preferences
-    if prefs_addon.verbose:
-        print("       - Unregistering Add-on Installation Error Preferences")
+    _logger.debug_ext("       - Unregistering Addon Error Prefs Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

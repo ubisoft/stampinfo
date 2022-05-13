@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,22 +28,20 @@ import bpy
 
 import os
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 def convertVersionStrToInt(versionStr):
-    """ Convert a string formated like "1.23.48" to a version integer such as 1023048
-    """
+    """Convert a string formated like "1.23.48" to a version integer such as 1023048"""
     formatedVersion = "{:02}{:03}{:03}"
     versionSplitted = versionStr.split(".")
     return int(formatedVersion.format(int(versionSplitted[0]), int(versionSplitted[1]), int(versionSplitted[2])))
 
 
 def convertVersionIntToStr(versionInt):
-    """ Convert an integer formated like 1023048 to a version string such as "1.23.48"
-    """
+    """Convert an integer formated like 1023048 to a version string such as "1.23.48" """
     versionIntStr = str(versionInt)
     length = len(versionIntStr)
     versionStr = (
@@ -57,10 +55,10 @@ def convertVersionIntToStr(versionInt):
 
 
 def addonVersion(addonName):
-    """ Return the add-on version in the form of a tupple made by: 
-            - a string x.y.z (eg: "1.21.3")
-            - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
-        Return None if the addon has not been found
+    """Return the add-on version in the form of a tupple made by:
+        - a string x.y.z (eg: "1.21.3")
+        - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
+    Return None if the addon has not been found
     """
     import addon_utils
 
@@ -90,17 +88,17 @@ def addonVersion(addonName):
     return versions
 
 
-def display_addon_registered_version(addon_name):
+def display_addon_registered_version(addon_name, more_info=""):
     versionTupple = addonVersion(addon_name)
     if versionTupple is not None:
         print(
-            "\n*** *** Registering "
+            "\n*** *** Registering Ubisoft "
             + addon_name
             + " Add-on - version: "
             + versionTupple[0]
-            + "  ("
-            + str(versionTupple[1])
-            + ") *** ***"
+            + f"  ({versionTupple[1]})"
+            + (f" - {more_info}" if more_info != "" else "")
+            + " *** ***"
         )
     else:
         print('\n *** Cannot find registered version for add-on "' + addon_name + '" ***\n')
@@ -162,7 +160,9 @@ def openMedia(media_filepath, inExternalPlayer=False):
 
         # bpy.ops.render.view_show()
         bpy.ops.image.open(
-            filepath=media_filepath, relative_path=False, show_multiview=False,
+            filepath=media_filepath,
+            relative_path=False,
+            show_multiview=False,
         )
 
         # bpy.data.images.[image_name].reload()
@@ -179,8 +179,8 @@ def openMedia(media_filepath, inExternalPlayer=False):
 def add_background_video_to_cam(
     camera: bpy.types.Camera, movie_path, frame_start, alpha=-1, proxyRenderSize="PROXY_50"
 ):
-    """ Camera argument: use camera.data, not the camera object
-        proxyRenderSize is PROXY_25, PROXY_50, PROXY_75, PROXY_100, FULL
+    """Camera argument: use camera.data, not the camera object
+    proxyRenderSize is PROXY_25, PROXY_50, PROXY_75, PROXY_100, FULL
     """
     print("add_background_video_to_cam")
     movie_path = Path(movie_path)
@@ -212,8 +212,7 @@ def add_background_video_to_cam(
 
 
 def findFirstUniqueName(originalItem, name, itemsArray):
-    """ Return a string that correspont to name.xxx as the first unique name in the array
-    """
+    """Return a string that correspont to name.xxx as the first unique name in the array"""
     itemInd = 0
     numDuplicatesFound = 0
     newIndexStr = ".{:03}"
@@ -229,8 +228,8 @@ def findFirstUniqueName(originalItem, name, itemsArray):
 
 
 def getSceneVSE(vsm_sceneName, createVseTab=False):
-    """ Return the scene that has the name held by vsm_sceneName and adds a VSE in it if there is not already one.
-        Use <returned scene>.sequence_editor to get the vse of the scene
+    """Return the scene that has the name held by vsm_sceneName and adds a VSE in it if there is not already one.
+    Use <returned scene>.sequence_editor to get the vse of the scene
     """
     vsm_scene = None
 
@@ -277,8 +276,7 @@ def getSceneVSE(vsm_sceneName, createVseTab=False):
 
 
 def duplicateObject(sourceObject):
-    """ Duplicate (deepcopy) an object and place it in the same collection
-    """
+    """Duplicate (deepcopy) an object and place it in the same collection"""
     newObject = sourceObject.copy()
     newObject.animation_data.action = sourceObject.animation_data.action.copy()
     newObject.data = sourceObject.data.copy()
@@ -290,4 +288,3 @@ def duplicateObject(sourceObject):
     else:
         (sourceObject.users_scene)[0].collection.objects.link(newObject)
     return newObject
-

@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,11 @@ from bpy.props import (
 )
 
 from ..utils import utils
+
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
+
 
 # # ------------------------------------------------------------------------#
 # #                                VSE tool Panel                             #
@@ -1016,6 +1021,8 @@ _classes = (
 
 
 def register():
+    _logger.debug_ext("       - Registering Utils VSE Render Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
@@ -1025,6 +1032,8 @@ def register():
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Utils VSE Render Package", form="UNREG")
+
     del bpy.types.WindowManager.stampinfo_vse_render
 
     bpy.utils.unregister_class(UAS_VSE_OpenFileBrowser)

@@ -16,32 +16,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-UI module
+Functions useful in a generic context
 """
 
-from . import about
-from . import prefs
 
-# from . import si_ui
-
-from stampinfo.config import sm_logging
-
-_logger = sm_logging.getLogger(__name__)
+def copyString(str1):
+    resStr = ""
+    for c in str1:
+        resStr += c
+    return resStr
 
 
-def register():
-    _logger.debug_ext("       - Registering UI Package", form="REG")
-
-    about.register()
-    prefs.register()
-
-
-#  si_ui.register()
-
-
-def unregister():
-    _logger.debug_ext("       - Unregistering UI Package", form="UNREG")
-
-    #  si_ui.unregister()
-    prefs.unregister()
-    about.unregister()
+def asciiColor(r, g, b):
+    """Convert rgb values to ascii color string"""
+    return f"\33[38;2;{r};{g};{b}m"

@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@ from pathlib import Path
 import bpy
 from bpy.types import Operator
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 def isRenderPathValid(scene):
@@ -47,7 +47,7 @@ def getRenderOutputFilename(scene, fileNameOnly=False):
     outputFiles = list()
 
     filePath = bpy.path.abspath(scene.render.filepath)
-    
+
     # print("\n *** images defs:")
     # print(f"   From {scene.frame_start} to {scene.frame_end} by {scene.frame_step}")
 
@@ -118,4 +118,3 @@ class Utils_LaunchRender(Operator):
             # bpy.ops.render.opengl ( animation = True )
 
         return {"FINISHED"}
-

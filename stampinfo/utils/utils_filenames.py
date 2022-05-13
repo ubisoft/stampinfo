@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@ Classes and functions dedicated to filenames management such as sequence names.
 from pathlib import Path
 import bpy
 
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
+
 
 class SequencePath:
     # to do:
@@ -32,7 +36,7 @@ class SequencePath:
     # - support absolute and relative paths
     """
     Split a file path into parts. Dedicated to sequence filename management.
-    
+
     Returns an instance made of:
         - fullpath: the file path and name
         - parent: the file path without the file name AND with a "\" at the end
@@ -40,7 +44,7 @@ class SequencePath:
         - stem: the name of the file without extension
         - seq_name: the name of the sequence when # are removed
         - suffix: the file extension
-    
+
     When the initial sequence path and name is submitted with no extension then it is seen as a path
 
     Eg.: myPath = SequencePath("c:\temp\mySequence_####.png")
@@ -326,10 +330,14 @@ _classes = (SequencePath,)
 
 
 def register():
+    _logger.debug_ext("       - Registering Filenames Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Filenames Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

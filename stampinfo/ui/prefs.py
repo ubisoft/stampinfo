@@ -22,6 +22,10 @@ This module defines the Preference menu of StampInfo
 import bpy
 from bpy.types import Menu
 
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
+
 
 #############
 # Preferences
@@ -63,10 +67,14 @@ _classes = (UAS_MT_StampInfo_Prefs_MainMenu,)
 
 
 def register():
+    _logger.debug_ext("       - Registering Prefs Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Prefs Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)
