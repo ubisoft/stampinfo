@@ -54,8 +54,9 @@ def getRenderResolutionForStampInfo(scene):
     """Get the rendered stamp info image output resolution - based on the current scene render settings! -
     as float tupple (not int !) and with taking into account the render percentage
     """
+    siSettings = scene.UAS_StampInfo_Settings
     stampRenderRes = (0.0, 0.0)
-    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
+    modeVal = siSettings.stampInfoRenderMode
 
     if "OVER" == modeVal:
         stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
@@ -65,9 +66,7 @@ def getRenderResolutionForStampInfo(scene):
             getRenderResolution(scene)[0],
             max(
                 getRenderResolution(scene)[1],
-                getRenderResolution(scene)[1]
-                * (scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage + 100.0)
-                * 0.01,
+                getRenderResolution(scene)[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
             ),
         )
 
@@ -87,8 +86,9 @@ def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
         resPercentage: use the scene render property named resolutionPercentage, or 100 to ignore it
         imageRes:   tupple 2 (width, height)
     """
+    siSettings = scene.UAS_StampInfo_Settings
     stampRenderRes = (0.0, 0.0)
-    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
+    modeVal = siSettings.stampInfoRenderMode
 
     # if "OVER" == modeVal:
     finalRenderResolutionFramed = [imageRes[0], imageRes[1]]
@@ -102,9 +102,7 @@ def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
             int(
                 max(
                     finalRenderResolutionFramed[1],
-                    finalRenderResolutionFramed[1]
-                    * (scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage + 100.0)
-                    * 0.01,
+                    finalRenderResolutionFramed[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
                 )
             ),
         )
@@ -115,15 +113,16 @@ def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
 
 def getInnerHeight(scene):
     """Get the height (integer) in pixels of the image between the 2 borders according to the current mode"""
+    siSettings = scene.UAS_StampInfo_Settings
     innerH = -1
 
-    if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+    if "OVER" == siSettings.stampInfoRenderMode:
         innerH = min(
             int(getRenderResolution(scene)[1]),
-            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResOver_percentage * 0.01),
+            int(getRenderResolution(scene)[1] * siSettings.stampRenderResOver_percentage * 0.01),
         )
 
-    elif "OUTSIDE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+    elif "OUTSIDE" == siSettings.stampInfoRenderMode:
         innerH = int(getRenderResolution(scene)[1])
 
     return innerH
@@ -152,10 +151,11 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
     *** Validity of the path is NOT tested ***
     """
     #   print("\n getInfoFileFullPath ")
+    siSettings = scene.UAS_StampInfo_Settings
     filepath = ""
 
-    if scene.UAS_StampInfo_Settings.renderRootPathUsed:
-        filepath = scene.UAS_StampInfo_Settings.renderRootPath
+    if siSettings.renderRootPathUsed:
+        filepath = siSettings.renderRootPath
     else:
         filepath = scene.render.filepath
 

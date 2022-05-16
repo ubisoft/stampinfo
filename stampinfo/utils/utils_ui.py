@@ -33,10 +33,7 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from .utils_os import open_folder
-
-from stampinfo.config import sm_logging
-
-_logger = sm_logging.getLogger(__name__)
+from .utils import convertVersionIntToStr
 
 
 ###################
@@ -258,8 +255,8 @@ class UAS_StampInfo_OT_Querybox(Operator):
 ####################################################################
 
 
-class UAS_ShotManager_UpdateDialog(Operator):
-    bl_idname = "uas_shot_manager.update_dialog"
+class UAS_StampInfo_UpdateDialog(Operator):
+    bl_idname = "uas_stamp_info.update_dialog"
     bl_label = "Add-on Update Available"
     bl_description = "Open a dialog window presenting the available update of the add-on"
 
@@ -313,19 +310,15 @@ _classes = (
     UAS_OT_Open_Documentation_Url,
     UAS_OpenFileBrowser,
     UAS_StampInfo_OT_Querybox,
-    UAS_ShotManager_UpdateDialog,
+    UAS_StampInfo_UpdateDialog,
 )
 
 
 def register():
-    _logger.debug_ext("       - Registering Utils UI Package", form="REG")
-
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
-    _logger.debug_ext("       - Unregistering Utils UI Package", form="UNREG")
-
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

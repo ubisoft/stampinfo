@@ -125,7 +125,6 @@ def register():
     from .utils import utils_ui
 
     utils_ui.register()
-    utils.display_addon_registered_version("Stamp Info")
 
     sm_logging.initialize()
     if config.devDebug:
@@ -133,6 +132,8 @@ def register():
 
     logger_level = f"Logger level: {sm_logging.getLevelName()}"
     versionTupple = utils.display_addon_registered_version("Stamp Info", more_info=logger_level)
+
+    utils.display_addon_registered_version("Stamp Info")
 
     # # logging
     # ###################

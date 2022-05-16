@@ -26,9 +26,9 @@ from bpy.props import IntProperty, BoolProperty
 from .addon_prefs_ui import draw_addon_prefs
 
 from stampinfo.utils import utils
+from stampinfo.utils.utils_os import get_latest_release_version
 
 from ..config import config
-from ..ui.dependencies_ui import drawDependencies
 
 from stampinfo.config import sm_logging
 
@@ -66,6 +66,25 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
 
     def initialize_stamp_info_prefs(self):
         print("\nInitializing Stamp Info Preferences...")
+
+        versionStr = get_latest_release_version("https://github.com/ubisoft/shotmanager/releases/latest", verbose=True)
+
+        if versionStr is not None:
+            # version string from the tags used by our releases on GitHub is formated as this: v<int>.<int>.<int>
+            version = utils.convertVersionStrToInt(versionStr)
+
+            _logger.debug_ext(
+                f"Checking for updates: Latest version of Ubisoft Stamp Info online is: {versionStr}", col="BLUE"
+            )
+            if self.version()[1] < version:
+                _logger.debug_ext("   New version available online...", col="BLUE")
+                self.newAvailableVersion = version
+            else:
+                self.newAvailableVersion = 0
+        else:
+            self.newAvailableVersion = 0
+
+        self.isInitialized = True
 
     install_failed: BoolProperty(
         name="Install failed",

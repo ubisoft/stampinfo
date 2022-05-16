@@ -62,6 +62,35 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
         """
         return utils.addonVersion("Stamp Info")
 
+    def initialize_stamp_info(self):
+        print(f"\nInitializing Stamp Info in the current scene ({bpy.context.scene.name})...")
+
+        prefs = bpy.context.preferences.addons["stampinfo"].preferences
+        if not prefs.isInitialized:
+            prefs.initialize_stamp_info_prefs()
+
+        self.isInitialized = True
+
+    def get_isInitialized(self):
+        #    print(" get_isInitialized")
+        val = self.get("isInitialized", False)
+
+        if not val:
+            self.initialize_stamp_info()
+
+        return val
+
+    def set_isInitialized(self, value):
+        #  print(" set_isInitialized: value: ", value)
+        self["isInitialized"] = value
+
+    isInitialized: BoolProperty(
+        get=get_isInitialized,
+        set=set_isInitialized,
+        default=False,
+        options=set(),
+    )
+
     renderRootPathUsed: BoolProperty(default=False)
     renderRootPath: StringProperty(
         name="Render Root Path",
