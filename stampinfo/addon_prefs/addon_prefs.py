@@ -67,7 +67,7 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
     def initialize_stamp_info_prefs(self):
         print("\nInitializing Stamp Info Preferences...")
 
-        versionStr = get_latest_release_version("https://github.com/ubisoft/shotmanager/releases/latest", verbose=True)
+        versionStr = get_latest_release_version("https://github.com/ubisoft/stampinfo/releases/latest", verbose=True)
 
         if versionStr is not None:
             # version string from the tags used by our releases on GitHub is formated as this: v<int>.<int>.<int>
