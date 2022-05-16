@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,10 @@
 Main panel UI
 """
 
-import logging
 
 import bpy
 import bpy.utils.previews
-from bpy.types import Panel
+from bpy.types import Panel, Operator
 
 import importlib
 
@@ -39,7 +38,9 @@ from ..utils.utils_os import module_can_be_imported
 
 from stampinfo.operators import debug
 
-_logger = logging.getLogger(__name__)
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
 
 
 importlib.reload(stampInfoSettings)
@@ -70,6 +71,7 @@ class UAS_PT_StampInfoAddon(Panel):
         row.operator("uas_stamp_info.about", text="", icon_value=icon.icon_id)
 
     def draw_header_preset(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
         layout = self.layout
         layout.emboss = "NONE"
         row = layout.row(align=True)
@@ -85,16 +87,20 @@ class UAS_PT_StampInfoAddon(Panel):
         #   row.operator("render.opengl", text="", icon='RENDER_ANIMATION').animation = True
         #    row.operator("screen.screen_full_area", text ="", icon = 'FULLSCREEN_ENTER').use_hide_panels=False
 
-        # row.operator("uas_shot_manager.go_to_video_shot_manager", text="", icon="SEQ_STRIP_DUPLICATE")
-
         # row.separator(factor=2)
         # icon = config.icons_col["General_Explorer_32"]
-        # row.operator("uas_shot_manager.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
+        # row.operator("uas_stamp_info.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
         #     bpy.data.filepath
         # )
 
         row.separator(factor=2)
         row.menu("UAS_MT_StampInfo_prefs_mainmenu", icon="PREFERENCES", text="")
+
+        if prefs.newAvailableVersion:
+            row.separator(factor=0.5)
+            subRow = row.row()
+            subRow.alert = True
+            subRow.operator("uas_stamp_info.update_dialog", text="", icon="WORLD_DATA")
 
         row.separator(factor=1.0)
 
@@ -102,6 +108,7 @@ class UAS_PT_StampInfoAddon(Panel):
         layout = self.layout
         scene = context.scene
         prefs = context.preferences.addons["stampinfo"].preferences
+        siSettings = scene.UAS_StampInfo_Settings
         okForRenderStill = True
         okForRenderAnim = True
 
@@ -110,26 +117,28 @@ class UAS_PT_StampInfoAddon(Panel):
         addonWarning = [
             addon.bl_info.get("warning", "") for addon in addon_utils.modules() if addon.bl_info["name"] == "Stamp Info"
         ]
+        warnCol = layout.column(align=False)
+        warnCol.scale_y = 0.8
 
         if "" != addonWarning[0]:
-            row = layout.row()
+            row = warnCol.row()
             row.alignment = "CENTER"
             row.alert = True
             row.label(text=f" ***  {addonWarning[0]}  ***")
 
         if not module_can_be_imported("PIL"):
-            row = layout.row()
+            row = warnCol.row()
             row.alignment = "CENTER"
             row.alert = True
             row.label(text=" *** PIL Library not found - Stamp Info cannot work normally ***")
 
         if config.devDebug:
-            row = layout.row()
+            row = warnCol.row()
             row.alignment = "CENTER"
             row.alert = True
             row.label(text=" *** Debug Mode ***")
 
-        #    row     = layout.row ()
+        #    row     = warnCol.row ()
         #    row.operator("stampinfo.clearhandlers")
         #    row.operator("stampinfo.createhandlers")
         #    row.menu(SCENECAMERA_MT_SelectMenu.bl_idname,text="Selection",icon='BORDERMOVE')
@@ -138,20 +147,20 @@ class UAS_PT_StampInfoAddon(Panel):
         # note: we can also use bpy.data.is_saved
         if "" == bpy.data.filepath:
             if config.devDebug:
-                row = layout.row()
+                row = warnCol.row()
                 row.alert = True
                 row.label(text="*** File Not Saved ***")
             okForRenderStill = True
             okForRenderAnim = True
         else:
             if None == (stamper.getInfoFileFullPath(context.scene, -1)[0]):
-                row = layout.row()
+                row = warnCol.row()
                 row.alert = True
                 row.label(text="*** Invalid Output Path ***")
                 okForRenderStill = False
                 okForRenderAnim = False
             elif "" == stamper.getRenderFileName(scene):
-                row = layout.row()
+                row = warnCol.row()
                 row.alert = True
                 row.label(text="*** Invalid Output File Name for Animation Rendering***")
                 okForRenderStill = False
@@ -159,7 +168,7 @@ class UAS_PT_StampInfoAddon(Panel):
 
         # if camera doen't exist
         if scene.camera is None:
-            row = layout.row()
+            row = warnCol.row()
             row.alert = True
             row.label(text="*** No Camera in the Scene ***")
             okForRenderStill = False
@@ -167,8 +176,17 @@ class UAS_PT_StampInfoAddon(Panel):
 
         # ready to render text
         if okForRenderStill and okForRenderAnim and config.devDebug:
-            row = layout.row()
+            row = warnCol.row()
             row.label(text="Ready to render")
+
+        # NOTE: Shot Manager Prefs and Shot Manager scene instance are initialized here:
+        if not siSettings.isInitialized:
+            layout.separator()
+            row = layout.row()
+            row.alert = True
+            row.operator("uas_stamp_info.initialize")
+            row.alert = False
+            layout.separator()
 
         # render buttons
         renderMainRow = layout.split(factor=0.45, align=False)
@@ -186,7 +204,7 @@ class UAS_PT_StampInfoAddon(Panel):
         layout.separator(factor=0.2)
 
         row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampInfoUsed", text="Use Stamp Info")
+        row.prop(siSettings, "stampInfoUsed", text="Use Stamp Info")
 
         icon = icons.icons_col["General_Explorer_32"]
         renderPath = stamper.getInfoFileFullPath(context.scene, -1)[0]
@@ -197,7 +215,7 @@ class UAS_PT_StampInfoAddon(Panel):
 
         # main settings
 
-        if scene.UAS_StampInfo_Settings.stampInfoUsed:
+        if siSettings.stampInfoUsed:
             outputResStampInfo = stamper.getRenderResolutionForStampInfo(scene)
             resStr = "Final Res: " + str(outputResStampInfo[0]) + " x " + str(outputResStampInfo[1]) + " px"
         else:
@@ -212,45 +230,43 @@ class UAS_PT_StampInfoAddon(Panel):
         if prefs.panelExpanded_mode:
             box = layout.box()
             row = box.row(align=True)
-            row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
-            row.prop(scene.UAS_StampInfo_Settings, "stampInfoRenderMode")
+            row.enabled = siSettings.stampInfoUsed
+            row.prop(siSettings, "stampInfoRenderMode")
 
-            #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings['stampInfoRenderMode']))
-            #    print("   init ui: stampInfoRenderMode: " + str(scene.UAS_StampInfo_Settings.stampInfoRenderMode))
+            #    print("   init ui: stampInfoRenderMode: " + str(siSettings['stampInfoRenderMode']))
+            #    print("   init ui: stampInfoRenderMode: " + str(siSettings.stampInfoRenderMode))
 
-            if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+            if "OVER" == siSettings.stampInfoRenderMode:
                 row = box.row(align=True)
-                row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
-                row.prop(scene.UAS_StampInfo_Settings, "stampRenderResOver_percentage")
+                row.enabled = siSettings.stampInfoUsed
+                row.prop(siSettings, "stampRenderResOver_percentage")
 
                 row = box.row(align=True)
-                innerIsInAcceptableRange = 10.0 <= scene.UAS_StampInfo_Settings.stampRenderResOver_percentage <= 95.0
+                innerIsInAcceptableRange = 10.0 <= siSettings.stampRenderResOver_percentage <= 95.0
                 subrowLeft = row.row()
                 #  row.alert = not innerIsInAcceptableRange
                 subrowLeft.alignment = "LEFT"
                 subrowLeft.label(text=resStr)
                 subrowRight = row.row()
-                subrowRight.alert = not innerIsInAcceptableRange and scene.UAS_StampInfo_Settings.stampInfoUsed
-                subrowRight.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+                subrowRight.alert = not innerIsInAcceptableRange and siSettings.stampInfoUsed
+                subrowRight.enabled = siSettings.stampInfoUsed
                 subrowRight.alignment = "LEFT"
                 subrowRight.label(text=resStr02)
 
-            elif "OUTSIDE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+            elif "OUTSIDE" == siSettings.stampInfoRenderMode:
                 row = box.row(align=True)
-                row.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
-                row.prop(scene.UAS_StampInfo_Settings, "stampRenderResYOutside_percentage")
+                row.enabled = siSettings.stampInfoUsed
+                row.prop(siSettings, "stampRenderResYOutside_percentage")
 
                 row = box.row(align=True)
-                outsideIsInAcceptableRange = (
-                    4.0 <= scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage <= 33.35  # 18.65
-                )
+                outsideIsInAcceptableRange = 4.0 <= siSettings.stampRenderResYOutside_percentage <= 33.35  # 18.65
                 subrowLeft = row.row()
                 # row.alert = not outsideIsInAcceptableRange
-                subrowLeft.alert = not outsideIsInAcceptableRange and scene.UAS_StampInfo_Settings.stampInfoUsed
+                subrowLeft.alert = not outsideIsInAcceptableRange and siSettings.stampInfoUsed
                 subrowLeft.alignment = "LEFT"
                 subrowLeft.label(text=resStr)
                 subrowRight = row.row()
-                subrowRight.enabled = scene.UAS_StampInfo_Settings.stampInfoUsed
+                subrowRight.enabled = siSettings.stampInfoUsed
                 subrowRight.alignment = "LEFT"
                 subrowRight.label(text=resStr02)
 
@@ -262,7 +278,7 @@ class UAS_PT_StampInfoAddon(Panel):
 
 def _getQuickHelp(topic):
 
-    docPath = "https://ubisoft-stampinfo.readthedocs.io/"
+    docPath = "https://ubisoft-stampinfo.readthedocs.io/en/latest/features/time-and-frame-info.html"
 
     if "3D_FRAME" == topic:
         title = "3D Frame"
@@ -301,6 +317,7 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        siSettings = scene.UAS_StampInfo_Settings
         splitFactor = 0.35
         # prefs = context.preferences.addons["stampinfo"].preferences
 
@@ -344,18 +361,18 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         row = col.row(align=True)
         split = row.split(factor=splitFactor)
         subRow = split.row(align=True)
-        subRow.prop(scene.UAS_StampInfo_Settings, "currentFrameUsed")
+        subRow.prop(siSettings, "currentFrameUsed")
 
         sceneFrameStr, isInRange = _formatRangeString(
             current=scene.frame_current,
-            animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
-            handles=None if not scene.UAS_StampInfo_Settings.handlesUsed else scene.UAS_StampInfo_Settings.shotHandles,
+            animRange=None if not siSettings.animRangeUsed else False,
+            handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
             start=scene.frame_start,
             end=scene.frame_end,
         )
 
         subRowLeft = split.row(align=True)
-        subRowLeft.enabled = scene.UAS_StampInfo_Settings.currentFrameUsed
+        subRowLeft.enabled = siSettings.currentFrameUsed
         subRowLeft.alignment = "CENTER"
         subRowLeft.alert = not isInRange
         subRowLeft.label(text=sceneFrameStr)
@@ -376,35 +393,33 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         if config.devDebug:
             #   box = layout.box()
             row = col.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "edit3DFrameUsed", text="3D Edit Frame")
+            row.prop(siSettings, "edit3DFrameUsed", text="3D Edit Frame")
             videoFrameStr, isInRange = _formatRangeString(
                 current=scene.frame_current - scene.frame_start,
-                animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
-                handles=None
-                if not scene.UAS_StampInfo_Settings.handlesUsed
-                else scene.UAS_StampInfo_Settings.shotHandles,
+                animRange=None if not siSettings.animRangeUsed else False,
+                handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
                 start=0,
                 end=scene.frame_end - scene.frame_start,
             )
 
-        #        row.prop(scene.UAS_StampInfo_Settings, "edit3DTotalNumberUsed", text="3D Edit Duration")
+        #        row.prop(siSettings, "edit3DTotalNumberUsed", text="3D Edit Duration")
 
         # ---------- video frame -------------
         row = col.row(align=True)
         split = row.split(factor=splitFactor)
         subRow = split.row(align=True)
-        subRow.prop(scene.UAS_StampInfo_Settings, "videoFrameUsed")
+        subRow.prop(siSettings, "videoFrameUsed")
 
         videoFrameStr, isInRange = _formatRangeString(
             current=scene.frame_current - scene.frame_start,
-            animRange=None if not scene.UAS_StampInfo_Settings.animRangeUsed else False,
-            handles=None if not scene.UAS_StampInfo_Settings.handlesUsed else scene.UAS_StampInfo_Settings.shotHandles,
+            animRange=None if not siSettings.animRangeUsed else False,
+            handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
             start=0,
             end=scene.frame_end - scene.frame_start,
         )
 
         subRowLeft = split.row(align=True)
-        subRowLeft.enabled = scene.UAS_StampInfo_Settings.videoFrameUsed
+        subRowLeft.enabled = siSettings.videoFrameUsed
         subRowLeft.alignment = "CENTER"
         subRowLeft.alert = not isInRange
         subRowLeft.label(text=videoFrameStr)
@@ -427,32 +442,32 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         col = box.column(align=False)
         row = col.row(align=True)
 
-        row.prop(scene.UAS_StampInfo_Settings, "animRangeUsed")
+        row.prop(siSettings, "animRangeUsed")
 
         handlesRow = col.row()
-        handlesRow.enabled = scene.UAS_StampInfo_Settings.animRangeUsed
+        handlesRow.enabled = siSettings.animRangeUsed
         # handlesRow = col.split(factor=0.5)
         split = handlesRow.split(factor=0.5)
         handlesSubRow = split.row()
         handlesSubRow.separator(factor=2)
-        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "handlesUsed", text="Handles (Advanced)")
-        #   row.prop(scene.UAS_StampInfo_Settings, "sceneFrameHandlesUsed", text = "")
+        handlesSubRow.prop(siSettings, "handlesUsed", text="Handles (Advanced)")
+        #   row.prop(siSettings, "sceneFrameHandlesUsed", text = "")
         handlesSubRow = split.row()
-        handlesSubRow.enabled = scene.UAS_StampInfo_Settings.handlesUsed
-        handlesSubRow.prop(scene.UAS_StampInfo_Settings, "shotHandles", text="Handles")
+        handlesSubRow.enabled = siSettings.handlesUsed
+        handlesSubRow.prop(siSettings, "shotHandles", text="Handles")
 
         # ---------- animation duration -------------
         box = layout.box()
         col = box.column(align=False)
         row = col.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "animDurationUsed")
+        row.prop(siSettings, "animDurationUsed")
         subrow = row.row(align=True)
-        subrow.enabled = scene.UAS_StampInfo_Settings.animDurationUsed
+        subrow.enabled = siSettings.animDurationUsed
         subrow.label(text=f"{scene.frame_end - scene.frame_start + 1} frames")
         row = col.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "framerateUsed")
+        row.prop(siSettings, "framerateUsed")
         subrow = row.row(align=True)
-        subrow.enabled = scene.UAS_StampInfo_Settings.framerateUsed
+        subrow.enabled = siSettings.framerateUsed
         subrow.label(text=f"{scene.render.fps} fps")
 
 
@@ -470,6 +485,7 @@ class UAS_PT_StampInfoShot(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        siSettings = scene.UAS_StampInfo_Settings
         splitFactor = 0.35
         # prefs = context.preferences.addons["stampinfo"].preferences
 
@@ -478,29 +494,29 @@ class UAS_PT_StampInfoShot(Panel):
         box = layout.box()
         col = box.column(align=False)
         row = col.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "sceneUsed")
+        row.prop(siSettings, "sceneUsed")
 
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "sequenceUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "sequenceName", text="")
+        split.prop(siSettings, "sequenceUsed")
+        split.prop(siSettings, "sequenceName", text="")
 
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "takeUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "takeName", text="")
+        split.prop(siSettings, "takeUsed")
+        split.prop(siSettings, "takeName", text="")
 
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "shotUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "shotName", text="")
+        split.prop(siSettings, "shotUsed")
+        split.prop(siSettings, "shotName", text="")
 
         # ---------- camera -------------
         split = col.split(factor=splitFactor)
-        split.prop(scene.UAS_StampInfo_Settings, "cameraUsed")
-        split.prop(scene.UAS_StampInfo_Settings, "cameraLensUsed")
+        split.prop(siSettings, "cameraUsed")
+        split.prop(siSettings, "cameraLensUsed")
 
         # ---------- Shot duration -------------
         box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "shotDurationUsed")
+        row.prop(siSettings, "shotDurationUsed")
 
 
 # ------------------------------------------------------------------------#
@@ -518,85 +534,79 @@ class UAS_PT_StampInfoMetadata(Panel):
         layout = self.layout
         scene = context.scene
         # prefs = context.preferences.addons["stampinfo"].preferences
+        siSettings = scene.UAS_StampInfo_Settings
 
         layout.label(text="Top: Project and Editing Info")
         box = layout.box()
 
         # ---------- logo -------------
-        # box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "logoUsed")
+        row.prop(siSettings, "logoUsed")
 
-        if scene.UAS_StampInfo_Settings.logoUsed:
+        if siSettings.logoUsed:
 
             row = box.row(align=False)
-            row.prop(scene.UAS_StampInfo_Settings, "logoMode", text="")
+            row.prop(siSettings, "logoMode", text="")
 
-            if "BUILTIN" == scene.UAS_StampInfo_Settings.logoMode:
-                row.prop(scene.UAS_StampInfo_Settings, "logoBuiltinName", text="")
+            if "BUILTIN" == siSettings.logoMode:
+                row.prop(siSettings, "logoBuiltinName", text="")
 
             else:
                 subRow = row.row(align=True)
-                subRow.prop(scene.UAS_StampInfo_Settings, "logoFilepath")
+                subRow.prop(siSettings, "logoFilepath")
                 subRow.operator("stampinfo.openfilebrowser", text="", icon="FILEBROWSER", emboss=True)
 
             row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoScaleH")
+            row.prop(siSettings, "logoScaleH")
 
             row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "logoPosNormX")
-            row.prop(scene.UAS_StampInfo_Settings, "logoPosNormY")
+            row.prop(siSettings, "logoPosNormX")
+            row.prop(siSettings, "logoPosNormY")
 
         # ---------- project -------------
-        if scene.UAS_StampInfo_Settings.logoUsed:
+        if siSettings.logoUsed:
             box.separator(factor=0.3)
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "projectUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "projectName")
+        row.prop(siSettings, "projectUsed")
+        row.prop(siSettings, "projectName")
 
         # ---------- date and user ----
         box = layout.box()
         col = box.column(align=False)
         row = col.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "dateUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "timeUsed")
+        row.prop(siSettings, "dateUsed")
+        row.prop(siSettings, "timeUsed")
         row = col.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "userNameUsed")
+        row.prop(siSettings, "userNameUsed")
 
         # ---------- file -------------
         box = layout.box()
         row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "filenameUsed")
-        row.prop(scene.UAS_StampInfo_Settings, "filepathUsed")
+        row.prop(siSettings, "filenameUsed")
+        row.prop(siSettings, "filepathUsed")
 
         # ---------- notes -------------
         box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "notesUsed")
-
-        if scene.UAS_StampInfo_Settings.notesUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine01", text="")
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine02", text="")
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "notesLine03", text="")
+        col = box.column(align=False)
+        col.prop(siSettings, "notesUsed")
+        if siSettings.notesUsed:
+            col.prop(siSettings, "notesLine01", text="")
+            col.prop(siSettings, "notesLine02", text="")
+            col.prop(siSettings, "notesLine03", text="")
 
         # ---------- corner note -------------
         box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "cornerNoteUsed")
-        if scene.UAS_StampInfo_Settings.cornerNoteUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "cornerNote", text="")
+        col = box.column(align=False)
+        col.prop(siSettings, "cornerNoteUsed")
+        if siSettings.cornerNoteUsed:
+            col.prop(siSettings, "cornerNote", text="")
 
         # ---------- bottom note -------------
         box = layout.box()
-        row = box.row(align=True)
-        row.prop(scene.UAS_StampInfo_Settings, "bottomNoteUsed")
-        if scene.UAS_StampInfo_Settings.bottomNoteUsed:
-            row = box.row(align=True)
-            row.prop(scene.UAS_StampInfo_Settings, "bottomNote", text="")
+        col = box.column(align=False)
+        row.prop(siSettings, "bottomNoteUsed")
+        if siSettings.bottomNoteUsed:
+            col.prop(siSettings, "bottomNote", text="")
 
 
 # ------------------------------------------------------------------------#
@@ -613,42 +623,43 @@ class UAS_PT_StampInfoLayout(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        siSettings = scene.UAS_StampInfo_Settings
 
         box = layout.box()
         row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "textColor")
+        row.prop(siSettings, "textColor")
 
         row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "automaticTextSize", text="Fit Text in Borders")
+        row.prop(siSettings, "automaticTextSize", text="Fit Text in Borders")
 
-        # if not scene.UAS_StampInfo_Settings.automaticTextSize:
+        # if not siSettings.automaticTextSize:
         row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "fontScaleHNorm", text="Text Size")
-
-        row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "interlineHNorm", text="Interline Size")
+        row.prop(siSettings, "fontScaleHNorm", text="Text Size")
 
         row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "extPaddingNorm")
+        row.prop(siSettings, "interlineHNorm", text="Interline Size")
 
         row = box.row()
-        row.prop(scene.UAS_StampInfo_Settings, "extPaddingHorizNorm")
+        row.prop(siSettings, "extPaddingNorm")
+
+        row = box.row()
+        row.prop(siSettings, "extPaddingHorizNorm")
 
         # ---------- border -------------
         box = layout.box()
         row = box.row(align=True)
 
-        # if stamper.getRenderRatio(scene) + 0.002 >= scene.UAS_StampInfo_Settings.innerImageRatio \
-        #     and scene.UAS_StampInfo_Settings.borderUsed:
+        # if stamper.getRenderRatio(scene) + 0.002 >= siSettings.innerImageRatio \
+        #     and siSettings.borderUsed:
         #     row.alert = True
 
-        row.prop(scene.UAS_StampInfo_Settings, "borderUsed")
-        row.prop(context.scene.UAS_StampInfo_Settings, "borderColor")
+        row.prop(siSettings, "borderUsed")
+        row.prop(siSettings, "borderColor")
 
-    #    row.prop(scene.UAS_StampInfo_Settings, "innerImageRatio")
+    #    row.prop(siSettings, "innerImageRatio")
 
     # row = layout.row()
-    # row.prop(scene.UAS_StampInfo_Settings, "linkTextToBorderEdge")
+    # row.prop(siSettings, "linkTextToBorderEdge")
 
 
 # ------------------------------------------------------------------------#
@@ -665,15 +676,33 @@ class UAS_PT_StampInfoSettings(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        siSettings = scene.UAS_StampInfo_Settings
 
         # row = layout.row()
-        # row.prop(scene.UAS_StampInfo_Settings, "linkTextToBorderEdge")
+        # row.prop(siSettings, "linkTextToBorderEdge")
 
         row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampPropertyLabel")
+        row.prop(siSettings, "stampPropertyLabel")
 
         row = layout.row()
-        row.prop(scene.UAS_StampInfo_Settings, "stampPropertyValue")
+        row.prop(siSettings, "stampPropertyValue")
+
+
+#########
+# MISC
+#########
+
+
+class UAS_PT_StampInfo_Initialize(Operator):
+    bl_idname = "uas_stamp_info.initialize"
+    bl_label = "Initialize Stamp Info"
+    bl_description = "Initialize Stamp Info"
+    bl_options = {"INTERNAL"}
+
+    def execute(self, context):
+        context.scene.UAS_StampInfo_Settings.initialize_stamp_info()
+
+        return {"FINISHED"}
 
 
 classes = (
@@ -683,6 +712,7 @@ classes = (
     UAS_PT_StampInfoMetadata,
     UAS_PT_StampInfoLayout,
     UAS_PT_StampInfoSettings,
+    UAS_PT_StampInfo_Initialize,
 )
 
 
@@ -695,10 +725,14 @@ def module_can_be_imported(name):
 
 
 def register():
+    _logger.debug_ext("       - Registering Main UI Package", form="REG")
+
     for cls in classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Main UI Package", form="UNREG")
+
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

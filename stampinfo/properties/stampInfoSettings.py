@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,21 +19,20 @@
 General settings
 """
 
-import os
+# import os
 from pathlib import Path
 from stampinfo import stamper
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
+from stampinfo import config
 from stampinfo import infoImage
 from stampinfo.utils import utils
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
-
-# from stampinfo.__init__ import bl_info
+_logger = sm_logging.getLogger(__name__)
 
 # global vars
 if "gbWkDebug" not in vars() and "gbWkDebug" not in globals():
@@ -56,12 +55,41 @@ else:
 
 class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     def version(self):
-        """ Return the add-on version in the form of a tupple made by:
-                - a string x.y.z (eg: "1.21.3")
-                - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
-            Return None if the addon has not been found
+        """Return the add-on version in the form of a tupple made by:
+            - a string x.y.z (eg: "1.21.3")
+            - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
+        Return None if the addon has not been found
         """
         return utils.addonVersion("Stamp Info")
+
+    def initialize_stamp_info(self):
+        print(f"\nInitializing Stamp Info in the current scene ({bpy.context.scene.name})...")
+
+        prefs = bpy.context.preferences.addons["stampinfo"].preferences
+        if not prefs.isInitialized:
+            prefs.initialize_stamp_info_prefs()
+
+        self.isInitialized = True
+
+    def get_isInitialized(self):
+        #    print(" get_isInitialized")
+        val = self.get("isInitialized", False)
+
+        if not val:
+            self.initialize_stamp_info()
+
+        return val
+
+    def set_isInitialized(self, value):
+        #  print(" set_isInitialized: value: ", value)
+        self["isInitialized"] = value
+
+    isInitialized: BoolProperty(
+        get=get_isInitialized,
+        set=set_isInitialized,
+        default=False,
+        options=set(),
+    )
 
     renderRootPathUsed: BoolProperty(default=False)
     renderRootPath: StringProperty(
@@ -224,7 +252,9 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     # ---------- shared settings ---------
     animRangeUsed: BoolProperty(
-        name="Frame Range", description="Stamp the range of the animation, in frames", default=True,
+        name="Frame Range",
+        description="Stamp the range of the animation, in frames",
+        default=True,
     )
     handlesUsed: BoolProperty(
         name="Frame Handles",
@@ -296,7 +326,10 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     # used by production scripts to specify another file than the current one
     # if set to "" then it is ignored and the current file name is used
     customFileFullPath: StringProperty(
-        name="Custom File Name", description="Enter a path and name of the file to display", default="", options=set(),
+        name="Custom File Name",
+        description="Enter a path and name of the file to display",
+        default="",
+        options=set(),
     )
 
     # ---------- shot manager -------------
@@ -320,7 +353,11 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     shotHandles: IntProperty(
-        name="Shot Handles Duration", description="Duration of the handles of the shot", default=10, min=0, soft_max=50,
+        name="Shot Handles Duration",
+        description="Duration of the handles of the shot",
+        default=10,
+        min=0,
+        soft_max=50,
     )
 
     # ---------- Camera properties -------------

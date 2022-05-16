@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,10 @@ from pathlib import Path
 
 from stampinfo import stamper
 from ..config import config
+
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
 
 
 class UAS_PT_StampInfo_Render(Operator):
@@ -181,7 +185,10 @@ class UAS_PT_StampInfo_Render(Operator):
                 + ".png"
             )
             stampInfoSettings.renderTmpImageWithStampedInfo(
-                scene, renderFrame, renderPath=tempFramedRenderPath, renderFilename=tempFramedRenderFilenameStill,
+                scene,
+                renderFrame,
+                renderPath=tempFramedRenderPath,
+                renderFilename=tempFramedRenderFilenameStill,
             )
 
         elif "ANIMATION" == self.renderMode:
@@ -300,10 +307,14 @@ _classes = (UAS_PT_StampInfo_Render,)
 
 
 def register():
+    _logger.debug_ext("       - Registering Render Operators Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Render Operators Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ import os
 import bpy
 import bpy.utils.previews
 
-import logging
+from stampinfo.config import sm_logging
 
-_logger = logging.getLogger(__name__)
+_logger = sm_logging.getLogger(__name__)
 
 
 def getRenderRange(scene):
@@ -36,8 +36,7 @@ def getRenderRange(scene):
 
 # wk fix: now retunrs an array of ints!
 def getRenderResolution(scene):
-    """Get the rendered image output resolution as float tupple (not int !) and with taking into account the render percentage
-    """
+    """Get the current scene rendered image output resolution as float tupple (not int !) and with taking into account the render percentage"""
     renderResolution = (
         scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
         scene.render.resolution_y * scene.render.resolution_percentage * 0.01,
@@ -52,11 +51,12 @@ def getRenderRatio(scene):
 
 # wk fix: returns an int array!
 def getRenderResolutionForStampInfo(scene):
-    """Get the rendered stamp info image output resolution as float tupple (not int !) and with taking
-    into account the render percentage
+    """Get the rendered stamp info image output resolution - based on the current scene render settings! -
+    as float tupple (not int !) and with taking into account the render percentage
     """
+    siSettings = scene.UAS_StampInfo_Settings
     stampRenderRes = (0.0, 0.0)
-    modeVal = scene.UAS_StampInfo_Settings.stampInfoRenderMode
+    modeVal = siSettings.stampInfoRenderMode
 
     if "OVER" == modeVal:
         stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
@@ -66,9 +66,7 @@ def getRenderResolutionForStampInfo(scene):
             getRenderResolution(scene)[0],
             max(
                 getRenderResolution(scene)[1],
-                getRenderResolution(scene)[1]
-                * (scene.UAS_StampInfo_Settings.stampRenderResYOutside_percentage + 100.0)
-                * 0.01,
+                getRenderResolution(scene)[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
             ),
         )
 
@@ -76,18 +74,55 @@ def getRenderResolutionForStampInfo(scene):
     return stampRenderRes
 
 
-def getInnerHeight(scene):
-    """Get the height (integer) in pixels of the image between the 2 borders according to the current mode
-    """
-    innerH = -1
+def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
+    """Compute the stamp info image output resolution for the specified resolution
+    as float tupple (not int !)
+    Note: percentage_resolution is not involed here
+    The purtpose of this function is to evaluate the output resolution for a given input
+    resolution, this independently from the context in the scene (that may not be up-to-date
+    for the need)
 
-    if "OVER" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
-        innerH = min(
-            int(getRenderResolution(scene)[1]),
-            int(getRenderResolution(scene)[1] * scene.UAS_StampInfo_Settings.stampRenderResOver_percentage * 0.01),
+    Args:
+        resPercentage: use the scene render property named resolutionPercentage, or 100 to ignore it
+        imageRes:   tupple 2 (width, height)
+    """
+    siSettings = scene.UAS_StampInfo_Settings
+    stampRenderRes = (0.0, 0.0)
+    modeVal = siSettings.stampInfoRenderMode
+
+    # if "OVER" == modeVal:
+    finalRenderResolutionFramed = [imageRes[0], imageRes[1]]
+    if 100 != resPercentage:
+        finalRenderResolutionFramed[0] = int(imageRes[0] * resPercentage / 100)
+        finalRenderResolutionFramed[1] = int(imageRes[1] * resPercentage / 100)
+
+    if "OUTSIDE" == modeVal:
+        finalRenderResolutionFramed = (
+            int(finalRenderResolutionFramed[0]),
+            int(
+                max(
+                    finalRenderResolutionFramed[1],
+                    finalRenderResolutionFramed[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
+                )
+            ),
         )
 
-    elif "OUTSIDE" == scene.UAS_StampInfo_Settings.stampInfoRenderMode:
+    stampRenderRes = (finalRenderResolutionFramed[0], finalRenderResolutionFramed[1])
+    return stampRenderRes
+
+
+def getInnerHeight(scene):
+    """Get the height (integer) in pixels of the image between the 2 borders according to the current mode"""
+    siSettings = scene.UAS_StampInfo_Settings
+    innerH = -1
+
+    if "OVER" == siSettings.stampInfoRenderMode:
+        innerH = min(
+            int(getRenderResolution(scene)[1]),
+            int(getRenderResolution(scene)[1] * siSettings.stampRenderResOver_percentage * 0.01),
+        )
+
+    elif "OUTSIDE" == siSettings.stampInfoRenderMode:
         innerH = int(getRenderResolution(scene)[1])
 
     return innerH
@@ -116,10 +151,11 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
     *** Validity of the path is NOT tested ***
     """
     #   print("\n getInfoFileFullPath ")
+    siSettings = scene.UAS_StampInfo_Settings
     filepath = ""
 
-    if scene.UAS_StampInfo_Settings.renderRootPathUsed:
-        filepath = scene.UAS_StampInfo_Settings.renderRootPath
+    if siSettings.renderRootPathUsed:
+        filepath = siSettings.renderRootPath
     else:
         filepath = scene.render.filepath
 
@@ -178,7 +214,7 @@ def getInfoFileFullPath(scene, renderFrameInd=None):
 
 def getStampInfoRenderFilepath(scene, useTempDir=False):
     """Get a functional render file path to render the temporary files
-    
+
     Returns: If the file is not saved and the path is relative then a temporary file path is returned
     """
     filepath = scene.render.filepath
@@ -197,8 +233,7 @@ def getTempBGImageBaseName():
 
 
 def createTempBGImage(scene):
-    """Create the temporaty image used to set the render size (not the one with the stamped info)
-    """
+    """Create the temporaty image used to set the render size (not the one with the stamped info)"""
     from PIL import Image
 
     print("\n createTempBGImage ")
@@ -236,8 +271,7 @@ def deleteTempImage(scene):
 
 
 def deletePreviousInfoImage(scene, currentFrame):
-    """Delete only the info image file rendered in the previous frame
-    """
+    """Delete only the info image file rendered in the previous frame"""
     print("\n   deletePreviousInfoImage [ ")
     rangeStart = getRenderRange(scene)[0]
 

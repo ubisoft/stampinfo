@@ -1,21 +1,31 @@
+# 1.1.1 (2022-05-11)
+
+## Code
+
+- Code cleaning and updated to match the implementation of Ubisoft Shot Manager add-on
+- Added custom class of Logger
+- changed the global debug variable gbWkDebug to a variable devDebug stored in config.py
+
+# 1.0.17 (2022-01-15)
+
+- Added function evaluateRenderResolutionForStampInfo
+
+
 # 1.0.15 (2021-11-02)
 
 ## Features
 
-- Improved tooltips and explainations about animation ranges
+- Improved tooltips and explanations about animation ranges
 - Added a text field for Sequence
 - Set date and time on by default
 
-<br><br>
 
 # 1.0.14 (2021-10-29)
 
 ## Bug fix
 
-- Logos builtin path was broken
+- Logos built-in path was broken
 
-
-<br><br>
 
 # 1.0.13 (2021-09-28)
 
@@ -24,16 +34,12 @@
 - Improved again error catching for better user feedback when not in admin mode
 
 
-<br><br>
-
 # 1.0.12 (2021-09-23)
 
 ## Installation
 
 - Improved error catching with pip download timeout
 
-
-<br><br>
 
 # 1.0.11 (2021-09-23)
 
@@ -46,8 +52,6 @@
 - Provided better user feedback at install time in case of errors
 
 
-<br><br>
-
 # 1.0.9 (2021-08-20)
 
 ## UI
@@ -59,15 +63,11 @@
 - Fix: Frame ranges are now disabled again when unchecked in the UI
 
 
-<br><br>
-
 # 1.0.8 (05/07/2021)
 
 - Rewamped UI
 - Improved documentation
 
-
-<br><br>
 
 # 1.0.1 (2021-06-12)
 
@@ -75,8 +75,6 @@
 because code was unstable and complicated
 - Added 2 Render buttons and a batch based on the VSE to create the final images
 
-
-<br><br>
 
 --------
 

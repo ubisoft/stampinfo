@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,24 +21,74 @@ This module defines the global preferences of the add-on
 
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import BoolProperty
+from bpy.props import IntProperty, BoolProperty
+
+from .addon_prefs_ui import draw_addon_prefs
+
+from stampinfo.utils import utils
+from stampinfo.utils.utils_os import get_latest_release_version
 
 from ..config import config
-from ..ui.dependencies_ui import drawDependencies
+
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
 
 
 class UAS_StampInfo_AddonPrefs(AddonPreferences):
     """
-        Use this to get these prefs:
-        prefs = context.preferences.addons["stampinfo"].preferences
+    Use this to get these prefs:
+    prefs = context.preferences.addons["stampinfo"].preferences
     """
 
     # this must match the add-on name, use '__package__'
     # when defining this in a submodule of a python package
     bl_idname = "stampinfo"
 
+    def version(self):
+        """Return the add-on version in the form of a tupple made by:
+            - a string x.y.z (eg: "1.21.3")
+            - an integer. x.y.z becomes xxyyyzzz (eg: "1.21.3" becomes 1021003)
+        Return None if the addon has not been found
+        """
+        return utils.addonVersion("Stamp Info")
+
+    newAvailableVersion: IntProperty(
+        description="Store the version of the latest release of the add-on as an integer if there is an online release"
+        "\nthat is more recent than this version. If there is none then the value is 0",
+        # default=2005001,
+        default=1007016,
+    )
+
+    isInitialized: BoolProperty(
+        default=False,
+    )
+
+    def initialize_stamp_info_prefs(self):
+        print("\nInitializing Stamp Info Preferences...")
+
+        versionStr = get_latest_release_version("https://github.com/ubisoft/shotmanager/releases/latest", verbose=True)
+
+        if versionStr is not None:
+            # version string from the tags used by our releases on GitHub is formated as this: v<int>.<int>.<int>
+            version = utils.convertVersionStrToInt(versionStr)
+
+            _logger.debug_ext(
+                f"Checking for updates: Latest version of Ubisoft Stamp Info online is: {versionStr}", col="BLUE"
+            )
+            if self.version()[1] < version:
+                _logger.debug_ext("   New version available online...", col="BLUE")
+                self.newAvailableVersion = version
+            else:
+                self.newAvailableVersion = 0
+        else:
+            self.newAvailableVersion = 0
+
+        self.isInitialized = True
+
     install_failed: BoolProperty(
-        name="Install failed", default=False,
+        name="Install failed",
+        default=False,
     )
 
     mediaFirstFrameIsZero: BoolProperty(
@@ -72,62 +122,18 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         options=set(),
     )
 
+    ##################################################################################
+    # Draw
+    ##################################################################################
     def draw(self, context):
-        layout = self.layout
-        splitFactor = 0.3
-
-        box = layout.box()
-        row = box.row()
-        row.separator(factor=3)
-        subCol = row.column()
-        subCol.prop(self, "mediaFirstFrameIsZero")
-        subCol.prop(self, "write_still")
-
-        layout.separator(factor=0.5)
-        layout.label(text="Technical Settings:")
-        box = layout.box()
-        box.label(text="Stamped Images Compositing:")
-        row = box.row()
-        row.separator(factor=3)
-        subCol = row.column()
-        subCol.prop(self, "delete_temp_scene")
-        subCol.prop(self, "delete_temp_images")
-
-        # Dependencies
-        ###############
-        drawDependencies(context, layout)
-
-        # Dev and debug
-        ###############
-        box = layout.box()
-
-        split = box.split(factor=splitFactor)
-        rowLeft = split.row()
-        rowLeft.label(text="Development and Debug:")
-        rowRight = split.row()
-
-        if config.devDebug:
-            strDebug = " *** Debug Mode is On ***"
-            rowRight.alignment = "RIGHT"
-            rowRight.alert = True
-            rowRight.label(text=strDebug)
-
-        split = box.split(factor=splitFactor)
-        rowLeft = split.row()
-        rowLeft.alignment = "RIGHT"
-        rowLeft.label(text="Debug Mode")
-        rowRight = split.row()
-        if config.devDebug:
-            rowRight.alert = True
-            rowRight.operator("uas_stamp_info.enable_debug", text="Turn Off").enable_debug = False
-        else:
-            rowRight.operator("uas_stamp_info.enable_debug", text="Turn On").enable_debug = True
+        draw_addon_prefs(self, context)
 
     # -----------------------------------------------------------
     # UI user preferences - Not exposed
     # -----------------------------------------------------------
     panelExpanded_mode: BoolProperty(
-        name="Expand Render Mode Properties", default=True,
+        name="Expand Render Mode Properties",
+        default=True,
     )
 
 
@@ -135,11 +141,14 @@ _classes = (UAS_StampInfo_AddonPrefs,)
 
 
 def register():
+    _logger.debug_ext("       - Registering Add-on Prefs Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering Add-on Prefs Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)
-

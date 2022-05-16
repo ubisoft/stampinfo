@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,10 @@ from bpy.types import Operator
 
 from ..ui.dependencies_ui import drawDependencies
 from ..utils.utils import addonCategory
+
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
 
 
 class UAS_StampInfo_OT_About(Operator):
@@ -102,10 +106,14 @@ _classes = (UAS_StampInfo_OT_About,)
 
 
 def register():
+    _logger.debug_ext("       - Registering About Package", form="REG")
+
     for cls in _classes:
         bpy.utils.register_class(cls)
 
 
 def unregister():
+    _logger.debug_ext("       - Unregistering About Package", form="UNREG")
+
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

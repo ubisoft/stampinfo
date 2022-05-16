@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,13 @@
 """
 Main init
 """
-import logging
 
-import os
-from pathlib import Path
+# import os
+# from pathlib import Path
 
 import bpy
 import bpy.utils.previews
-from bpy.props import PointerProperty
+from bpy.props import IntProperty, PointerProperty
 
 
 from .config import config
@@ -43,14 +42,18 @@ importlib.reload(stampInfoSettings)
 importlib.reload(stamper)
 importlib.reload(debug)
 
+from stampinfo.config import sm_logging
+
+_logger = sm_logging.getLogger(__name__)
+
 
 bl_info = {
     "name": "Stamp Info",
     "author": "Julien Blervaque (aka Werwack) - Ubisoft",
     "description": "Stamp scene information on the rendered images",
-    "blender": (2, 92, 0),
-    "version": (1, 0, 16),
-    "location": "Right panel in the 3D View",
+    "blender": (3, 1, 0),
+    "version": (1, 1, 1),
+    "location": "View3D > Stamp Info",
     "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
     "tracker_url": "https://github.com/ubisoft/stampinfo/issues",
     "support": "COMMUNITY",
@@ -65,36 +68,38 @@ display_version = __version__
 # Logging
 ###########
 
-_logger = logging.getLogger(__name__)
-_logger.propagate = False
-MODULE_PATH = Path(__file__).parent.parent
-logging.basicConfig(level=logging.INFO)
-_logger.setLevel(logging.DEBUG)  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
+# _logger = sm_logging.getLogger(__name__)
+# _logger.propagate = False
+# MODULE_PATH = Path(__file__).parent.parent
+# logging.basicConfig(level=logging.INFO)
+# _logger.setLevel(logging.DEBUG)  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
+
+import logging
 
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
-# _logger.info(f"Logger {}")
-# _logger.warning(f"logger {}")
-# _logger.error(f"error {}")
-# _logger.debug(f"debug {}")
+# # _logger.info(f"Logger {}")
+# # _logger.warning(f"logger {}")
+# # _logger.error(f"error {}")
+# # _logger.debug(f"debug {}")
 
 
-class Formatter(logging.Formatter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# class Formatter(logging.Formatter):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
 
-    def format(self, record: logging.LogRecord):
-        """
-        The role of this custom formatter is:
-        - append filepath and lineno to logging format but shorten path to files, to make logs more clear
-        - to append "./" at the begining to permit going to the line quickly with VS Code CTRL+click from terminal
-        """
-        s = super().format(record)
-        # s = record
-        pathname = Path(record.pathname).relative_to(MODULE_PATH)
-        s += f" [{os.curdir}{os.sep}{pathname}:{record.lineno}]"
-        return s
+#     def format(self, record: logging.LogRecord):
+#         """
+#         The role of this custom formatter is:
+#         - append filepath and lineno to logging format but shorten path to files, to make logs more clear
+#         - to append "./" at the begining to permit going to the line quickly with VS Code CTRL+click from terminal
+#         """
+#         s = super().format(record)
+#         # s = record
+#         pathname = Path(record.pathname).relative_to(MODULE_PATH)
+#         s += f" [{os.curdir}{os.sep}{pathname}:{record.lineno}]"
+#         return s
 
 
 classes = (
@@ -114,20 +119,30 @@ def stampInfo_resetProperties():
 
 
 def register():
+
+    config.initGlobalVariables()
+
     from .utils import utils_ui
 
     utils_ui.register()
-    utils.display_addon_registered_version("Stamp Info")
-    config.initGlobalVariables()
 
-    # logging
-    ###################
-    if len(_logger.handlers) == 0:
-        _logger.setLevel(logging.WARNING)
-        formatter = Formatter("{asctime} {levelname[0]} {name:<36}  - {message:<80}", style="{")
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        _logger.addHandler(handler)
+    sm_logging.initialize()
+    if config.devDebug:
+        _logger.setLevel("DEBUG")  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
+
+    logger_level = f"Logger level: {sm_logging.getLevelName()}"
+    versionTupple = utils.display_addon_registered_version("Stamp Info", more_info=logger_level)
+
+    utils.display_addon_registered_version("Stamp Info")
+
+    # # logging
+    # ###################
+    # if len(_logger.handlers) == 0:
+    #     _logger.setLevel(logging.WARNING)
+    #     formatter = Formatter("{asctime} {levelname[0]} {name:<36}  - {message:<80}", style="{")
+    #     handler = logging.StreamHandler()
+    #     handler.setFormatter(formatter)
+    #     _logger.addHandler(handler)
 
     # install dependencies and required Python libraries
     ###################
@@ -148,6 +163,14 @@ def register():
     from stampinfo import icons
     from .addon_prefs import addon_prefs
     from .operators import render_operators
+
+    ###################
+    # update data
+    ###################
+
+    bpy.types.WindowManager.UAS_stamp_info_version = IntProperty(
+        name="Add-on Version Int", description="Add-on version as integer", default=versionTupple[1]
+    )
 
     for cls in classes:
         bpy.utils.register_class(cls)
@@ -200,6 +223,8 @@ def unregister():
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.WindowManager.UAS_stamp_info_version
 
     utils_ui.unregister()
     config.releaseGlobalVariables()

@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2021 Ubisoft
+# Copyright (C) 2022 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from .utils_os import open_folder
+from .utils import convertVersionIntToStr
+
 
 ###################
 # UI
@@ -40,17 +42,41 @@ from .utils_os import open_folder
 
 
 def collapsable_panel(
-    layout: bpy.types.UILayout, data: bpy.types.AnyType, property: str, alert: bool = False, **kwargs
+    layout: bpy.types.UILayout,
+    data: bpy.types.AnyType,
+    property: str,
+    alert: bool = False,
+    text=None,
 ):
-    row = layout.row()
+    """Draw an arrow to collapse or extend a panel.
+    Return the title row
+    Args:
+        layout: parent component
+        data: the object with the properties
+        property: the boolean used to store the rolled-down state of the panel
+        alert: is the title bar of the panel is drawn in alert mode
+        text: the title of the panel
+    eg: collapsable_panel(layout, addon_props, "display_users", text="Server Users")
+        if addon_props.addonPrefs_ui_expanded: ...
+    """
+    row = layout.row(align=True)
+    row.alignment = "LEFT"
+    # row.scale_x = 0.9
+    row.alert = alert
     row.prop(
-        data, property, icon="TRIA_DOWN" if getattr(data, property) else "TRIA_RIGHT", icon_only=True, emboss=False,
+        data,
+        property,
+        icon="TRIA_DOWN" if getattr(data, property) else "TRIA_RIGHT",
+        icon_only=True,
+        emboss=False,
+        text=text,
     )
     if alert:
-        row.alert = True
         row.label(text="", icon="ERROR")
-    row.label(**kwargs)
-    return getattr(data, property)
+    # row.label(text=text)
+    row.alert = False
+
+    return row
 
 
 ###################
@@ -228,7 +254,64 @@ class UAS_StampInfo_OT_Querybox(Operator):
 
 ####################################################################
 
-_classes = (UAS_StampInfo_OpenExplorer, UAS_OT_Open_Documentation_Url, UAS_OpenFileBrowser, UAS_StampInfo_OT_Querybox)
+
+class UAS_StampInfo_UpdateDialog(Operator):
+    bl_idname = "uas_stamp_info.update_dialog"
+    bl_label = "Add-on Update Available"
+    bl_description = "Open a dialog window presenting the available update of the add-on"
+
+    # can be a web url or an intranet path
+    url: StringProperty(default="")
+
+    addonName: StringProperty(default="")
+
+    def invoke(self, context, event):
+        self.addonName = "Ubisoft Stamp Info"
+        self.url = "https://github.com/ubisoft/stampinfo/releases/latest"
+
+        return context.window_manager.invoke_props_dialog(self, width=450)
+
+    def draw(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+
+        layout = self.layout
+        box = layout.box()
+        col = box.column()
+
+        sepRow = col.row()
+        sepRow.separator(factor=0.5)
+
+        row = col.row()
+        newVersionStr = f"V. {convertVersionIntToStr(prefs.newAvailableVersion)}"
+        row.label(text=f"A new version of {self.addonName} is available on GitHub: {newVersionStr}")
+
+        sepRow = col.row()
+        sepRow.separator(factor=0.5)
+
+        row = col.row()
+        row.label(text="You can download it here:")
+
+        doc_op = row.operator("stampinfo.open_documentation_url", text="Download Latest", icon="URL")
+        doc_op.path = self.url
+        doc_op.tooltip = "Open latest Stamp Info download page: " + doc_op.path
+
+        sepRow = col.row()
+        sepRow.separator(factor=0.5)
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+
+####################################################################
+
+
+_classes = (
+    UAS_StampInfo_OpenExplorer,
+    UAS_OT_Open_Documentation_Url,
+    UAS_OpenFileBrowser,
+    UAS_StampInfo_OT_Querybox,
+    UAS_StampInfo_UpdateDialog,
+)
 
 
 def register():
