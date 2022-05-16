@@ -1,10 +1,12 @@
 # 1.1.1 (2022-05-11)
 
+- Support for Blender 3.1+ and Python 3.10
+
 ## Code
 
 - Code cleaning and updated to match the implementation of Ubisoft Shot Manager add-on
 - Added custom class of Logger
-- changed the global debug variable gbWkDebug to a variable devDebug stored in config.py
+- (partly) changed the global debug variable gbWkDebug to a variable devDebug stored in config.py
 
 # 1.0.17 (2022-01-15)
 
