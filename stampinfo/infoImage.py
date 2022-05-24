@@ -56,8 +56,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     if verbose:
         print("\n       renderTmpImageWithStampedInfo ")
 
-    userSettings = scene.UAS_StampInfo_Settings
-    prefs = bpy.context.preferences.addons["stampinfo"].preferences
+    siSettings = scene.UAS_StampInfo_Settings
+    # prefs = bpy.context.preferences.addons["stampinfo"].preferences
     paddingLeftMetadataTopNorm = 0.0
     paddingLeftMetadataBottomNorm = 0.0
 
@@ -126,24 +126,24 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     borderBottomH = borderTopH
 
     # ---------- framing control settings ----------------
-    paddingTopExtNorm = userSettings.extPaddingNorm
+    paddingTopExtNorm = siSettings.extPaddingNorm
     # 0.03      # padding near the exterior of the image on the border rectangle
     paddingTopIntNorm = 0.04  # not used here # padding near the interior of the image on the border rectangle
-    paddingLeftNorm = userSettings.extPaddingHorizNorm
+    paddingLeftNorm = siSettings.extPaddingHorizNorm
 
-    textLineNorm = userSettings.fontScaleHNorm
-    textInterlineNorm = userSettings.interlineHNorm  # 0.01
+    textLineNorm = siSettings.fontScaleHNorm
+    textInterlineNorm = siSettings.interlineHNorm  # 0.01
     numLinesTop = 3
     numLinesBottom = numLinesTop
 
-    if userSettings.automaticTextSize:
+    if siSettings.automaticTextSize:
         borderTopNorm = min(0.5, borderTopH / renderH)
-        paddingTopExtNormInBorder = userSettings.extPaddingNorm * 10.0  # 0.2
+        paddingTopExtNormInBorder = siSettings.extPaddingNorm * 10.0  # 0.2
         paddingTopIntNormInBorder = 0.1
         paddingTopExtNorm = paddingTopExtNormInBorder * borderTopNorm
         paddingTopIntNorm = paddingTopIntNormInBorder * borderTopNorm
 
-        textInterlineNormInBorder = userSettings.interlineHNorm  # 0.04
+        textInterlineNormInBorder = siSettings.interlineHNorm  # 0.04
         textInterlineNorm = textInterlineNormInBorder * borderTopNorm
 
         textBorderNorm = borderTopNorm - paddingTopExtNorm - paddingTopIntNorm
@@ -156,7 +156,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # ---------- framing control settings ----------------
 
     # All dimensions are normalized as if the image had the size 1.0 * 1.0
-    # fontScaleHNorm      = userSettings.fontScaleHNorm        #0.03
+    # fontScaleHNorm      = siSettings.fontScaleHNorm        #0.03
     # fontsize            = int(fontScaleHNorm * renderH)
     # font                = ImageFont.truetype("arial", fontsize)
     # textLineH           = (font.getsize("Aj"))[1]            # line height
@@ -182,7 +182,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     #    paddingTopInt = int(paddingTopIntNorm * renderH)
     #    paddingBottomInt = paddingTopInt
 
-    borderColorRGB = userSettings.borderColor  # (0, 0, 0, 255)
+    borderColorRGB = siSettings.borderColor  # (0, 0, 0, 255)
     borderColorRGBA = (
         int(borderColorRGB[0] * 255),
         int(borderColorRGB[1] * 255),
@@ -190,18 +190,18 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         int(borderColorRGB[3] * 255),
     )
 
-    #   borderColorOpacity  = userSettings.borderColorOpacity                  #(0, 0, 0, 255)
+    #   borderColorOpacity  = siSettings.borderColorOpacity                  #(0, 0, 0, 255)
     #   borderColorRGBA = (int(borderColorRGB[0] * borderColorOpacity * 255), int(borderColorRGB[1] * borderColorOpacity * 255), int(borderColorRGB[2] * borderColorOpacity * 255), int(borderColorOpacity * 255) )
     #   borderColorRGBA = (int(borderColorRGB[0] * 255), int(borderColorRGB[1] * 255), int(borderColorRGB[2] * 255), int(borderColorOpacity * 255) )
     # print("borderColor: " + str(borderColor[0]))
     #  borderColor         = (0, 0, 0, 255)
 
-    # innerAspectRatio    = userSettings.innerImageRatio              #16/9   # must be >= 1
+    # innerAspectRatio    = siSettings.innerImageRatio              #16/9   # must be >= 1
     # if 1.0 >= innerAspectRatio:
     #     innerAspectRatio = 1.0
     # innerH              = renderW * 1.0 / innerAspectRatio
-    textColorRGB = userSettings.textColor  # (0, 0, 0, 255)
-    #   textColorOpacity  = userSettings.textColorOpacity                  #(0, 0, 0, 255)
+    textColorRGB = siSettings.textColor  # (0, 0, 0, 255)
+    #   textColorOpacity  = siSettings.textColorOpacity                  #(0, 0, 0, 255)
     #  textColorRGBA = (int(textColorRGB[0] * textColorOpacity * 255), int(textColorRGB[1] * textColorOpacity * 255), int(textColorRGB[2] * textColorOpacity * 255), int(textColorOpacity * 255) )
     textColorRGBA = (
         int(textColorRGB[0] * 255),
@@ -212,7 +212,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     # textColorWhite = (235, 235, 235, 255)
 
-    # alertColorRGB = userSettings.textColor
+    # alertColorRGB = siSettings.textColor
     alertColorRGB = (0.7, 0.2, 0.2, 255)
     alertColorRGBA = (
         int(alertColorRGB[0] * 255),
@@ -222,7 +222,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     )
 
     # move the content (border + text) toward center
-    offsetToCenterH = int(userSettings.offsetToCenterHNorm * renderH)
+    offsetToCenterH = int(siSettings.offsetToCenterHNorm * renderH)
 
     imgInfo = Image.new("RGBA", (renderW, renderH), (0, 0, 0, 0))
 
@@ -239,7 +239,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # -------------------------------- #
     # stamp borders with PIL
     # -------------------------------- #
-    if userSettings.borderUsed:
+    if siSettings.borderUsed:
         imgBorderRect = Image.new("RGBA", (renderW, borderTopH), borderColorRGBA)
         imgInfo.paste(imgBorderRect, (0, offsetToCenterH))
         imgBorderRect = Image.new("RGBA", (renderW, borderBottomH), borderColorRGBA)
@@ -248,7 +248,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # -------------------------------- #
     # Debug - Draw text lines
     # -------------------------------- #
-    if userSettings.debug_DrawTextLines:
+    if siSettings.debug_DrawTextLines:
         currentTextLeft = paddingLeft + paddingLeftMetadataTop
         currentTextTop = offsetToCenterH + paddingTopExt
 
@@ -297,16 +297,16 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # if the logo is not found a red fake logo is stamped instead
     # -------------------------------- #
 
-    if userSettings.logoUsed:
+    if siSettings.logoUsed:
 
         logoFile = ""
 
-        if "BUILTIN" == userSettings.logoMode:
+        if "BUILTIN" == siSettings.logoMode:
             dir = Path(os.path.dirname(os.path.abspath(__file__)) + "\\Logos")
-            logoFile = str(dir) + "\\" + str(userSettings.logoBuiltinName)
+            logoFile = str(dir) + "\\" + str(siSettings.logoBuiltinName)
         else:
-            logoFile = userSettings.logoFilepath
-        #  print("  Logo: userSettings.logoFilepath: " + userSettings.logoFilepath)
+            logoFile = siSettings.logoFilepath
+        #  print("  Logo: siSettings.logoFilepath: " + siSettings.logoFilepath)
 
         filename, extension = os.path.splitext(logoFile)
         # print('Selected file:', self.filepath)
@@ -323,16 +323,16 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         if os.path.exists(logoFile):
             logoFilePathIsValid = True
         else:
-            if userSettings.logoUsed:
+            if siSettings.logoUsed:
                 print("  Logo path is NOT valid")
                 # wkip mettre alert rouge
 
         # logoScaleW = 0.09                                         # logo size is in % of width relatively to the outpur render size. In other words: 1.0 => logo width = renderW
         # logoScaleH = 0.08                                         # logo size is in % of height relatively to the outpur render size. In other words: 1.0 => logo height = renderH
-        logoScaleH = userSettings.logoScaleH
+        logoScaleH = siSettings.logoScaleH
         logoPositionNorm = [
-            renderW * userSettings.logoPosNormX,
-            renderH * userSettings.logoPosNormY,
+            renderW * siSettings.logoPosNormX,
+            renderH * siSettings.logoPosNormY,
         ]  # normalized in range [0,1]
 
         imgLogoSource = None
@@ -361,8 +361,8 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # put text on image
     img_draw = ImageDraw.Draw(imgInfo)
 
-    stampLabel = userSettings.stampPropertyLabel
-    stampValue = userSettings.stampPropertyValue
+    stampLabel = siSettings.stampPropertyLabel
+    stampValue = siSettings.stampPropertyValue
     textProp = ""
 
     # ---------------------------------
@@ -381,9 +381,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     currentTextTop = offsetToCenterH + paddingTopExt
 
     # ---------- project -------------
-    if userSettings.projectUsed:
+    if siSettings.projectUsed:
         textProp = "Project: " if stampLabel and not stampValue else ""
-        textProp += userSettings.projectName if stampValue else ""
+        textProp += siSettings.projectName if stampValue else ""
         img_draw.text((col02, currentTextTop), textProp, font=fontLarge, fill=textColorRGBA)
 
     # ---------------------
@@ -392,7 +392,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     currentTextTop = borderTopH - paddingTopExt - fontHeight
 
     # ---------- user -------------
-    if userSettings.userNameUsed:
+    if siSettings.userNameUsed:
         textProp = "By: "  # if stampLabel else ""
         textProp += getpass.getuser() if stampValue else ""
 
@@ -405,16 +405,16 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     now = datetime.now()
     timeStr = now.strftime("%H:%M:%S")
-    if userSettings.dateUsed:
+    if siSettings.dateUsed:
         textProp = "Date: " if stampLabel else ""
         textProp += now.strftime("%b-%d-%Y") if stampValue else ""  # Month abbreviation, day and year
-        if userSettings.timeUsed:
+        if siSettings.timeUsed:
             textProp += "  " + timeStr if stampValue else ""
-    elif userSettings.timeUsed:
+    elif siSettings.timeUsed:
         textProp = "Time: " if stampLabel else ""
         textProp += "  " + timeStr if stampValue else ""
 
-    if userSettings.dateUsed or userSettings.timeUsed:
+    if siSettings.dateUsed or siSettings.timeUsed:
         img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------------------
@@ -428,21 +428,21 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
 
     # now = datetime.now()
     # timeStr = now.strftime("%H:%M:%S")
-    # if userSettings.dateUsed:
+    # if siSettings.dateUsed:
     #     textProp = "Date: " if stampLabel else ""
     #     textProp += now.strftime("%b-%d-%Y") if stampValue else ""  # Month abbreviation, day and year
-    #     if userSettings.timeUsed:
+    #     if siSettings.timeUsed:
     #         textProp += "  " + timeStr if stampValue else ""
-    # elif userSettings.timeUsed:
+    # elif siSettings.timeUsed:
     #     textProp = "Time: " if stampLabel else ""
     #     textProp += "  " + timeStr if stampValue else ""
 
-    # if userSettings.dateUsed or userSettings.timeUsed:
+    # if siSettings.dateUsed or siSettings.timeUsed:
     #     img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- user -------------
     # currentTextTop += textLineH + textInterlineH
-    # if True or userSettings.userNameUsed:
+    # if True or siSettings.userNameUsed:
     #     textProp = "By: "  # if stampLabel else ""
     #     textProp += getpass.getuser() if stampValue else ""
     #     img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -453,19 +453,22 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     currentTextTopForVideoFrames = offsetToCenterH + paddingTopExt + textLineH + textInterlineH
     currentTextLeftForVideoFrames = renderW * (1.0 - paddingLeftNorm)
 
-    if userSettings.videoFrameUsed:
+    if siSettings.videoFrameUsed:
         # textProp = "Video: " if stampLabel else ""
         textProp = "Video Frame: "
 
-        currentImage = scene.frame_current - scene.frame_start
+        if siSettings.videoFirstFrameIndexUsed:
+            currentImage = scene.frame_current - scene.frame_start + siSettings.videoFirstFrameIndex
+            firstFrameInd = siSettings.videoFirstFrameIndex
+            lastFrameInd = scene.frame_end - scene.frame_start + siSettings.videoFirstFrameIndex
+        else:
+            currentImage = scene.frame_current - scene.frame_start
+            firstFrameInd = 0
+            lastFrameInd = scene.frame_end - scene.frame_start
 
-        if not prefs.mediaFirstFrameIsZero:
-            currentImage += 1
-        firstFrameInd = 0 if prefs.mediaFirstFrameIsZero else 1
-        lastFrameInd = scene.frame_end - scene.frame_start
-        if not prefs.mediaFirstFrameIsZero:
-            lastFrameInd += 1
-
+        # _logger.debug_ext(
+        #     f"drawRangesAndFrame: currentImage: {currentImage}, firstFrameInd: {firstFrameInd}, lastFrameInd: {lastFrameInd}"
+        # )
         drawRangesAndFrame(
             scene,
             img_draw,
@@ -473,24 +476,25 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             currentImage,
             firstFrameInd,
             lastFrameInd,
-            userSettings.shotHandles,
-            userSettings.currentFrameUsed,
-            userSettings.animRangeUsed,
-            userSettings.handlesUsed,
+            siSettings.shotHandles,
+            siSettings.currentFrameUsed,
+            siSettings.animRangeUsed,
+            siSettings.handlesUsed,
             currentTextLeftForVideoFrames,
             currentTextTopForVideoFrames,
             font,
             fontLarge,
             textColorRGBA,
+            siSettings.frameDigitsPadding,
         )
 
     # ------------ corner note ---------------
     currentTextTop = offsetToCenterH + paddingTopExt / 2.0
     currentTextRight = renderW * (1.0 - paddingLeftNorm)
 
-    if userSettings.cornerNoteUsed:
+    if siSettings.cornerNoteUsed:
         # textProp = "Corner Note: " if stampLabel else ""
-        textProp = userSettings.cornerNote if stampValue else ""
+        textProp = siSettings.cornerNote if stampValue else ""
         img_draw.text(
             (currentTextRight - (font.getsize(textProp))[0], currentTextTop),
             textProp,
@@ -501,7 +505,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # ---------- fps and 3D edit -------------
     currentTextTop = currentTextTopForVideoFrames + textLineH + textInterlineH
 
-    if userSettings.framerateUsed:
+    if siSettings.framerateUsed:
         textProp = "Framerate: " if stampLabel else ""
         textProp += str(scene.render.fps) + " fps" if stampValue else ""
         img_draw.text(
@@ -511,19 +515,19 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             fill=textColorRGBA,
         )
 
-    if userSettings.edit3DFrameUsed:
+    if siSettings.edit3DFrameUsed:
         textProp = "Index in 3D Edit: " if stampLabel else ""
         #  textProp += '{:03d}'.format(scene.render.fps) + " fps" if stampValue else ""
-        currentImage = userSettings.edit3DFrame
-        totalImages = userSettings.edit3DTotalNumber
+        currentImage = siSettings.edit3DFrame
+        totalImages = siSettings.edit3DTotalNumber
         textProp += str(int(currentImage)) if stampValue else ""
-        if userSettings.edit3DTotalNumberUsed:
+        if siSettings.edit3DTotalNumberUsed:
             textProp += " / " + str(int(totalImages)) + " fr." if stampValue else ""
         img_draw.text((col035, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
     # ---------- video duration -------------
     # currentTextTop += textLineH + textInterlineH
-    if userSettings.animDurationUsed:
+    if siSettings.animDurationUsed:
         textProp = "Duration: "
         textProp += str(scene.frame_end - scene.frame_start + 1) + " fr." if stampValue else ""
         img_draw.text((col028, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -533,7 +537,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # ---------- notes -------------
     currentTextTop = offsetToCenterH + paddingTopExt
 
-    if userSettings.notesUsed:
+    if siSettings.notesUsed:
         # colNotes = col02
 
         currentBoxTop = currentTextTop - 0.005 * renderH
@@ -551,15 +555,15 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         img_draw.text((colNotesLabel, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
         currentTextTop += textLineH + textInterlineH
-        textProp = userSettings.notesLine01 if stampValue else ("Notes Line 1" if stampLabel else "")
+        textProp = siSettings.notesLine01 if stampValue else ("Notes Line 1" if stampLabel else "")
         img_draw.text((colNotes, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
         currentTextTop += textLineH + textInterlineH
-        textProp = userSettings.notesLine02 if stampValue else ("Notes Line 2" if stampLabel else "")
+        textProp = siSettings.notesLine02 if stampValue else ("Notes Line 2" if stampLabel else "")
         img_draw.text((colNotes, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
         currentTextTop += textLineH + textInterlineH
-        textProp = userSettings.notesLine03 if stampValue else ("Notes Line 3" if stampLabel else "")
+        textProp = siSettings.notesLine03 if stampValue else ("Notes Line 3" if stampLabel else "")
         img_draw.text((colNotes, currentTextTop), textProp, font=font, fill=textColorRGBA)
 
         # draw box
@@ -610,34 +614,34 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     stampLabel3D = stampLabel or stampValue
 
     yPos = currentTextTop + -1.0 * fontLargeHeight + 1.0 * textInterlineH
-    if userSettings.shotUsed:
+    if siSettings.shotUsed:
         # textProp = "Shot: " if stampLabel3D else ""
-        textProp = userSettings.shotName if stampValue else ""
+        textProp = siSettings.shotName if stampValue else ""
         img_draw.text((col01, yPos), textProp, font=fontLarge, fill=textColorRGBA)  # textColorRGBA
         lineTextXEnd += (fontLarge.getsize(textProp))[0] + separatorX
 
     # ---------- shot duration -------------
     # currentTextTop += fontHeight * (1.2 / fontLargeFactor)
-    if userSettings.shotDurationUsed:
+    if siSettings.shotDurationUsed:
         # textProp = "Shot Duration: "
         textProp = (
-            str(scene.frame_end - scene.frame_start + 1 - 2 * userSettings.shotHandles) + " fr." if stampValue else ""
+            str(scene.frame_end - scene.frame_start + 1 - 2 * siSettings.shotHandles) + " fr." if stampValue else ""
         )
         img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
         lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
     # ---------- sequence -------------
-    if userSettings.sequenceUsed:
+    if siSettings.sequenceUsed:
         textProp = "Seq: " if stampLabel3D else ""
-        textProp += userSettings.sequenceName if stampValue else ""
+        textProp += siSettings.sequenceName if stampValue else ""
         yPos = currentTextTop + -1.0 * fontHeight + 1.0 * textInterlineH
         img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
         lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
     # ---------- take -------------
-    if userSettings.takeUsed:
+    if siSettings.takeUsed:
         textProp = "Take: " if stampLabel3D else ""
-        textProp += userSettings.takeName if stampValue else ""
+        textProp += siSettings.takeName if stampValue else ""
         yPos = currentTextTop + -1.0 * fontHeight + 1.0 * textInterlineH
         img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
         lineTextXEnd += (font.getsize(textProp))[0] + separatorX
@@ -645,7 +649,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # ---------- 3d frames and range -------------
     # currentTextTopFor3DFrames += textLineH + textInterlineH
 
-    if userSettings.currentFrameUsed:
+    if siSettings.currentFrameUsed:
         currentTextTopFor3DFrames = currentTextTop  # - fontHeight
         currentTextLeftFor3DFrames = renderW * (1.0 - paddingLeftNorm)
         drawRangesAndFrame(
@@ -655,22 +659,23 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             currentFrame,
             scene.frame_start,
             scene.frame_end,
-            userSettings.shotHandles,
-            userSettings.currentFrameUsed,
-            userSettings.animRangeUsed,
-            userSettings.handlesUsed,
+            siSettings.shotHandles,
+            siSettings.currentFrameUsed,
+            siSettings.animRangeUsed,
+            siSettings.handlesUsed,
             currentTextLeftFor3DFrames,
             currentTextTopFor3DFrames,
             font,
             fontLarge,
             textColorRGBA,
+            siSettings.frameDigitsPadding,
         )
 
     currentTextTop += textLineH + 2.0 * textInterlineH
 
     lineTextXEnd = col01
     # ---------- scene -------------
-    if userSettings.sceneUsed:
+    if siSettings.sceneUsed:
         textProp = "Scene: " if stampLabel3D else ""
         textProp += str(scene.name) if stampValue else ""
         # yPos = currentTextTop
@@ -679,18 +684,18 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         lineTextXEnd += (font.getsize(textProp))[0] + separatorX
 
     # ---------- bottom note -------------
-    if userSettings.bottomNoteUsed:
+    if siSettings.bottomNoteUsed:
         # textProp = "Scene: " if stampLabel3D else ""
         # yPos = currentTextTop
         yPos = currentTextFromBottom - textInterlineH - textLineH
-        textProp = userSettings.bottomNote if stampValue else ""
+        textProp = siSettings.bottomNote if stampValue else ""
         img_draw.text((lineTextXEnd, yPos), textProp, font=font, fill=textColorRGBA)
 
     # ---------- camera -------------
     currentTextRight = renderW * (1.0 - paddingLeftNorm)
 
-    if userSettings.cameraLensUsed:
-        if userSettings.cameraUsed:
+    if siSettings.cameraLensUsed:
+        if siSettings.cameraUsed:
             textProp = ""
         else:
             textProp = "Lens: " if stampLabel else ""
@@ -700,14 +705,14 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             (currentTextRight - (font.getsize(textProp))[0], currentTextTop), textProp, font=font, fill=textColorRGBA
         )
 
-    if userSettings.cameraUsed:
-        if userSettings.cameraLensUsed:
+    if siSettings.cameraUsed:
+        if siSettings.cameraLensUsed:
             currentTextRight -= (font.getsize(textProp))[0]
         textProp = "Cam: " if stampLabel3D else ""
         textProp += str(scene.camera.name) if stampValue else ""
-        if userSettings.cameraLensUsed:
+        if siSettings.cameraLensUsed:
             textProp += "    "
-        # if userSettings.cameraLensUsed:
+        # if siSettings.cameraLensUsed:
         #     textProp += "   " + (str(int(scene.camera.data.lens))).rjust(3, " ") + " mm" if stampValue else ""
         # img_draw.text(
         #     (currentTextRight - (font.getsize(textProp))[0], currentTextTop), textProp, font=font, fill=textColorRGBA,
@@ -722,12 +727,12 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
     # ---------- file -------------
     # currentTextTop += textLineH + textInterlineH  # * 2
 
-    if userSettings.filenameUsed or userSettings.filepathUsed:
+    if siSettings.filenameUsed or siSettings.filepathUsed:
         textProp = "Blender file: " if stampLabel else ""
         if stampValue:
             filenameStr = ""
-            if "" != userSettings.customFileFullPath:
-                filenameStr = userSettings.customFileFullPath
+            if "" != siSettings.customFileFullPath:
+                filenameStr = siSettings.customFileFullPath
                 if "" == filenameStr:
                     textProp += "*** Custom File not specified ***"
             else:
@@ -736,9 +741,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
                     textProp += "*** File not saved ***"
             if "" != filenameStr:
                 # head, tail = ntpath.split(filenameStr)
-                if userSettings.filepathUsed:
+                if siSettings.filepathUsed:
                     textProp += str(Path(filenameStr).parent) + "\\"
-                if userSettings.filenameUsed:
+                if siSettings.filenameUsed:
                     textProp += Path(filenameStr).name
             # textProp  += str(os.path.basename(bpy.data.filepath))
         # img_draw.text((col01, currentTextTop), textProp, font=font, fill=textColorRGBA)
@@ -788,15 +793,17 @@ def drawRangesAndFrame(
     font,
     fontLarge,
     color,
+    padding,
 ):
     """
     framemode can be '3DFRAME' or 'VIDEOFRAME'
     """
-    userSettings = scene.UAS_StampInfo_Settings
+    siSettings = scene.UAS_StampInfo_Settings
 
     #    currentTextTopFor3DFrames += textLineH + textInterlineH
     #    currentTextLeftFor3DFrames = renderW * (1.0 - 0.05)
 
+    # print(f"currentFrame: {currentFrame}")
     currentTextTopFor3DFrames = textTop
     currentTextLeftFor3DFrames = textRight
     textColorRGBA = color
@@ -807,8 +814,8 @@ def drawRangesAndFrame(
     textColorGreen = (70, 210, 70, 255)
     textColorOrange = (245, 135, 42, 255)
 
-    # stampLabel = userSettings.stampPropertyLabel
-    stampValue = userSettings.stampPropertyValue
+    # stampLabel = siSettings.stampPropertyLabel
+    stampValue = siSettings.stampPropertyValue
     textProp = ""
 
     # fontsize            = int(fontScaleHNorm * renderH)
@@ -826,7 +833,8 @@ def drawRangesAndFrame(
             )
 
         if rangeUsed:
-            textProp = "{:03d}".format(endRange)
+            fmt = f"0{padding}d"
+            textProp = f"{endRange:{fmt}}"
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
             textColor = textColorOrange if not handlesUsed and currentFrame == endRange else textColorGray
             if handlesUsed and (endRange - handle < currentFrame):
@@ -841,7 +849,7 @@ def drawRangesAndFrame(
             )
 
         if handlesUsed:
-            textProp = "{:03d}".format(endRange - handle)
+            textProp = f"{(endRange - handle):{fmt}}"
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
             textColor = textColorOrange if currentFrame == endRange - handle else textColorGrayLight
             img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
@@ -854,7 +862,7 @@ def drawRangesAndFrame(
             )
 
         if frameUsed:
-            textProp = "{:03d}".format(currentFrame)
+            textProp = f"{currentFrame:{fmt}}"
             currentTextLeftFor3DFrames -= (fontLarge.getsize(textProp))[0]
             # currentTextHeight = (font.getsize(textProp))[1]
             textColor = textColorWhite
@@ -883,7 +891,7 @@ def drawRangesAndFrame(
             )
 
         if handlesUsed:
-            textProp = "{:03d}".format(startRange + handle)
+            textProp = f"{(startRange + handle):{fmt}}"
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
             textColor = textColorGreen if currentFrame == startRange + handle else textColorGrayLight
             img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColor)
@@ -896,7 +904,7 @@ def drawRangesAndFrame(
             )
 
         if rangeUsed:
-            textProp = "{:03d}".format(startRange)
+            textProp = f"{startRange:{fmt}}"
             currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
             textColor = textColorGreen if not handlesUsed and currentFrame == startRange else textColorGray
             if handlesUsed and (currentFrame < startRange + handle):
@@ -921,13 +929,13 @@ def drawRangesAndFrame(
         currentTextLeftFor3DFrames -= (font.getsize(textProp))[0]
         img_draw.text((currentTextLeftFor3DFrames, currentTextTopFor3DFrames), textProp, font=font, fill=textColorRGBA)
 
-        # if userSettings.sceneFrameHandlesUsed:
-        #     textProp += " / " + '{:03d}'.format(scene.frame_end - userSettings.shotHandles) + " / " if stampValue else ""
-        # if userSettings.sceneFrameRangeUsed:
+        # if siSettings.sceneFrameHandlesUsed:
+        #     textProp += " / " + '{:03d}'.format(scene.frame_end - siSettings.shotHandles) + " / " if stampValue else ""
+        # if siSettings.sceneFrameRangeUsed:
         #     textProp += '{:03d}'.format(scene.frame_end) + "]" if stampValue else ""
         # img_draw.text((currentTextLeftFor3DFrames, currentTextTop ), textProp, font=font, fill=textColorRGBA )
 
-    # if userSettings.sceneFrameRangeUsed:
+    # if siSettings.sceneFrameRangeUsed:
     #     textProp = "Range: " if stampLabel else ""
     #     textProp += "[" + str(scene.frame_start) + " / " + str(scene.frame_end) + "]" if stampValue else ""
     #     img_draw.text((col03, currentTextTop), textProp, font=font, fill=textColorRGBA )

@@ -1,3 +1,12 @@
+# 1.2.1 (2022-05-24)
+
+- Add a property to specify the time context to use for the output images indices
+- Add a property to set the start frame on video (videoFirstFrameIndex)
+- Add a property to control the number of digits in the frame numbers (frameDigitsPadding)
+
+- Add-on Preference property named mediaFirstFrameIsZero has been removed, it is now
+  advantageously replaced by videoFirstFrameIndex
+
 # 1.1.2 (2022-05-11)
 
 - Fix on the get latest release version path

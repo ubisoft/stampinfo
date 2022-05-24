@@ -192,7 +192,7 @@ class SequencePath:
 
     def sequence_indices(self, at_frame=None):
         """
-        at_frame: frame infex at which the indices should be set.
+        at_frame: frame index at which the indices should be set.
             Returns an empty string if there is no indice pattern in the filename.
         """
         if self._fullpath is None:

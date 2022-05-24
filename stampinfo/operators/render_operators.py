@@ -83,13 +83,13 @@ class UAS_PT_StampInfo_Render(Operator):
     def execute(self, context):
 
         scene = context.scene
-        stampInfoSettings = scene.UAS_StampInfo_Settings
+        siSettings = scene.UAS_StampInfo_Settings
         prefs = context.preferences.addons["stampinfo"].preferences
         vse_render = context.window_manager.stampinfo_vse_render
 
         # Stamp Info not used: Blender standard rendering behavior
         # --------------------
-        if not stampInfoSettings.stampInfoUsed:
+        if not siSettings.stampInfoUsed:
             if "STILL" == self.renderMode:
                 bpy.ops.render.render("INVOKE_DEFAULT", use_viewport=True)
             elif "ANIMATION" == self.renderMode:
@@ -184,7 +184,7 @@ class UAS_PT_StampInfo_Render(Operator):
                 + seqPath.sequence_indices(at_frame=renderFrame)
                 + ".png"
             )
-            stampInfoSettings.renderTmpImageWithStampedInfo(
+            siSettings.renderTmpImageWithStampedInfo(
                 scene,
                 renderFrame,
                 renderPath=tempFramedRenderPath,
@@ -219,7 +219,7 @@ class UAS_PT_StampInfo_Render(Operator):
                     + ".png"
                 )
 
-                stampInfoSettings.renderTmpImageWithStampedInfo(
+                siSettings.renderTmpImageWithStampedInfo(
                     scene, currentFrame, renderPath=tempFramedRenderPath, renderFilename=tempFramedRenderFilename
                 )
 
@@ -278,6 +278,8 @@ class UAS_PT_StampInfo_Render(Operator):
             video_frame_start = scene.frame_start
             video_frame_end = scene.frame_end
 
+        videoFirstFrameIndex = siSettings.videoFirstFrameIndex if siSettings.videoFirstFrameIndexUsed else 0
+
         if True:
             #            vse_render.compositeVideoInVSE(
             vse_render.compositeMedia(
@@ -291,8 +293,9 @@ class UAS_PT_StampInfo_Render(Operator):
                 output_file=compositedMediaFile,
                 postfix_scene_name="_StampInfoRender",
                 output_resolution=res,
-                import_at_frame=video_frame_start,
-                clean_temp_scene=prefs.delete_temp_scene,
+                import_at_frame=videoFirstFrameIndex,
+                outputImgIndicesMode=siSettings.outputImgIndicesMode,
+                clean_temp_scene=False,  # prefs.delete_temp_scene,
             )
 
         if prefs.delete_temp_images:

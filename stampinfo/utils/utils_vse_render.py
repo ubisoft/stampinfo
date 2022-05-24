@@ -113,8 +113,8 @@ _logger = sm_logging.getLogger(__name__)
 
 # This operator requires   from bpy_extras.io_utils import ImportHelper
 # See https://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
-class UAS_VSE_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import ImportHelper
-    bl_idname = "uasvse.openfilebrowser"
+class UAS_VSE_StampInfo_OpenFileBrowser(Operator):  # from bpy_extras.io_utils import ImportHelper
+    bl_idname = "uasvse_stampinfo.openfilebrowser"
     bl_label = "Open"
     bl_description = (
         "Open the file browser to define the image to stamp\n"
@@ -757,7 +757,8 @@ class StampInfo_Vse_Render(PropertyGroup):
         frame_end=None,
         postfix_scene_name="",
         output_resolution=None,
-        import_at_frame=1,
+        import_at_frame=0,
+        outputImgIndicesMode="3D_FRAME",
         clean_temp_scene=True,
     ):
         """High level function used to create a media from a backgroupd and foreground media and a sound
@@ -791,6 +792,7 @@ class StampInfo_Vse_Render(PropertyGroup):
             postfixSceneName=postfix_scene_name,
             output_resolution=output_resolution,
             importAtFrame=import_at_frame,
+            outputImgIndicesMode=outputImgIndicesMode,
         )
 
         if clean_temp_scene:
@@ -810,7 +812,8 @@ class StampInfo_Vse_Render(PropertyGroup):
         output_filepath,
         postfixSceneName="",
         output_resolution=None,
-        importAtFrame=1,
+        importAtFrame=0,
+        outputImgIndicesMode="3D_FRAME",
     ):
         """Low level function that will use the bg and fg media already held by this vse_render class to generate
         a media
@@ -819,23 +822,25 @@ class StampInfo_Vse_Render(PropertyGroup):
             output_resolution: array [width, height]
         """
 
+        renderAtFrame = frame_start if "3D_FRAME" == outputImgIndicesMode else importAtFrame
+
         self.printMedia()
-        print(f" output_filepath: {output_filepath}")
+        # print(f" output_filepath: {output_filepath}")
         mediaStr = "VSE_Render  output_resolution:   "
         mediaStr += (
             "None" if output_resolution is None else f"{output_resolution[0]} x {output_resolution[1]}"
         ) + f"  {output_resolution}\n"
-        print(mediaStr)
+        _logger.debug_ext(f"mediaStr: {mediaStr}", col="BLUE")
 
         specificFrame = None
         if frame_start == frame_end:
-            specificFrame = frame_start
+            specificFrame = renderAtFrame
 
         previousScene = bpy.context.window.scene
         previousWorkspace = bpy.context.workspace.name
-        print(f"Previous Workspace: {previousWorkspace}")
+        # print(f"Previous Workspace: {previousWorkspace}")
         previousScreen = bpy.context.window.screen.name
-        print(f"Previous Screen: {previousScreen}")
+        # print(f"Previous Screen: {previousScreen}")
         previousRenderView = None
         region = next(
             iter([area.spaces[0].region_3d for area in bpy.context.screen.areas if area.type == "VIEW_3D"]), None
@@ -875,8 +880,10 @@ class StampInfo_Vse_Render(PropertyGroup):
         # print(f"  * - * vse_scene.render.resolution: {vse_scene.render.resolution_x} x {vse_scene.render.resolution_y}")
 
         # add BG
-        vse_scene.frame_start = frame_start
-        vse_scene.frame_end = frame_end
+        vse_scene.frame_start = renderAtFrame
+        vse_scene.frame_end = (
+            frame_end if "3D_FRAME" == outputImgIndicesMode else frame_end - frame_start + importAtFrame
+        )
 
         # get output file format from specified output
         fileExt = str(Path(output_filepath).suffix).upper()
@@ -915,7 +922,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         if "" != self.inputBGMediaPath:
             try:
                 #    print(f"self.inputBGMediaPath: {self.inputBGMediaPath}")
-                bgClip = self.createNewClip(vse_scene, self.inputBGMediaPath, 1, atFrame=importAtFrame)
+                bgClip = self.createNewClip(vse_scene, self.inputBGMediaPath, 1, atFrame=renderAtFrame)
             #    print("BG Media OK")
             except Exception:
                 print(f" *** Rendered shot not found: {self.inputBGMediaPath}")
@@ -940,7 +947,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         if "" != self.inputOverMediaPath:
             overClip = None
             try:
-                overClip = self.createNewClip(vse_scene, self.inputOverMediaPath, 2, atFrame=importAtFrame)
+                overClip = self.createNewClip(vse_scene, self.inputOverMediaPath, 2, atFrame=renderAtFrame)
             #    print("Over Media OK")
             except Exception:
                 print(f" *** Rendered shot not found: {self.inputOverMediaPath}")
@@ -962,7 +969,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         if self.inputAudioMediaPath is not None:
             if specificFrame is None:
                 if os.path.exists(self.inputAudioMediaPath):
-                    self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=importAtFrame)
+                    self.createNewClip(vse_scene, self.inputAudioMediaPath, 3, atFrame=renderAtFrame)
                 else:
                     print(f" *** Rendered shot not found: {self.inputAudioMediaPath}")
 
@@ -1016,7 +1023,7 @@ class StampInfo_Vse_Render(PropertyGroup):
 _classes = (
     StampInfo_Vse_Render,
     StampInfo_compositeVideoInVSE,
-    #  UAS_VSE_OpenFileBrowser,
+    UAS_VSE_StampInfo_OpenFileBrowser,
 )
 
 
@@ -1026,8 +1033,6 @@ def register():
     for cls in _classes:
         bpy.utils.register_class(cls)
 
-    bpy.utils.register_class(UAS_VSE_OpenFileBrowser)
-
     bpy.types.WindowManager.stampinfo_vse_render = PointerProperty(type=StampInfo_Vse_Render)
 
 
@@ -1035,8 +1040,6 @@ def unregister():
     _logger.debug_ext("       - Unregistering Utils VSE Render Package", form="UNREG")
 
     del bpy.types.WindowManager.stampinfo_vse_render
-
-    bpy.utils.unregister_class(UAS_VSE_OpenFileBrowser)
 
     for cls in reversed(_classes):
         bpy.utils.unregister_class(cls)

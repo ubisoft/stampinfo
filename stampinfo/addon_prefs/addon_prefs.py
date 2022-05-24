@@ -28,7 +28,7 @@ from .addon_prefs_ui import draw_addon_prefs
 from stampinfo.utils import utils
 from stampinfo.utils.utils_os import get_latest_release_version
 
-from ..config import config
+# from ..config import config
 
 from stampinfo.config import sm_logging
 
@@ -89,14 +89,6 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
     install_failed: BoolProperty(
         name="Install failed",
         default=False,
-    )
-
-    mediaFirstFrameIsZero: BoolProperty(
-        name="Output Media First Frame is 0",
-        description="If checked (most common approach) then the first frame of the output\nmedia has index 0 (last then have index (seq. number of frames - 1).\n"
-        "If not checked then it has index 1 and the last frame has the index equal to the media duration",
-        default=True,
-        options=set(),
     )
 
     write_still: BoolProperty(
