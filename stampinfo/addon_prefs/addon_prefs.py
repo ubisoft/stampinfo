@@ -91,6 +91,12 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         default=False,
     )
 
+    display_main_panel: BoolProperty(
+        name="Display Panel",
+        description="Display the Stamp Info properties panel in the tab list in the 3D View",
+        default=True,
+    )
+
     write_still: BoolProperty(
         name="Write rendered still images on disk",
         description="If checked then writes rendered still images on disk.\n"

@@ -61,6 +61,11 @@ class UAS_PT_StampInfoAddon(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     # About panel ###
     def draw_header(self, context):
         layout = self.layout
@@ -329,6 +334,11 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -521,6 +531,11 @@ class UAS_PT_StampInfoShot(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -568,6 +583,11 @@ class UAS_PT_StampInfoMetadata(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
 
     def draw(self, context):
         layout = self.layout
@@ -659,6 +679,11 @@ class UAS_PT_StampInfoLayout(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -711,6 +736,11 @@ class UAS_PT_StampInfoSettings(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
 
     def draw(self, context):
         layout = self.layout
