@@ -6,7 +6,7 @@
 
 - Added an add-on preferences property to toggle the visibility of the main UI panel in the 3D View
 
-### Code
+#### Code
 
 - Add-on Preference property named mediaFirstFrameIsZero has been removed, it is now
   advantageously replaced by videoFirstFrameIndex
