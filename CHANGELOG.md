@@ -3,7 +3,6 @@
 - Added a property to specify the time context to use for the output images indices
 - Added a property to set the start frame on video (videoFirstFrameIndex)
 - Added a property to control the number of digits in the frame numbers (frameDigitsPadding)
-
 - Added an add-on preferences property to toggle the visibility of the main UI panel in the 3D View
 
 #### Code
