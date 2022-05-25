@@ -6,7 +6,6 @@
 - Added an add-on preferences property to toggle the visibility of the main UI panel in the 3D View
 
 #### Code
-
 - Add-on Preference property named mediaFirstFrameIsZero has been removed, it is now
   advantageously replaced by videoFirstFrameIndex
 
@@ -16,7 +15,6 @@
 
 
 ## 1.1.1 (2022-05-11)
-
 - Support for Blender 3.1+ and Python 3.10
 
 #### Code
