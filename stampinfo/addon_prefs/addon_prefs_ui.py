@@ -21,7 +21,6 @@ UI for the Add-on Preferences
 
 from stampinfo.config import config
 from stampinfo.ui.dependencies_ui import drawDependencies
-from stampinfo.utils.utils_ui import collapsable_panel
 
 ##################################################################################
 # Draw
@@ -38,7 +37,7 @@ def draw_addon_prefs(self, context):
     row = box.row()
     row.separator(factor=3)
     subCol = row.column()
-    subCol.prop(self, "mediaFirstFrameIsZero")
+    subCol.prop(self, "display_main_panel", text="Display Stamp Info panel in the 3D View tabs")
     subCol.prop(self, "write_still")
 
     layout.separator(factor=0.5)

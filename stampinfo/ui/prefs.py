@@ -50,11 +50,11 @@ class UAS_MT_StampInfo_Prefs_MainMenu(Menu):
         layout.separator()
 
         row = layout.row(align=True)
-        row.operator("preferences.addon_show", text="Add-on Preferences...").module = "stampinfo"
+        row.operator("preferences.addon_show", text="Add-on Preferences...", icon="PREFERENCES").module = "stampinfo"
 
         row = layout.row(align=True)
         row.operator(
-            "stampinfo.open_documentation_url", text="Documentation"
+            "stampinfo.open_documentation_url", text="Documentation", icon="HELP"
         ).path = "https://ubisoft-stampinfo.readthedocs.io/"
 
         layout.separator()

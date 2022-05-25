@@ -61,6 +61,11 @@ class UAS_PT_StampInfoAddon(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     # About panel ###
     def draw_header(self, context):
         layout = self.layout
@@ -201,19 +206,34 @@ class UAS_PT_StampInfoAddon(Panel):
             "uas_stampinfo.render", text=" Render Animation", icon="RENDER_ANIMATION"
         ).renderMode = "ANIMATION"
 
-        layout.separator(factor=0.2)
+        col = layout.column(align=False)
+        col.scale_y = 0.9
 
-        row = layout.row()
+        sepRow = col.row()
+        sepRow.separator(factor=0.2)
+
+        row = col.row()
         row.prop(siSettings, "stampInfoUsed", text="Use Stamp Info")
 
+        row = col.row()
+        row.enabled = siSettings.stampInfoUsed
+        split = row.split(factor=0.5)
+        split.label(text="Output Images Indices:")
+
+        subRow = split.row()
         icon = icons.icons_col["General_Explorer_32"]
         renderPath = stamper.getInfoFileFullPath(context.scene, -1)[0]
-        row.operator("uas_stampinfo.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
+        subRow.alignment = "RIGHT"
+        subRow.prop(siSettings, "outputImgIndicesMode", text="")
+        subRow.operator("uas_stampinfo.open_explorer", text="", icon_value=icon.icon_id).path = bpy.path.abspath(
             renderPath
         )
-        layout.separator(factor=0.7)
+
+        sepRow = col.row()
+        sepRow.separator(factor=0.2)
 
         # main settings
+        ##################################
 
         if siSettings.stampInfoUsed:
             outputResStampInfo = stamper.getRenderResolutionForStampInfo(scene)
@@ -314,6 +334,11 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -321,24 +346,25 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         splitFactor = 0.35
         # prefs = context.preferences.addons["stampinfo"].preferences
 
-        def _formatRangeString(current=None, animRange=None, handles=None, start=None, end=None):
+        def _formatRangeString(current=None, animRange=None, handles=None, start=None, end=None, offset=0, padding=3):
             str = ""
+            fmt = f"0{padding}d"
 
             if animRange is not None:
                 str += "["
                 if start is not None:
-                    str += f"{start:03d} / "
+                    str += f"{start + offset:{fmt}} / "
             if handles is not None and start is not None and animRange is not None:
-                str += f"{(start + handles):03d} / "
+                str += f"{(start + handles + offset):{fmt}} / "
 
             if current is not None:
-                str += f" {current:03d} "
+                str += f" {current + offset:{fmt}} "
 
             if handles is not None and end is not None and animRange is not None:
-                str += f" / {(end - handles):03d}"
+                str += f" / {(end - handles + offset):{fmt}}"
             if animRange is not None:
                 if end is not None:
-                    str += f" / {end:03d}"
+                    str += f" / {end + offset:{fmt}}"
                 str += "]"
 
             # return True if current frame is in the animation range
@@ -354,40 +380,8 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
 
         #        layout.label(text="Top: Project and Editing Info")
 
-        # ---------- 3D frame -------------
         box = layout.box()
         col = box.column(align=False)
-
-        row = col.row(align=True)
-        split = row.split(factor=splitFactor)
-        subRow = split.row(align=True)
-        subRow.prop(siSettings, "currentFrameUsed")
-
-        sceneFrameStr, isInRange = _formatRangeString(
-            current=scene.frame_current,
-            animRange=None if not siSettings.animRangeUsed else False,
-            handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
-            start=scene.frame_start,
-            end=scene.frame_end,
-        )
-
-        subRowLeft = split.row(align=True)
-        subRowLeft.enabled = siSettings.currentFrameUsed
-        subRowLeft.alignment = "CENTER"
-        subRowLeft.alert = not isInRange
-        subRowLeft.label(text=sceneFrameStr)
-
-        # help tooltip and doc
-        subRowRight = row.row(align=True)
-        subRowRight.emboss = "NONE"
-        subRowRight.alignment = "RIGHT"
-        doc_op = subRowRight.operator("stampinfo.open_documentation_url", text="", icon="INFO")
-        quickHelpInfo = _getQuickHelp("3D_FRAME")
-        doc_op.path = quickHelpInfo[3]
-        tooltipStr = quickHelpInfo[1]
-        tooltipStr += f"\n{quickHelpInfo[2]}"
-        tooltipStr += f"\n\nOpen Stamp Info online documentation for a more detailed explanation:\n     {doc_op.path}"
-        doc_op.tooltip = tooltipStr
 
         # ---------- 3D edit frame -------------
         if config.devDebug:
@@ -400,6 +394,8 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
                 handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
                 start=0,
                 end=scene.frame_end - scene.frame_start,
+                offset=0,
+                padding=siSettings.frameDigitsPadding,
             )
 
         #        row.prop(siSettings, "edit3DTotalNumberUsed", text="3D Edit Duration")
@@ -416,6 +412,8 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
             handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
             start=0,
             end=scene.frame_end - scene.frame_start,
+            offset=siSettings.videoFirstFrameIndex if siSettings.videoFirstFrameIndexUsed else 0,
+            padding=siSettings.frameDigitsPadding,
         )
 
         subRowLeft = split.row(align=True)
@@ -434,6 +432,49 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         tooltipStr = quickHelpInfo[1]
         tooltipStr += f"\n{quickHelpInfo[2]}"
         tooltipStr += f"\n\nOpen Stamp Info online documentation:\n     {doc_op.path}"
+        doc_op.tooltip = tooltipStr
+
+        subRow = col.row(align=True)
+        subRow.enabled = siSettings.videoFrameUsed
+        split = subRow.split(factor=0.5)
+        labSubRow = split.row()
+        labSubRow.separator(factor=2)
+        labSubRow.prop(siSettings, "videoFirstFrameIndexUsed", text="First Frame Index")
+        frameIndSubRow = split.row()
+        frameIndSubRow.enabled = siSettings.videoFirstFrameIndexUsed
+        frameIndSubRow.prop(siSettings, "videoFirstFrameIndex", text="")
+
+        # ---------- 3D frame -------------
+        row = col.row(align=True)
+        split = row.split(factor=splitFactor)
+        subRow = split.row(align=True)
+        subRow.prop(siSettings, "currentFrameUsed")
+
+        sceneFrameStr, isInRange = _formatRangeString(
+            current=scene.frame_current,
+            animRange=None if not siSettings.animRangeUsed else False,
+            handles=None if not siSettings.handlesUsed else siSettings.shotHandles,
+            start=scene.frame_start,
+            end=scene.frame_end,
+            padding=siSettings.frameDigitsPadding,
+        )
+
+        subRowLeft = split.row(align=True)
+        subRowLeft.enabled = siSettings.currentFrameUsed
+        subRowLeft.alignment = "CENTER"
+        subRowLeft.alert = not isInRange
+        subRowLeft.label(text=sceneFrameStr)
+
+        # help tooltip and doc
+        subRowRight = row.row(align=True)
+        subRowRight.emboss = "NONE"
+        subRowRight.alignment = "RIGHT"
+        doc_op = subRowRight.operator("stampinfo.open_documentation_url", text="", icon="INFO")
+        quickHelpInfo = _getQuickHelp("3D_FRAME")
+        doc_op.path = quickHelpInfo[3]
+        tooltipStr = quickHelpInfo[1]
+        tooltipStr += f"\n{quickHelpInfo[2]}"
+        tooltipStr += f"\n\nOpen Stamp Info online documentation for a more detailed explanation:\n     {doc_op.path}"
         doc_op.tooltip = tooltipStr
 
         # ---------- shared settings -------------
@@ -455,6 +496,14 @@ class UAS_PT_StampInfoTimeAndFrames(Panel):
         handlesSubRow = split.row()
         handlesSubRow.enabled = siSettings.handlesUsed
         handlesSubRow.prop(siSettings, "shotHandles", text="Handles")
+
+        sepRow = col.row()
+        sepRow.separator(factor=0.2)
+
+        paddingRow = col.row()
+        split = paddingRow.split(factor=0.5)
+        split.label(text="Digits Padding")
+        split.prop(siSettings, "frameDigitsPadding", text="")
 
         # ---------- animation duration -------------
         box = layout.box()
@@ -481,6 +530,11 @@ class UAS_PT_StampInfoShot(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
 
     def draw(self, context):
         layout = self.layout
@@ -529,6 +583,11 @@ class UAS_PT_StampInfoMetadata(Panel):
     bl_region_type = "UI"
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
 
     def draw(self, context):
         layout = self.layout
@@ -620,6 +679,11 @@ class UAS_PT_StampInfoLayout(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -673,6 +737,11 @@ class UAS_PT_StampInfoSettings(Panel):
     bl_category = "Stamp Info"
     bl_options = {"DEFAULT_CLOSED"}
 
+    @classmethod
+    def poll(self, context):
+        prefs = context.preferences.addons["stampinfo"].preferences
+        return prefs.display_main_panel
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -714,14 +783,6 @@ classes = (
     UAS_PT_StampInfoSettings,
     UAS_PT_StampInfo_Initialize,
 )
-
-
-def module_can_be_imported(name):
-    try:
-        __import__(name)
-        return True
-    except ModuleNotFoundError:
-        return False
 
 
 def register():

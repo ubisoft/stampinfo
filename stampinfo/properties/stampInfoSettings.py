@@ -26,7 +26,6 @@ from stampinfo import stamper
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
-from stampinfo import config
 from stampinfo import infoImage
 from stampinfo.utils import utils
 
@@ -273,10 +272,61 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
     )
 
     # ---------- video image -------------
+
+    outputImgIndicesMode: EnumProperty(
+        name="Output Images Indices",
+        description="Specify the time context to use for the indices of the output file names."
+        "\nWhen the output image sequence is used in a compositing or editing software"
+        "\nthen using the Video Frame mode makes the exchanges more robust",
+        items=[
+            (
+                "VIDEO_FRAME",
+                "Video Time",
+                "The time stamped as the Video Frame is used." "\nIt usually starts at 0.",
+                0,
+            ),
+            (
+                "3D_FRAME",
+                "3D Time",
+                "The time stamped as the 3D Frame is used." "\nIt will use the same indices as in a standard rendering",
+                1,
+            ),
+        ],
+        default=1,
+        options=set(),
+    )
+
+    frameDigitsPadding: IntProperty(
+        name="Digits Padding",
+        description="Number of digits to use for the index of the frames and" "\nin the output image names",
+        min=3,
+        max=6,
+        default=3,
+        options=set(),
+    )
+
     videoFrameUsed: BoolProperty(
         name="Video Frame",
         description="Stamp the index of the current image in the image sequence",
         default=False,
+        options=set(),
+    )
+
+    videoFirstFrameIndexUsed: BoolProperty(
+        name="Use Video First Frame Index",
+        description="Use the Video First Frame Index." "\nIf not used then the first used frame for videos is 0",
+        default=False,
+        options=set(),
+    )
+
+    videoFirstFrameIndex: IntProperty(
+        name="Video First Frame Index",
+        description="Value given to the first frame of the rendered image sequence."
+        "\nThis is 0 in most editing applications, sometimes 1. Can sometimes be a very custom"
+        "\nvalue such as 1000 or 1001.",
+        min=0,
+        soft_max=50,
+        default=1,
         options=set(),
     )
 

@@ -39,5 +39,5 @@
     ],
     "blender.addon.sourceDirectory": "./stampinfo",
     "restructuredtext.confPath": "${​​​​​​​​workspaceFolder}​​​​​​​​\\docs",
-    "esbonio.sphinx.confDir": ""
+    "esbonio.sphinx.confDir": "${​​​​​​​​workspaceFolder}​​​​​​​​\\docs"
 }
