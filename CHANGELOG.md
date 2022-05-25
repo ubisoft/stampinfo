@@ -13,7 +13,7 @@
 ## 1.1.2 (2022-05-11)
 - Fix on the get latest release version path
 
-
+-----
 ## 1.1.1 (2022-05-11)
 - Support for Blender 3.1+ and Python 3.10
 
