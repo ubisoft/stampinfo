@@ -8,7 +8,7 @@
 - Add-on Preference property named mediaFirstFrameIsZero has been removed, it is now
   advantageously replaced by videoFirstFrameIndex
 
-_________________________
+-----
 
 ## 1.1.2 (2022-05-11)
 - Fix on the get latest release version path
