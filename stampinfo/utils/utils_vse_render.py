@@ -292,7 +292,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         if mediaExt in (".mp4", ".avi", ".mov", ".mkv"):
             mediaType = "MOVIE"
         elif mediaExt in (".jpg", ".jpeg", ".png", ".tga", ".tif", ".tiff"):
-            if -1 != filePath.find("###"):
+            if -1 != filePath.find("#"):
                 mediaType = "IMAGES_SEQUENCE"
             else:
                 mediaType = "IMAGE"
@@ -895,7 +895,7 @@ class StampInfo_Vse_Render(PropertyGroup):
             if "PNG" == fileExt:
                 vse_scene.render.image_settings.file_format = "PNG"
             elif "JPG" == fileExt:
-                vse_scene.render.image_settings.file_format = "JPG"
+                vse_scene.render.image_settings.file_format = "JPEG"
             elif "MP4" == fileExt:
                 vse_scene.render.image_settings.file_format = "FFMPEG"
                 vse_scene.render.ffmpeg.format = "MPEG4"
@@ -916,7 +916,7 @@ class StampInfo_Vse_Render(PropertyGroup):
         vse_scene.render.use_file_extension = False
 
         # change color tone mode to prevent washout bug
-        vse_scene.view_settings.view_transform = "Filmic"  # "raw"
+        # vse_scene.view_settings.view_transform = "Filmic"  # "raw"
 
         bgClip = None
         if "" != self.inputBGMediaPath:

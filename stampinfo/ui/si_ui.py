@@ -30,7 +30,7 @@ from stampinfo.config import config
 from stampinfo import icons
 from stampinfo.utils.utils_ui import collapsable_panel
 
-from .. import stamper
+from ..properties import stamper
 from .. import stampInfoSettings
 
 from stampinfo.utils import utils
@@ -179,6 +179,31 @@ class UAS_PT_StampInfoAddon(Panel):
             okForRenderStill = False
             okForRenderAnim = False
 
+        # if current res is not multiples of 2
+        if 0 != scene.render.resolution_x % 2 or 0 != scene.render.resolution_y % 2:
+            row = warnCol.row()
+            row.alert = True
+            row.label(text="*** Rendering resolution must use multiples of 2 ***")
+            okForRenderStill = False
+            okForRenderAnim = False
+
+        # if still image file format is invalid
+        if scene.render.image_settings.file_format in ["FFMPEG", "AVI_RAW", "AVI_JPEG"]:
+            row = warnCol.row()
+            row.alert = True
+            row.label(text="*** Rendering file format is not suitable for still image ***")
+            okForRenderStill = False
+            okForRenderAnim = True
+
+        # if still image file format is invalid
+        # if scene.render.image_settings.file_format in ['BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'AVI_JPEG', 'AVI_RAW', 'FFMPEG']:
+        if scene.render.image_settings.file_format not in ["PNG", "FFMPEG"]:  # "JPEG",
+            row = warnCol.row()
+            row.alert = True
+            row.label(text="*** Rendering file formats other than PNG and FFMPEG are not supported yet ***")
+            okForRenderStill = False
+            okForRenderAnim = False
+
         # ready to render text
         if okForRenderStill and okForRenderAnim and config.devDebug:
             row = warnCol.row()
@@ -236,7 +261,7 @@ class UAS_PT_StampInfoAddon(Panel):
         ##################################
 
         if siSettings.stampInfoUsed:
-            outputResStampInfo = stamper.getRenderResolutionForStampInfo(scene)
+            outputResStampInfo = stamper.getRenderResolutionForStampInfo(scene, forceMultiplesOf2=False)
             resStr = "Final Res: " + str(outputResStampInfo[0]) + " x " + str(outputResStampInfo[1]) + " px"
         else:
             outputResRender = stamper.getRenderResolution(scene)

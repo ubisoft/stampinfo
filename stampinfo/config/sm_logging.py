@@ -1,6 +1,6 @@
 # GPLv3 License
 #
-# Copyright (C) 2022 Ubisoft
+# Copyright (C) 2021 Ubisoft
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Logging for Stamp Info
+Logging for the add-on
 
 Read this: https://stackoverflow.com/questions/7274732/extending-the-python-logger
 
@@ -48,7 +48,8 @@ class SM_Logger(logging.getLoggerClass()):
     def __init__(self, name):
         super(SM_Logger, self).__init__(name)
 
-        self._prefix = "StampInfo"
+        self._prefix = ""
+        self._addon_name = ""
         self._defaultColor = "WHITE"
         self._defaultForm = "STD"
 
@@ -60,8 +61,10 @@ class SM_Logger(logging.getLoggerClass()):
 
         # 1; :bold
         self._colors = {
+            "DEFAULT": "\033[0m",
             "BLUE": "\33[34m",
             "BLUE_LIGHT": "\33[1;34m",
+            "CYAN": "\033[96m",
             "GREEN": "\33[32m",
             "GREEN_LIGHT": "\33[1;32m",
             "GRAY": "\33[1;30m",
@@ -81,10 +84,15 @@ class SM_Logger(logging.getLoggerClass()):
         # self._formatter_standard = Formatter("\33[36m" + "~Basic +++" + " {message:<140}" + "\033[0m", style="{")
         self._formatter_standard = Formatter(self._prefix + " - " + " {message:<110}", style="{")
         self._formatter_basic = Formatter("\33[36m" + "~Basic +++" + " {message:<140}" + "\033[0m", style="{")
+
+        self._formatter_info = Formatter("{message:<140}", style="{")
+
         self._formatter_other = Formatter("\33[36m" + "S OTHER M+" + " {message:<140}" + "\033[0m", style="{")
+
         self._formatter = {
             "STD": self._formatter_standard,
             "BASIC": self._formatter_basic,
+            "INFO": self._formatter_info,
             "OTHER": self._formatter_other,
         }
 
@@ -98,9 +106,17 @@ class SM_Logger(logging.getLoggerClass()):
     def prefix(self, value):
         self._prefix = value
 
+    @property
+    def addon_name(self):
+        return self._addon_name
+
+    @addon_name.setter
+    def addon_name(self, value):
+        self._addon_name = value
+
     def _getFormatter(self, col="", form="DEFAULT"):
         color = self._colors[col] if col != "" else ""
-        _ENDCOLOR = "\033[0m"
+        _ENDCOLOR = self._colors["DEFAULT"]
 
         if "STD" == form:
             f = Formatter(color + self._prefix + "  {message:<120}" + _ENDCOLOR, style="{")
@@ -116,6 +132,10 @@ class SM_Logger(logging.getLoggerClass()):
             if "" == col:
                 color = self._colors["ORANGE"]
             f = Formatter(color + "[DEPRECATED] {message:<90}" + _ENDCOLOR, style="{")
+        elif "INFO" == form:
+            if "" == col:
+                color = self._colors["DEFAULT"]
+            f = Formatter(color + "{message:<140}" + _ENDCOLOR, style="{")
         elif "WARNING" == form:
             if "" == col:
                 color = self._colors["ORANGE"]
@@ -123,15 +143,13 @@ class SM_Logger(logging.getLoggerClass()):
         elif "ERROR" == form:
             if "" == col:
                 color = self._colors["RED"]
-            f = Formatter(color + "Stamp Info: " + " {message:<140}" + _ENDCOLOR, style="{")
+            f = Formatter(color + self._addon_name + ": " + " {message:<140}" + _ENDCOLOR, style="{")
         elif "CRITICAL" == form:
             if "" == col:
                 color = self._colors["RED_BG"]
-            f = Formatter(color + "Stamp Info: " + " {message:<140}" + _ENDCOLOR, style="{")
-        elif "OTHER" == form:
-            f = Formatter(color + "~Other +++" + " {message:<140}" + _ENDCOLOR, style="{")
+            f = Formatter(color + self._addon_name + " : " + " {message:<140}" + _ENDCOLOR, style="{")
         else:  # "DEFAULT"
-            f = Formatter("\033[0m" + "~default +++" + " {message:<140}", style="{")
+            f = Formatter(_ENDCOLOR + self._prefix + " {message:<140}", style="{")
         return f
 
     # def debug_basic(self, msg, extra=None, color="GREEN", formatter="OTHER"):
@@ -196,9 +214,11 @@ class SM_Logger(logging.getLoggerClass()):
         _logger.debug_ext(f"message: {text}", tag="DEPRECATED")
         _logger.warning_ext(f"message: {text}")
         """
+        if form in ["REG", "UNREG"]:
+            tag = form
         self._print_ext("DEBUG", msg, extra=extra, col=col, form=form, tag=tag, display=display)
 
-    def info_ext(self, msg, extra=None, col="BLUE_LIGHT", form="STD", tag=None, display=True):
+    def info_ext(self, msg, extra=None, col="DEFAULT", form="INFO", tag=None, display=True):
         self._print_ext("INFO", msg, extra=extra, col=col, form=form, tag=tag, display=display)
 
     def warning_ext(self, msg, extra=None, col="ORANGE", form="WARNING", tag=None, display=True):
@@ -209,6 +229,14 @@ class SM_Logger(logging.getLoggerClass()):
 
     def critical_ext(self, msg, extra=None, col="RED_BG", form="CRITICAL", tag=None, display=True):
         self._print_ext("CRITICAL", msg, extra=extra, col=col, form=form, tag=tag, display=display)
+
+    # custom function
+    def print_ext(self, msg, col="DEFAULT", tag=None, display=True):
+        """Do an unformated multiline colored print"""
+        # TODO: support INFO mode
+        _ENDCOLOR = self._colors["DEFAULT"]
+        color = self._colors["DEFAULT"] if "" == col else self._colors[col]
+        print(f"{color}{msg}{_ENDCOLOR}")
 
 
 class Formatter(logging.Formatter):
@@ -223,10 +251,13 @@ class Formatter(logging.Formatter):
         """
         s = super().format(record)
 
+        #         print(f"formatStack: {super().formatStack}")
+
         MODULE_PATH = Path(__file__).parent.parent
         # print("MODULE_PATH:" + str(MODULE_PATH))
         pathname = Path(record.pathname).relative_to(MODULE_PATH)
-        s += f"  [{os.curdir}{os.sep}{pathname}:{record.lineno}]"
+        #  s += f"  [{os.curdir}{os.sep}{pathname}:{record.lineno}]"
+        s += f"  [{os.curdir}{os.sep}{record.pathname}:{record.lineno}]"
         return s
 
 
@@ -264,7 +295,7 @@ _logger = logging.getLogger(__name__)
 # https://stackoverflow.com/questions/11581794/how-do-i-change-the-format-of-a-python-log-message-on-a-per-logger-basis
 
 
-def initialize():
+def initialize(addonName="", prefix=""):
 
     if config.devDebug:
         #  print("Initializing Logger...")
@@ -276,10 +307,13 @@ def initialize():
     logging.basicConfig(level=logging.INFO)
     _logger.setLevel(logging.INFO)  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
 
+    _logger.addon_name = addonName
+    _logger.prefix = prefix
+
     # _logger.setLevel(logging.DEBUG)
     formatter = None
 
-    # call config.initGlobalVariables() to get the config variables (currently done in Stamp Info init)
+    # call config.initGlobalVariables() to get the config variables (currently done in the add-on init)
     if config.devDebug_ignoreLoggerFormatting:
         ch = "~"  # "\u02EB"
         formatter = Formatter("\33[36m" + ch + " {message:<140}" + "\033[0m", style="{")

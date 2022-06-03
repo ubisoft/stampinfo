@@ -85,7 +85,7 @@ class SequencePath:
 
         return True
 
-    # wkip to finish
+    # TOFIX wkip to finish
     def format_path(self, path, separator_at_end=True):
         """
         Return a path made with by the specified separator

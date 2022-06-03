@@ -1,3 +1,12 @@
+-----
+## 1.3.1 (2022-06-02)
+- Code refactor to allow more flexibility on the use of rendering resolution for Shot Manager
+- Updated sm_logging
+- Added warnings to disable the render buttons when the scene is not in a valid rendering state
+- Cleaned get resolution functions
+
+
+-----
 ## 1.2.1 (2022-05-24)
 - Added a property to specify the time context to use for the output images indices
 - Added a property to set the start frame on video (videoFirstFrameIndex)
