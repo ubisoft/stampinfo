@@ -39,15 +39,11 @@ def initGlobalVariables():
     global devDebug_keepVSEContent
     devDebug_keepVSEContent = True and devDebug
 
-    if devDebug:
-        print("Dev debug: ", devDebug)
-
     global devDebug_ignoreLoggerFormatting
     devDebug_ignoreLoggerFormatting = True and devDebug
 
 
 def releaseGlobalVariables():
-
     pass
 
 
@@ -56,5 +52,8 @@ def getLoggingTags():
 
     # debug tags
     tags["DEPRECATED"] = False
+
+    tags["REG"] = False
+    tags["UNREG"] = False
 
     return tags

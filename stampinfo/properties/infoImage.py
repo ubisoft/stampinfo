@@ -27,11 +27,7 @@ import getpass
 import bpy
 
 from datetime import datetime
-from .stamper import (
-    getRenderResolutionForStampInfo,
-    getInnerHeight,
-    getInfoFileFullPath,
-)
+from .stamper import getInfoFileFullPath
 
 from stampinfo.config import sm_logging
 
@@ -39,7 +35,9 @@ _logger = sm_logging.getLogger(__name__)
 
 
 # Preparation of the files
-def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
+def renderStampedImage(
+    scene, currentFrame, renderW, renderH, innerH, renderPath=None, renderFilename=None, verbose=False
+):
     """Called by the Pre renderer callback
     Preparation of the files
     """
@@ -108,17 +106,6 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             or scene.render.use_strip_meta
         ):
             paddingLeftMetadataBottomNorm = 0.2
-
-    # variables
-    # renderW             = int(getRenderResolution(scene)[0])
-    # renderH             = int(getRenderResolution(scene)[1])
-    # renderW = int(getRenderResolutionForStampInfo(scene)[0])
-    # renderH = int(getRenderResolutionForStampInfo(scene)[1])
-    renderW = getRenderResolutionForStampInfo(scene)[0]
-    renderH = getRenderResolutionForStampInfo(scene)[1]
-    #  print("   renderW: " + str(renderW) + ", renderH: " + str(renderH))
-
-    innerH = getInnerHeight(scene)
 
     borderTopH = max(
         int((renderH - innerH) * 0.5), 0
@@ -324,7 +311,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
             logoFilePathIsValid = True
         else:
             if siSettings.logoUsed:
-                print("  Logo path is NOT valid")
+                _logger.error_ext(f"Logo path is NOT valid: {logoFile}")
                 # wkip mettre alert rouge
 
         # logoScaleW = 0.09                                         # logo size is in % of width relatively to the outpur render size. In other words: 1.0 => logo width = renderW
@@ -339,7 +326,7 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         if logoFilePathIsValid:
             imgLogoSource = Image.open(logoFile).convert("RGBA")
             if imgLogoSource is None:
-                print(f"******* Cannot open specified logo !!! *** File: {logoFile} *********")
+                _logger.warning_ext(f"******* Cannot open specified logo !!! *** File: {logoFile} *********")
                 logoFilePathIsValid = False
         else:
             imgLogoSource = Image.new("RGBA", (150, 150), "red")
@@ -770,10 +757,9 @@ def renderTmpImageWithStampedInfo(scene, currentFrame, renderPath=None, renderFi
         print("Info file rendered name: ", (filepath))
 
     try:
-        print(f"Rendering StampInfo file: {filepath}...")
         imgInfo.save(filepath)
     except BaseException:
-        print(" * * * renderTmpImageWithStampedInfo Error: Cannot save file: ", filepath)
+        _logger.error_ext(f"Stamp Info: renderTmpImageWithStampedInfo Error: Cannot save file: {filepath}")
         raise
 
 

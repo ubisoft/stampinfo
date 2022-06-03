@@ -21,12 +21,16 @@ General settings
 
 # import os
 from pathlib import Path
-from stampinfo import stamper
+from stampinfo.properties import stamper
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty, FloatProperty, EnumProperty
 
-from stampinfo import infoImage
+from stampinfo.properties import infoImage
+from stampinfo.properties.stamper import (
+    getRenderResolutionForStampInfo,
+    getInnerHeight,
+)
 from stampinfo.utils import utils
 
 from stampinfo.config import sm_logging
@@ -585,10 +589,40 @@ class UAS_StampInfoSettings(bpy.types.PropertyGroup):
 
     debug_DontDeleteCompoNodes: BoolProperty(default=False)
 
-    def renderTmpImageWithStampedInfo(self, scene, currentFrame, renderPath=None, renderFilename=None, verbose=False):
-        infoImage.renderTmpImageWithStampedInfo(
-            scene, currentFrame, renderPath=renderPath, renderFilename=renderFilename, verbose=verbose
+    def renderTmpImageWithStampedInfo(
+        self,
+        scene,
+        currentFrame,
+        resolution=None,
+        innerHeight=None,
+        renderPath=None,
+        renderFilename=None,
+        verbose=False,
+    ):
+        """Args:
+        resolution: the resolution frame"""
+
+        if resolution is None or innerHeight is None:
+            renderW = getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)[0]
+            renderH = getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)[1]
+            innerH = getInnerHeight(scene)
+        else:
+            renderW = resolution[0]
+            renderH = resolution[1]
+            innerH = innerHeight
+
+        infoImage.renderStampedImage(
+            scene,
+            currentFrame,
+            renderW,
+            renderH,
+            innerH,
+            renderPath=renderPath,
+            renderFilename=renderFilename,
+            verbose=verbose,
         )
 
-    def getRenderResolutionForStampInfo(self, scene):
-        return stamper.getRenderResolutionForStampInfo(scene)
+    def getRenderResolutionForStampInfo(self, scene, usePercentage=True, forceMultiplesOf2=True):
+        return stamper.getRenderResolutionForStampInfo(
+            scene, usePercentage=usePercentage, forceMultiplesOf2=forceMultiplesOf2
+        )

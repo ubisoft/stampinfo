@@ -24,13 +24,14 @@ from bpy.types import Operator
 from bpy.props import EnumProperty
 
 # from ..utils.utils_render import getRenderOutputFilename
+from ..utils import utils
 from ..utils.utils_filenames import SequencePath
 from ..utils.utils_os import delete_folder
 from ..utils.utils_ui import show_message_box
 
 from pathlib import Path
 
-from stampinfo import stamper
+from stampinfo.properties import stamper
 from ..config import config
 
 from stampinfo.config import sm_logging
@@ -135,6 +136,13 @@ class UAS_PT_StampInfo_Render(Operator):
                     return {"FINISHED"}
         elif "ANIMATION" == self.renderMode:
             render_filepath = stamper.getStampInfoRenderFilepath(scene)
+
+            # test if we have some # in the file name
+            render_filepath = bpy.path.abspath(render_filepath)
+            outputName = Path(render_filepath).stem
+            if "#" != outputName[-1]:
+                render_filepath = f"{Path(render_filepath).parent}\{outputName}_#####{Path(render_filepath).suffix}"
+
             seqPath = SequencePath(bpy.path.abspath(render_filepath))
             if "" == seqPath.sequence_name():
                 show_message_box("Please set a valid sequence output file name", "Rendering aborted", icon="ERROR")
@@ -197,6 +205,11 @@ class UAS_PT_StampInfo_Render(Operator):
             scene.render.filepath = f"{tempImgRenderPath}{seqPath.sequence_name()}"
             print(f" scene.render.filepath: {scene.render.filepath}")
 
+            validRes = utils.convertToSupportedRenderResolution([scene.render.resolution_x, scene.render.resolution_y])
+
+            scene.render.resolution_x = validRes[0]
+            scene.render.resolution_y = validRes[1]
+
             displayRenderWindow = False
             #     bpy.ops.render.view_show()
             # bpy.ops.render.render(use_viewport=True)
@@ -255,12 +268,12 @@ class UAS_PT_StampInfo_Render(Operator):
         print(f" vse over: infoImgSeq: {infoImgSeq}")
 
         #        res = [scene.render.resolution_x, scene.render.resolution_y]
-        res = stamper.getRenderResolutionForStampInfo(scene)  # wkip float!!
+        res = stamper.getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)  # wkip float!!
 
         bgMedia = tempImgRenderPath + outputStillFile + seqPath.sequence_name(at_frame=atSpecificFrame)
         bgRes = stamper.getRenderResolution(scene)
         fgMedia = infoImgSeq
-        fgRes = stamper.getRenderResolutionForStampInfo(scene)  # wkip int !!!
+        fgRes = stamper.getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)  # wkip int !!!
 
         # vse_render.inputOverMediaPath = infoImgSeq
         # vse_render.inputOverResolution = res

@@ -33,7 +33,7 @@ from .utils.utils_render import Utils_LaunchRender
 from .utils import utils_vse_render
 from .properties import stampInfoSettings
 from .operators import debug
-from . import stamper
+from .properties import stamper
 from .ui import si_ui
 
 import importlib
@@ -52,7 +52,7 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack) - Ubisoft",
     "description": "Stamp scene information on the rendered images",
     "blender": (3, 1, 0),
-    "version": (1, 2, 1),
+    "version": (1, 3, 1),
     "location": "View3D > Stamp Info",
     "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
     "tracker_url": "https://github.com/ubisoft/stampinfo/issues",
@@ -126,14 +126,12 @@ def register():
 
     utils_ui.register()
 
-    sm_logging.initialize()
+    sm_logging.initialize(addonName="Stamp Info", prefix="SI")
     if config.devDebug:
         _logger.setLevel("DEBUG")  # CRITICAL ERROR WARNING INFO DEBUG NOTSET
 
     logger_level = f"Logger level: {sm_logging.getLevelName()}"
     versionTupple = utils.display_addon_registered_version("Stamp Info", more_info=logger_level)
-
-    utils.display_addon_registered_version("Stamp Info")
 
     # # logging
     # ###################

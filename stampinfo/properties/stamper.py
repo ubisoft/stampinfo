@@ -24,6 +24,8 @@ import os
 import bpy
 import bpy.utils.previews
 
+from stampinfo.utils import utils
+
 from stampinfo.config import sm_logging
 
 _logger = sm_logging.getLogger(__name__)
@@ -35,11 +37,13 @@ def getRenderRange(scene):
 
 
 # wk fix: now retunrs an array of ints!
-def getRenderResolution(scene):
+def getRenderResolution(scene, usePercentage=True):
     """Get the current scene rendered image output resolution as float tupple (not int !) and with taking into account the render percentage"""
+    resPercentage = scene.render.resolution_percentage * 0.01 if usePercentage else 1
+
     renderResolution = (
-        scene.render.resolution_x * scene.render.resolution_percentage * 0.01,
-        scene.render.resolution_y * scene.render.resolution_percentage * 0.01,
+        scene.render.resolution_x * resPercentage,
+        scene.render.resolution_y * resPercentage,
     )
     renderResolution = [int(renderResolution[0]), int(renderResolution[1])]
     return renderResolution
@@ -49,65 +53,36 @@ def getRenderRatio(scene):
     return scene.render.resolution_x / scene.render.resolution_y
 
 
-# wk fix: returns an int array!
-def getRenderResolutionForStampInfo(scene):
+def getRenderResolutionForStampInfo(scene, usePercentage=True, forceMultiplesOf2=False):
     """Get the rendered stamp info image output resolution - based on the current scene render settings! -
-    as float tupple (not int !) and with taking into account the render percentage
+    as int array and with taking into account the render percentage
     """
+    resPercentage = scene.render.resolution_percentage * 0.01 if usePercentage else 1
     siSettings = scene.UAS_StampInfo_Settings
-    stampRenderRes = (0.0, 0.0)
-    modeVal = siSettings.stampInfoRenderMode
+    stampRenderRes = [-1, -1]
 
-    if "OVER" == modeVal:
-        stampRenderRes = (getRenderResolution(scene)[0], getRenderResolution(scene)[1])
+    sceneRes = getRenderResolution(scene, usePercentage=False)
 
-    elif "OUTSIDE" == modeVal:
-        stampRenderRes = (
-            getRenderResolution(scene)[0],
-            max(
-                getRenderResolution(scene)[1],
-                getRenderResolution(scene)[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
-            ),
+    if "OVER" == siSettings.stampInfoRenderMode:
+        stampRenderRes = [sceneRes[0], sceneRes[1]]
+
+    elif "OUTSIDE" == siSettings.stampInfoRenderMode:
+        stampRenderRes[0] = sceneRes[0]
+        stampRenderRes[1] = max(
+            sceneRes[1],
+            sceneRes[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
         )
+
+    if usePercentage:
+        stampRenderRes[0] = stampRenderRes[0] * resPercentage
+        stampRenderRes[1] = stampRenderRes[1] * resPercentage
+
+    # make the resolutions valid for video rendering
+    if forceMultiplesOf2:
+        stampRenderRes = utils.convertToSupportedRenderResolution(stampRenderRes)
 
     stampRenderRes = [int(stampRenderRes[0]), int(stampRenderRes[1])]
-    return stampRenderRes
 
-
-def evaluateRenderResolutionForStampInfo(imageRes, resPercentage=100):
-    """Compute the stamp info image output resolution for the specified resolution
-    as float tupple (not int !)
-    Note: percentage_resolution is not involed here
-    The purtpose of this function is to evaluate the output resolution for a given input
-    resolution, this independently from the context in the scene (that may not be up-to-date
-    for the need)
-
-    Args:
-        resPercentage: use the scene render property named resolutionPercentage, or 100 to ignore it
-        imageRes:   tupple 2 (width, height)
-    """
-    siSettings = scene.UAS_StampInfo_Settings
-    stampRenderRes = (0.0, 0.0)
-    modeVal = siSettings.stampInfoRenderMode
-
-    # if "OVER" == modeVal:
-    finalRenderResolutionFramed = [imageRes[0], imageRes[1]]
-    if 100 != resPercentage:
-        finalRenderResolutionFramed[0] = int(imageRes[0] * resPercentage / 100)
-        finalRenderResolutionFramed[1] = int(imageRes[1] * resPercentage / 100)
-
-    if "OUTSIDE" == modeVal:
-        finalRenderResolutionFramed = (
-            int(finalRenderResolutionFramed[0]),
-            int(
-                max(
-                    finalRenderResolutionFramed[1],
-                    finalRenderResolutionFramed[1] * (siSettings.stampRenderResYOutside_percentage + 100.0) * 0.01,
-                )
-            ),
-        )
-
-    stampRenderRes = (finalRenderResolutionFramed[0], finalRenderResolutionFramed[1])
     return stampRenderRes
 
 
@@ -241,10 +216,8 @@ def createTempBGImage(scene):
     filepath = dirAndFilename[0] + getTempBGImageBaseName()
     print("    filepath tmp image in create: " + filepath)
 
-    # renderStampInfoResW = int(getRenderResolutionForStampInfo(scene)[0])
-    # renderStampInfoResH = int(getRenderResolutionForStampInfo(scene)[1])
-    renderStampInfoResW = getRenderResolutionForStampInfo(scene)[0]
-    renderStampInfoResH = getRenderResolutionForStampInfo(scene)[1]
+    renderStampInfoResW = getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)[0]
+    renderStampInfoResH = getRenderResolutionForStampInfo(scene, forceMultiplesOf2=True)[1]
 
     # PIL
     # Black image with transparent alpha
@@ -256,7 +229,7 @@ def createTempBGImage(scene):
     return filepath
 
 
-# wkip jamais appelé!!!!
+# Not used...
 def deleteTempImage(scene):
     print("\n deleteTempImage ")
     dirAndFilename = getInfoFileFullPath(scene, -1)
