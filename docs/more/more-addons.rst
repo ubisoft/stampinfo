@@ -39,5 +39,5 @@ Asset Bank
 Source code on GitHub
 =====================
 
-The source code of the whole add-on as well as some development notes are avalable here:
+The source code of the whole add-on as well as some development notes are available here:
 |br| `Stamp Info on GitHub <https://github.com/ubisoft/stampinfo>`_ 
