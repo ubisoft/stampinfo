@@ -24,7 +24,7 @@ How it works
 
 When a rendering is done with Stamp Info the stamped information is collected and written on an image
 that is saved on disk and then composited with the actual rendered image from the scene in a custom
-post-process step to create the final output. Technicaly speaking this blending is done is the Video
+post-process step to create the final output. Technically speaking this blending is done is the Video
 Sequence Editor of the same Blender file as the one opened for the rendering. Temporary scene and
 files are then cleaned in order to make all that as transparent as possible for the user.
 
