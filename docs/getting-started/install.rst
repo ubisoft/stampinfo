@@ -36,7 +36,7 @@ Install of Stamp Info
 ---------------------
 
 .. note::
-    Stamp Info needs to download some external Python dependencies in order to be fully functionnal. Hence,
+    Stamp Info needs to download some external Python dependencies in order to be fully functional. Hence,
     when launching the installation of this add-on, be sure to match these conditions:
 
         - **Be connected to the internet**
@@ -44,7 +44,7 @@ Install of Stamp Info
         - In the case Blender has been installed from the executable installer package to your OS **launch Blender in Administrator mode**
         - Then inside Blender install the add-on as usual
 
-Note that if you are using a verion of Blender coming for a zip file - which is probably the case when working in a studio and the
+Note that if you are using a version of Blender coming from a zip file - which is probably the case when working in a studio and the
 application was deployed by the production - the Administrator rights should not be required.
 
 Inside Blender
