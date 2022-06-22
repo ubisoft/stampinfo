@@ -52,6 +52,7 @@ class UAS_MT_StampInfo_Prefs_MainMenu(Menu):
         row = layout.row(align=True)
         row.operator("preferences.addon_show", text="Add-on Preferences...", icon="PREFERENCES").module = "stampinfo"
 
+        layout.separator()
         row = layout.row(align=True)
         row.operator(
             "stampinfo.open_documentation_url", text="Documentation", icon="HELP"

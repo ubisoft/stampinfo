@@ -1,4 +1,8 @@
 -----
+## 1.3.5 (2022-06-22)
+- Added a preference property to toggle the check for updates
+
+-----
 ## 1.3.1 (2022-06-02)
 - Code refactor to allow more flexibility on the use of rendering resolution for Shot Manager
 - Updated sm_logging
