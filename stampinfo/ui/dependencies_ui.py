@@ -46,4 +46,4 @@ def drawDependencies(context, layout: bpy.types.UILayout, **kwargs):
         subRow.alert = True
         subRow.label(text="Module not found  - Add-on cannot run normally")
 
-    box.separator()
+    box.separator(factor=0.2)

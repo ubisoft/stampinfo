@@ -19,7 +19,7 @@
 functions that are not particularly related to the add-on and that could be reused as is
 """
 
-
+import sys
 import re
 from pathlib import Path
 from urllib.parse import unquote_plus, urlparse
@@ -125,10 +125,24 @@ def addonCategory(addonName):
     return categ
 
 
+# To get the script path folder use this:
+# https://blender.stackexchange.com/questions/64129/get-blender-scripts-path
+# bpy.utils.script_paths()
+# or bpy.utils.script_path_user()
+
+
 def addonPath():
+    "Return the install path of this add-on"
     # get the path of this file and climb to its parent
     filePath = Path(os.path.dirname(os.path.abspath(__file__))).parent
     return str(filePath)
+
+
+def getPythonPackagesFolder():
+    pyExeFile = sys.executable
+    # we have to go above \bin dir
+    localPyDir = str((Path(pyExeFile).parent).parent) + "\\lib\\site-packages\\"
+    return localPyDir
 
 
 def file_path_from_uri(uri):

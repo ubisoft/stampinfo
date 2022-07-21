@@ -19,6 +19,7 @@
 UI for the Add-on Preferences
 """
 
+from stampinfo import icons
 from stampinfo.config import config
 from stampinfo.ui.dependencies_ui import drawDependencies
 
@@ -30,19 +31,32 @@ from stampinfo.ui.dependencies_ui import drawDependencies
 def draw_addon_prefs(self, context):
     layout = self.layout
     # layout = layout.column(align=False)
+    mainCol = self.layout.column(align=False)
+
+    # Dependencies
+    ###############
+    drawDependencies(context, mainCol)
+
+    # General
+    ###############
 
     splitFactor = 0.3
 
-    box = layout.box()
+    box = mainCol.box()
     row = box.row()
     row.separator(factor=3)
     subCol = row.column()
     subCol.prop(self, "display_main_panel", text="Display Stamp Info panel in the 3D View tabs")
     subCol.prop(self, "write_still")
 
-    layout.separator(factor=0.5)
-    layout.label(text="Technical Settings:")
-    box = layout.box()
+    drawGeneral(context, self, mainCol)
+
+    # Technical settings
+    ###############
+
+    mainCol.separator(factor=0.5)
+    mainCol.label(text="Technical Settings:")
+    box = mainCol.box()
     box.label(text="Stamped Images Compositing:")
     row = box.row()
     row.separator(factor=3)
@@ -50,13 +64,10 @@ def draw_addon_prefs(self, context):
     subCol.prop(self, "delete_temp_scene")
     subCol.prop(self, "delete_temp_images")
 
-    # Dependencies
-    ###############
-    drawDependencies(context, layout)
-
     # Dev and debug
     ###############
-    box = layout.box()
+    box = mainCol.box()
+    colSepHeight = 0.5
 
     split = box.split(factor=splitFactor)
     rowLeft = split.row()
@@ -79,3 +90,36 @@ def draw_addon_prefs(self, context):
         rowRight.operator("uas_stamp_info.enable_debug", text="Turn Off").enable_debug = False
     else:
         rowRight.operator("uas_stamp_info.enable_debug", text="Turn On").enable_debug = True
+
+    box.separator(factor=colSepHeight)
+    row = box.row()
+    iconExplorer = icons.icons_col["General_Explorer_32"]
+    row.operator("uas_si_utils.open_addon_folder", text="Open add-on Folder", icon_value=iconExplorer.icon_id)
+
+    if config.devDebug:
+        # initialization state
+        initRow = box.row()
+        initRow.prop(self, "isInitialized")
+
+
+##################################################################
+# Draw functions
+##################################################################
+
+
+def drawGeneral(context, prefs, layout):
+    box = layout.box()
+    # collapsable_panel(box, prefs, "addonPrefs_ui_expanded", text="UI")
+    # if prefs.addonPrefs_ui_expanded:
+    uiSplitFactor = 0.15
+
+    # column component here is technicaly not necessary but reduces the space between lines
+    col = box.column()
+
+    # split = col.split(factor=uiSplitFactor)
+    # rowLeft = split.row()
+    # rowLeft.separator()
+    # rowRight = split.row()
+    row = col.row()
+    row.separator(factor=3)
+    row.prop(prefs, "checkForNewAvailableVersion", text="Check for Updates")

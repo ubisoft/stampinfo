@@ -29,6 +29,7 @@ from bpy.props import IntProperty, PointerProperty
 
 from .config import config
 from .utils import utils
+from .utils import utils_operators
 from .utils.utils_render import Utils_LaunchRender
 from .utils import utils_vse_render
 from .properties import stampInfoSettings
@@ -52,9 +53,9 @@ bl_info = {
     "author": "Julien Blervaque (aka Werwack) - Ubisoft",
     "description": "Stamp scene information on the rendered images",
     "blender": (3, 1, 0),
-    "version": (1, 3, 1),
+    "version": (1, 3, 6),
     "location": "View3D > Stamp Info",
-    "wiki_url": "https://ubisoft-stampinfo.readthedocs.io",
+    "doc_url": "https://ubisoft-stampinfo.readthedocs.io",
     "tracker_url": "https://github.com/ubisoft/stampinfo/issues",
     "support": "COMMUNITY",
     # "warning": "BETA Version",
@@ -179,6 +180,7 @@ def register():
     si_ui.register()
     ui.register()
     utils_vse_render.register()
+    utils_operators.register()
 
     bpy.types.Scene.UAS_StampInfo_Settings = PointerProperty(type=stampInfoSettings.UAS_StampInfoSettings)
 
@@ -212,6 +214,7 @@ def unregister():
     from .operators import render_operators
     from .addon_prefs import addon_prefs
 
+    utils_operators.unregister()
     utils_vse_render.unregister()
     ui.unregister()
     si_ui.unregister()
