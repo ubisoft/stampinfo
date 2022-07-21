@@ -28,8 +28,7 @@ from .addon_prefs_ui import draw_addon_prefs
 from stampinfo.utils import utils
 from stampinfo.utils.utils_os import get_latest_release_version
 
-# from ..config import config
-
+from stampinfo.config import config
 from stampinfo.config import sm_logging
 
 _logger = sm_logging.getLogger(__name__)
@@ -57,32 +56,52 @@ class UAS_StampInfo_AddonPrefs(AddonPreferences):
         description="Store the version of the latest release of the add-on as an integer if there is an online release"
         "\nthat is more recent than this version. If there is none then the value is 0",
         # default=2005001,
-        default=1007016,
+        default=1000000,
+    )
+
+    checkForNewAvailableVersion: BoolProperty(
+        name="Check for Updates",
+        description=(
+            "If checked then the add-on automaticaly see if a new release\n"
+            "is available online, and if so then a red world icon is displayed at the\n"
+            "top right corner of the main panel"
+        ),
+        default=True,
     )
 
     isInitialized: BoolProperty(
+        name="Preferences Initialization State",
+        description=(
+            "Flag to validate that Stamp Info preferences have been correctly initialized"
+            "\nThis flag can be changed for debug purpose: activate the debug mode and go to the add-on Preferences, in the Debug tab"
+        ),
         default=False,
     )
 
     def initialize_stamp_info_prefs(self):
         print("\nInitializing Stamp Info Preferences...")
 
-        versionStr = get_latest_release_version("https://github.com/ubisoft/stampinfo/releases/latest", verbose=True)
+        self.newAvailableVersion = 0
 
-        if versionStr is not None:
-            # version string from the tags used by our releases on GitHub is formated as this: v<int>.<int>.<int>
-            version = utils.convertVersionStrToInt(versionStr)
-
-            _logger.debug_ext(
-                f"Checking for updates: Latest version of Ubisoft Stamp Info online is: {versionStr}", col="BLUE"
+        if self.checkForNewAvailableVersion and not config.devDebug:
+            versionStr = get_latest_release_version(
+                "https://github.com/ubisoft/stampinfo/releases/latest", verbose=True
             )
-            if self.version()[1] < version:
-                _logger.debug_ext("   New version available online...", col="BLUE")
-                self.newAvailableVersion = version
+
+            if versionStr is not None:
+                # version string from the tags used by our releases on GitHub is formated as this: v<int>.<int>.<int>
+                version = utils.convertVersionStrToInt(versionStr)
+
+                _logger.debug_ext(
+                    f"Checking for updates: Latest version of Ubisoft Stamp Info online is: {versionStr}", col="BLUE"
+                )
+                if self.version()[1] < version:
+                    _logger.debug_ext("   New version available online...", col="BLUE")
+                    self.newAvailableVersion = version
+                else:
+                    self.newAvailableVersion = 0
             else:
                 self.newAvailableVersion = 0
-        else:
-            self.newAvailableVersion = 0
 
         self.isInitialized = True
 

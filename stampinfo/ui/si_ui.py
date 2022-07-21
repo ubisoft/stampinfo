@@ -101,7 +101,7 @@ class UAS_PT_StampInfoAddon(Panel):
         row.separator(factor=2)
         row.menu("UAS_MT_StampInfo_prefs_mainmenu", icon="PREFERENCES", text="")
 
-        if prefs.newAvailableVersion:
+        if not config.devDebug and prefs.checkForNewAvailableVersion and prefs.newAvailableVersion:
             row.separator(factor=0.5)
             subRow = row.row()
             subRow.alert = True
