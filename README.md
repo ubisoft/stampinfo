@@ -4,6 +4,8 @@
 
 </br>
 
+**This tool is NOT SUPPORTED ANYMORE. It has been integrated inside Ubisoft Shot Manager V2.0+**
+
 **Stamp Info creates a frame around the rendered images and writes scene information on it.
 It is a flexible alternative to the Metadata post processing integrated system of Blender.**
 
@@ -24,9 +26,7 @@ It is a flexible alternative to the Metadata post processing integrated system o
 
 ## Disclaimer
 
->**This tool is NOT SUPPORTED ANYMORE. It has been integrated inside Ubisoft Shot Manager V2.0+**
->
->**It was supporting LTS version of Blender 2.93 and up to Blender 3.0**
+>**when supported, this tool was dedicated to LTS version of Blender 2.93 and up to Blender 3.0**
 >
 >It was initially developed for an animated TV series production in 2020 on Blender 2.83. It has the features that were needed at the time but it
 may not be considered as feature complete for a more generic purpose. In spite of all our efforts to make it reliable some troubles may occur in use cases we have not faced.
