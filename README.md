@@ -4,7 +4,7 @@
 
 </br>
 
-**This tool is NOT SUPPORTED ANYMORE. It has been integrated inside Ubisoft Shot Manager V2.0+**
+**This tool is NOT SUPPORTED ANYMORE. It has been integrated inside [Ubisoft Shot Manager V2.0+](https://github.com/ubisoft/shotmanager/)**
 
 **Stamp Info creates a frame around the rendered images and writes scene information on it.
 It is a flexible alternative to the Metadata post processing integrated system of Blender.**
