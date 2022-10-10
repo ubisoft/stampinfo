@@ -11,27 +11,28 @@ stages:
 #     - pip install black flake8 flake8-black pep8-naming flake8-bugbear --constraint requirements-dev.txt
 #     - flake8 -v stampinfo
 
-doc:
-  services:
-    - docker:20.10.10-dind
-  variables:
-    DOCKER_HOST: tcp://localhost:2376
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: /certs/client
-  stage: pre_release
-  tags:
-    - square_linux_dind
-  image: python:3
-  when: manual
-  script:
-    - pip install sphinx sphinx-rtd-theme
-    - sphinx-build -b html docs docs/_build/html
-    - rm -rf docs/_build/doctree
-  artifacts:
-    name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHORT_SHA}_html"
-    paths:
-      - docs/_build
-    expire_in: 1 week
+# Uncomment this to bfing back the synchronisation with the Readthedocs repository
+# doc:
+#   services:
+#     - docker:20.10.10-dind
+#   variables:
+#     DOCKER_HOST: tcp://localhost:2376
+#     DOCKER_TLS_VERIFY: 1
+#     DOCKER_CERT_PATH: /certs/client
+#   stage: pre_release
+#   tags:
+#     - square_linux_dind
+#   image: python:3
+#   when: manual
+#   script:
+#     - pip install sphinx sphinx-rtd-theme
+#     - sphinx-build -b html docs docs/_build/html
+#     - rm -rf docs/_build/doctree
+#   artifacts:
+#     name: "${CI_PROJECT_NAME}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHORT_SHA}_html"
+#     paths:
+#       - docs/_build
+#     expire_in: 1 week
 
 zip:
   services:
