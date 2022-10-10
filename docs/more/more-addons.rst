@@ -20,19 +20,21 @@ Shot Manager
 Video Tracks
 ------------
     Add track headers to the channels of the Video Sequence Editor, as well as tools To
-    navigate between markers.
+    navigate between markers. **(archived)**
     |br| `Video Tracks on GitHub <https://github.com/ubisoft/videotracks>`_ 
 
 Mixer
 -----
     Real-time collaboration between Blender users, enabling them to work together on the same data, on different computers.
+    **(archived)**
     |br| `Mixer <https://ubisoft-mixer.readthedocs.io>`_
     
 
 Asset Bank
 ----------
     Manage asset banks and import or link 3D objects into Blender scenes.
-    |br| `Asset Bank on GitHub <https://github.com/ubisoft/assetbank>`_ 
+    **(archived)**
+    |br| `Asset Bank on GitHub <https://github.com/ubisoft/assetbank>`_
 
 
 

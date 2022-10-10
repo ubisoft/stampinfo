@@ -8,11 +8,15 @@
 Ubisoft Stamp Info: Write text on images rendered with Blender
 ==============================================================
 
-**This tool is NOT SUPPORTED ANYMORE. It has been integrated inside [Ubisoft Shot Manager V2.0+](https://github.com/ubisoft/shotmanager/)**
-
 **Print all the scene and animation information required to understand the context of an image directly onto the rendered outputs.**
 
-**The latest available version is 1.0. It was supporting Blender versions 2.93.x and 3.0.x.**
+This tool is NOT SUPPORTED ANYMORE. It has been integrated inside `Ubisoft Shot Manager V2.0+ <https://github.com/ubisoft/shotmanager>`_
+---------------------------------------------------------------------------------------------------------------------------------------
+
+In July 2022 this add-on was merged in the Blender add-on it was designed to complement. Its maintenance as a standalone add-on is
+not easy for us, we then let it available as an archive on `GitHub <https://github.com/ubisoft/stampinfo>`_ .
+
+**The latest available version is 1.3.1. It was supporting Blender versions 2.93.x and 3.0.x.**
 
 ..  image:: /img/StampInfo_Screen.jpg
     :align: center
